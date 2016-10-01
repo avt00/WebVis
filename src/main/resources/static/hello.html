@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Hello world!</h2>
+
+<div id="render">
+
+</div>
+
+
+
+<button id="getData">
+    Get data
+</button>
+
+<div id="results">
+</div>
+
+
+</body>
+</html>
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!--<script src="JsLib/three.min.js"></script>-->
+<script src="JsLib/three.js"></script>
+<script src="JsLib/OrbitControls.js"></script>
+<script>
+    var radius = 60;
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio( window.devicePixelRatio );
+    renderer.setSize( 1024, 1024 );
+    document.getElementById('render').appendChild( renderer.domElement );
+
+    var camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.2, 1000 );
+    camera.position.z = 100;
+    var controls = new THREE.OrbitControls( camera );
+
+    var scene = new THREE.Scene();
+
+
+    var geometry = new THREE.SphereGeometry( radius, 24, 18 );
+    var loader = new THREE.TextureLoader();
+//    loader.crossOrigin = true;
+
+    var texture = THREE.ImageUtils.loadTexture("times.jpg");
+    texture.minFilter = THREE.LinearFilter;
+//    console.log(texture);
+    var material = new THREE.MeshPhongMaterial({map: texture});
+    var sphere = new THREE.Mesh( geometry, material );
+//    sphere.castShadow = true;
+//    sphere.receiveShadow = false;
+    sphere.position.x = 0
+    scene.add( sphere );
+
+
+    scene.add( new THREE.AmbientLight( 0x505050 ) );
+//    var light = new THREE.SpotLight( 0xffffff, 0.5 );
+//    light.position.set( -80, 125, 80 )
+//    light.angle = Math.PI/2;
+//    light.penumbra = 0.2;
+//
+//    light.castShadow = true;
+//    light.shadowDarkness = 0.5;
+//    light.shadowCameraRight     =  5;
+//    light.shadowCameraLeft     = -5;
+//    light.shadowCameraTop      =  5;
+//    light.shadowCameraBottom   = -5;
+//    light.shadowCameraVisible = true;
+//
+//    scene.add(light);
+
+    function getXYZ(lat, lon) {
+        var phi   = (90-lat)*(Math.PI/180),
+                theta = (lon+180)*(Math.PI/180),
+                x = -(Math.sin(phi)*Math.cos(theta)),
+                z = (Math.sin(phi)*Math.sin(theta)),
+                y = (Math.cos(phi));
+
+        return new THREE.Vector3(x,y,z);
+    }
+
+    var render = function () {
+        requestAnimationFrame( render );
+        controls.update();
+//			cube.rotation.x += 0.01;
+//			cube.rotation.y += 0.05;
+        renderer.render( scene, camera );
+    };
+
+    render();
+
+    var particles, uniforms;
+    var PARTICLE_SIZE = 50;
+    var texturePoint = THREE.ImageUtils.loadTexture("disc.png");
+    function drawPoints(listPoint) {
+
+        var positions = new Float32Array( listPoint.length * listPoint[0].length * 3 );
+        var colors = new Float32Array( listPoint.length * listPoint[0].length * 3 );
+        var sizes = new Float32Array( listPoint.length * listPoint[0].length );
+        var indices = new Uint16Array( 6*(listPoint.length-1)*(listPoint[0].length-1) );
+        var normals = new Float32Array(listPoint.length * listPoint[0].length * 3);
+
+        var vertex;
+        var color = new THREE.Color();
+        var geometry = new THREE.BufferGeometry();
+        var count = 0;
+
+        var sizeM = listPoint.length; //listPoint.length;
+        console.log(listPoint.length);
+        console.log(listPoint[0].length);
+        for ( var i = 0, l1 = sizeM; i < l1; i ++ ) {
+            for (var j = 0, l2 = sizeM; j < l2; j++) {
+
+                var normal = getXYZ(listPoint[i][j].latitude, listPoint[i][j].longitude);
+                normal.toArray(normal, (i + j*l2)*3);
+//                console.log(normal);
+                vertex =  normal.multiplyScalar(radius+5);
+//                console.log(vertex);
+                vertex.toArray(positions, (i + j*l2) * 3);
+
+                color.setHSL(1.0, 0.3, 0.7);
+                color.toArray(colors, (i + j*l2) * 3);
+
+                sizes[i+j*l2] = PARTICLE_SIZE * 0.5;
+
+
+
+
+//                var ind = new THREE.Vector3(first, second, first+1);
+//                ind.toArray(indices, (i + j*l2) * 6);
+//                var ind2 = new THREE.Vector3(second, second+1, first + 1);
+//                ind2.toArray(indices, (i + j*l2) * 6 + 3);
+            }
+        }
+    for ( var i = 0, l1 = sizeM - 1; i < l1; i ++ ) {
+        for (var j = 0, l2 = sizeM-1; j < l2; j++) {
+            var first = i*sizeM+j;
+            var second = first + sizeM;
+            indices[count++] = first;
+            indices[count++] = second;
+            indices[count++] = first + 1;
+//
+            indices[count++] = second;
+            indices[count++] = second + 1;
+            indices[count++] = first + 1;
+        }
+    }
+//        for (var latNumber=0; latNumber < listPoint.length; latNumber++) {
+//            for (var longNumber=0; longNumber < listPoint.; longNumber++) {
+//                var first = (latNumber * (longitudeBands + 1)) + longNumber;
+//                var second = first + longitudeBands + 1;
+//                indexData.push(first);
+//                indexData.push(second);
+//                indexData.push(first + 1);
+//                indexData.push(second);
+//                indexData.push(second + 1);
+//                indexData.push(first + 1);
+//            }
+//        }
+
+
+
+        console.log(positions);
+        console.log(colors);
+        console.log(indices);
+//        console.log(sizes);
+        console.log(texturePoint);
+        geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+        geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
+        geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+        geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
+        geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
+
+
+//        var material = new THREE.ShaderMaterial( {
+//            uniforms: {
+//                color:   { value: new THREE.Color( 0xffffff ) },
+//                texture: { value: texturePoint },
+//            },
+//            vertexShader: document.getElementById( 'vertexshader' ).textContent,
+//            fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+//            alphaTest: 0.9,
+//        } );
+
+//        material = new THREE.PointsMaterial( { size: 3, sizeAttenuation: false, map: texturePoint, alphaTest: 0.5, transparent: true } );
+//        material.color.setHSL( 1.0, 0.3, 0.7 );
+        var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
+        particles = new THREE.Mesh( geometry, material );
+//        particles = new THREE.Points( geometry, material );
+        scene.add( particles );
+    }
+    function getData() {
+        $.ajax({
+            dataType: 'json',
+            url: '/getData/test',
+            success: function(jsondata){
+                console.log("Data was received");
+//                console.log(jsondata);
+                drawPoints(jsondata);
+            }
+        });
+    }
+
+    $('#getData').click(getData);
+</script>
+
+<script type="x-shader/x-vertex" id="vertexshader">
+    attribute float size;
+    attribute vec3 customColor;
+
+    varying vec3 vColor;
+
+    void main() {
+
+        vColor = customColor;
+
+        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+        gl_PointSize = size * ( 300.0 / -mvPosition.z );
+        gl_Position = projectionMatrix * mvPosition;
+    }
+</script>
+
+<script type="x-shader/x-fragment" id="fragmentshader">
+    uniform vec3 color;
+    uniform sampler2D texture;
+
+    varying vec3 vColor;
+
+    void main() {
+        gl_FragColor = vec4( color * vColor, 1.0 );
+        gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+        if ( gl_FragColor.a < ALPHATEST ) discard;
+    }
+</script>
