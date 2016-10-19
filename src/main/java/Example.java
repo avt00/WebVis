@@ -15,8 +15,9 @@ public class Example {
 
     @RequestMapping("/getData/{name}")
     List<List<PointData>> home(@PathVariable String name) {
+        NetCDFReader reader = new NetCDFReader();
         if(name.equals("test")){
-            return NetCDFReader.read();
+            return reader.read();
         }
         else{
             return null;

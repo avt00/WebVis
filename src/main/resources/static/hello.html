@@ -17,6 +17,29 @@
 </div>
 
 
+<input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
+<input type="number" name="2" id="lenght1Y" size="40" min="1" value="100">
+
+<input type="number" name="3" id="lenght2X" size="40" min="1" value="0">
+<input type="number" name="4" id="lenght2Y" size="40" min="1" value="100">
+
+<button id="drawButton">
+    Draw Data
+</button>
+
+<input type="checkbox" id="drawPoint">
+Draw Point
+</input>
+
+<input type="checkbox" id="drawFromFile">
+drawFromFile
+</input>
+
+<input type="checkbox" id="drawCustomPoint">
+drawCustomPoint
+</input>
+
+
 </body>
 </html>
 
@@ -35,46 +58,46 @@
 
     var camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.2, 1000 );
     camera.position.z = 100;
-    var controls = new THREE.OrbitControls( camera );
+    var controls = new THREE.OrbitControls( camera, renderer.domElement, renderer.domElement);
 
     var scene = new THREE.Scene();
 
 
     var geometry = new THREE.SphereGeometry( radius, 24, 18 );
     var loader = new THREE.TextureLoader();
-//    loader.crossOrigin = true;
+    //    loader.crossOrigin = true;
 
     var texture = THREE.ImageUtils.loadTexture("times.jpg");
     texture.minFilter = THREE.LinearFilter;
-//    console.log(texture);
+    //    console.log(texture);
     var material = new THREE.MeshPhongMaterial({map: texture});
     var sphere = new THREE.Mesh( geometry, material );
-//    sphere.castShadow = true;
-//    sphere.receiveShadow = false;
+    //    sphere.castShadow = true;
+    //    sphere.receiveShadow = false;
     sphere.position.x = 0
     scene.add( sphere );
 
 
     scene.add( new THREE.AmbientLight( 0x505050 ) );
-//    var light = new THREE.SpotLight( 0xffffff, 0.5 );
-//    light.position.set( -80, 125, 80 )
-//    light.angle = Math.PI/2;
-//    light.penumbra = 0.2;
-//
-//    light.castShadow = true;
-//    light.shadowDarkness = 0.5;
-//    light.shadowCameraRight     =  5;
-//    light.shadowCameraLeft     = -5;
-//    light.shadowCameraTop      =  5;
-//    light.shadowCameraBottom   = -5;
-//    light.shadowCameraVisible = true;
-//
-//    scene.add(light);
+    //    var light = new THREE.SpotLight( 0xffffff, 0.5 );
+    //    light.position.set( -80, 125, 80 )
+    //    light.angle = Math.PI/2;
+    //    light.penumbra = 0.2;
+    //
+    //    light.castShadow = true;
+    //    light.shadowDarkness = 0.5;
+    //    light.shadowCameraRight     =  5;
+    //    light.shadowCameraLeft     = -5;
+    //    light.shadowCameraTop      =  5;
+    //    light.shadowCameraBottom   = -5;
+    //    light.shadowCameraVisible = true;
+    //
+    //    scene.add(light);
 
     function getXYZ(lat, lon) {
         var phi   = (90-lat)*(Math.PI/180),
                 theta = (lon+180)*(Math.PI/180),
-                x = -(Math.sin(phi)*Math.cos(theta)),
+                x = (Math.sin(phi)*Math.cos(theta)),
                 z = (Math.sin(phi)*Math.sin(theta)),
                 y = (Math.cos(phi));
 
@@ -82,6 +105,7 @@
     }
 
     var render = function () {
+
         requestAnimationFrame( render );
         controls.update();
 //			cube.rotation.x += 0.01;
@@ -94,71 +118,71 @@
     var particles, uniforms;
     var PARTICLE_SIZE = 50;
     var texturePoint = THREE.ImageUtils.loadTexture("disc.png");
-    function drawPoints(listPoint) {
-
-        var positions = new Float32Array( listPoint.length * listPoint[0].length * 3 );
-        var colors = new Float32Array( listPoint.length * listPoint[0].length * 3 );
-        var sizes = new Float32Array( listPoint.length * listPoint[0].length );
-        var indices = new Uint16Array( 6*(listPoint.length-1)*(listPoint[0].length-1) );
-        var normals = new Float32Array(listPoint.length * listPoint[0].length * 3);
+    function drawPoints(listPoint, lenX, lenY, len2X, len2Y) {
+        scene.remove(particles);
+        if(!(lenX<lenY)){
+            console.error("incorrect input data")
+            return;
+        }
+        var countPoint = lenY - lenX;
+        var countPoint2 = len2Y - len2X;
+        var positions = new Float32Array( countPoint * countPoint2 * 3);
+        var colors = new Float32Array( countPoint * countPoint2 * 3 );
+        var sizes = new Float32Array( countPoint * countPoint2 );
+        var indices = new Uint16Array( 6*(countPoint-1)* (countPoint2-1));
+        var normals = new Float32Array( countPoint * countPoint2 * 3);
 
         var vertex;
+        var normal;
         var color = new THREE.Color();
         var geometry = new THREE.BufferGeometry();
         var count = 0;
 
-        var sizeM = listPoint.length; //listPoint.length;
-        console.log(listPoint.length);
-        console.log(listPoint[0].length);
-        for ( var i = 0, l1 = sizeM; i < l1; i ++ ) {
-            for (var j = 0, l2 = sizeM; j < l2; j++) {
-
-                var normal = getXYZ(listPoint[i][j].latitude, listPoint[i][j].longitude);
-                normal.toArray(normal, (i + j*l2)*3);
-//                console.log(normal);
-                vertex =  normal.multiplyScalar(radius+5);
-//                console.log(vertex);
-                vertex.toArray(positions, (i + j*l2) * 3);
-
-                color.setHSL(1.0, 0.3, 0.7);
-                color.toArray(colors, (i + j*l2) * 3);
-
-                sizes[i+j*l2] = PARTICLE_SIZE * 0.5;
+        var vertices = [];
+//        var sizeM = listPoint.length; //listPoint.length;
+        for (var j = len2X; j < len2Y; j++) {
+            for ( var i = lenX; i < lenY; i ++ ) {
 
 
-
-
-//                var ind = new THREE.Vector3(first, second, first+1);
-//                ind.toArray(indices, (i + j*l2) * 6);
-//                var ind2 = new THREE.Vector3(second, second+1, first + 1);
-//                ind2.toArray(indices, (i + j*l2) * 6 + 3);
+                if ($('#drawCustomPoint').is(":checked"))
+                {
+                    normal = getXYZ(1*i, 1*j);
+                    var coord = normal.clone();
+                    normal.toArray(normals, ((i - lenX)*countPoint2 + (j - len2X))*3);
+                    vertex =  coord.multiplyScalar(radius+5);
+                    vertex.toArray(positions, ((i - lenX)*countPoint2 + (j - len2X)) * 3);
+                    color.setHSL(1.0, 0.3, 0.7);
+                    color.toArray(colors, ((i - lenX)*countPoint2 + (j - len2X)) * 3);
+                    sizes[i+j*countPoint2] = PARTICLE_SIZE * 0.5;
+                    vertices.push(vertex);
+                }
+                if($('#drawFromFile').is(":checked")){
+                    normal = getXYZ(listPoint[i][j].latitude, listPoint[i][j].longitude);
+                    normal.multiplyScalar(-1);
+                    normal.toArray(normals, ((i - lenX)*countPoint2 + (j - len2X))*3);
+                    vertex =  normal.multiplyScalar(radius+5);
+                    vertex.toArray(positions, ((i - lenX)*countPoint2 + (j - len2X)) * 3);
+                    color.setHSL((j+i)%10/10, (j+i)%10/10, (j+i)%10/10);
+                    color.toArray(colors, ((i - lenX)*countPoint2 + (j - len2X)) * 3);
+                    sizes[i+j*countPoint2] = PARTICLE_SIZE * 0.5;
+                    vertices.push(vertex);
+                }
             }
         }
-    for ( var i = 0, l1 = sizeM - 1; i < l1; i ++ ) {
-        for (var j = 0, l2 = sizeM-1; j < l2; j++) {
-            var first = i*sizeM+j;
-            var second = first + sizeM;
-            indices[count++] = first;
-            indices[count++] = second;
-            indices[count++] = first + 1;
+        for ( var i = 0, l1 = countPoint - 1; i < l1; i ++ ) {
+            for (var j = 0, l2 = countPoint2-1; j < l2; j++) {
+                var first = i*countPoint2+j;
+                var second = first + countPoint2;
+                indices[count++] = first;
+                indices[count++] = second;
+                indices[count++] = first + 1;
 //
-            indices[count++] = second;
-            indices[count++] = second + 1;
-            indices[count++] = first + 1;
+                indices[count++] = second;
+                indices[count++] = second + 1;
+                indices[count++] = first + 1;
+            }
         }
-    }
-//        for (var latNumber=0; latNumber < listPoint.length; latNumber++) {
-//            for (var longNumber=0; longNumber < listPoint.; longNumber++) {
-//                var first = (latNumber * (longitudeBands + 1)) + longNumber;
-//                var second = first + longitudeBands + 1;
-//                indexData.push(first);
-//                indexData.push(second);
-//                indexData.push(first + 1);
-//                indexData.push(second);
-//                indexData.push(second + 1);
-//                indexData.push(first + 1);
-//            }
-//        }
+
 
 
 
@@ -166,12 +190,12 @@
         console.log(colors);
         console.log(indices);
 //        console.log(sizes);
-        console.log(texturePoint);
+//        console.log(texturePoint);
         geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
-        geometry.addAttribute( 'customColor', new THREE.BufferAttribute( colors, 3 ) );
-        geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
+        geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
+//        geometry.addAttribute( 'size', new THREE.BufferAttribute( sizes, 1 ) );
         geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
-        geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
+//        geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
 
 
 //        var material = new THREE.ShaderMaterial( {
@@ -184,26 +208,51 @@
 //            alphaTest: 0.9,
 //        } );
 
-//        material = new THREE.PointsMaterial( { size: 3, sizeAttenuation: false, map: texturePoint, alphaTest: 0.5, transparent: true } );
-//        material.color.setHSL( 1.0, 0.3, 0.7 );
-        var material = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
-        particles = new THREE.Mesh( geometry, material );
-//        particles = new THREE.Points( geometry, material );
+        if($('#drawPoint').is(":checked")) {
+            material = new THREE.PointsMaterial( { size: 3, sizeAttenuation: false, map: texturePoint, alphaTest: 0.5, transparent: true } );
+            material.color.setHSL( 1.0, 0.3, 0.7 );
+            particles = new THREE.Points( geometry, material );
+        }
+        else {
+            var holes = [];
+            var triangles = THREE.Shape.Utils.triangulateShape( vertices, holes );
+            for( var i = 0; i < triangles.length; i++ ){
+                geometry.faces.push( new THREE.Face3( triangles[i][0], triangles[i][1], triangles[i][2] ));
+            }
+            var material = new THREE.MeshBasicMaterial( { vertexColors: THREE.FaceColors } );
+            particles = new THREE.Mesh( geometry, material );
+        }
+
+
         scene.add( particles );
     }
+
+    var jsonDataReceived;
     function getData() {
         $.ajax({
             dataType: 'json',
             url: '/getData/test',
             success: function(jsondata){
                 console.log("Data was received");
+                jsonDataReceived = jsondata;
 //                console.log(jsondata);
-                drawPoints(jsondata);
+//                drawPoints(jsondata);
             }
         });
     }
 
+    function drawData() {
+        var length1X = parseInt($('#lenght1X').val());
+        var length1Y = parseInt($('#lenght1Y').val());
+
+        var length2X = parseInt($('#lenght2X').val());
+        var length2Y = parseInt($('#lenght2Y').val());
+        drawPoints(jsonDataReceived, length1X, length1Y, length2X, length2Y);
+    }
+
     $('#getData').click(getData);
+    $('#drawButton').click(drawData);
+
 </script>
 
 <script type="x-shader/x-vertex" id="vertexshader">
