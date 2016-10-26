@@ -1,5 +1,6 @@
 package DataReader;
 
+import Model.PointArrayData;
 import Model.PointData;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.Variable;
@@ -9,12 +10,17 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by user on 28.09.2016.
  */
 public class NetCDFReader {
+
+    private Map<String, Array> mapDataNcDF;
+
     public List<List<PointData>> read(){
         URL url = this.getClass().getClassLoader().getResource("test1.nc");
         NetcdfFile dataFile = null;
@@ -81,5 +87,40 @@ public class NetCDFReader {
         }
         System.out.println("*** SUCCESS reading example file simple_xy.nc!");
         return listPoint;
+    }
+
+    public void loadDataFromFile(String filename){
+        URL url = this.getClass().getClassLoader().getResource(filename);
+        mapDataNcDF = new HashMap<String, Array>();
+        NetcdfFile dataFile = null;
+        try {
+            dataFile = NetcdfFile.open(url.toURI().getPath(), null);
+            // Retrieve the variable named "data"
+            List<Variable> vi = dataFile.getVariables();
+            for (Variable v : vi) {
+                System.out.println();
+                int[] sizeVariable;
+                sizeVariable = v.getShape();
+                int[] origin = new int[sizeVariable.length];
+                Array dataArray = v.read(origin, sizeVariable);
+                mapDataNcDF.put(v.getFullName(), dataArray);
+
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidRangeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public PointArrayData getCoordinates(){
+        double[][] arrayLatitude = (double[][])mapDataNcDF.get("latitude").copyToNDJavaArray();
+        double[][] arrayLongitude = (double[][])mapDataNcDF.get("longitude").copyToNDJavaArray();
+        PointArrayData data = new PointArrayData();
+        data.setLatitudeArray(arrayLatitude);
+        data.setLongitudeArray(arrayLongitude);
+        return data;
     }
 }

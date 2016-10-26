@@ -2,6 +2,7 @@
  * Created by user on 28.09.2016.
  */
 import DataReader.NetCDFReader;
+import Model.PointArrayData;
 import Model.PointData;
 import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
@@ -14,10 +15,12 @@ import java.util.List;
 public class Example {
 
     @RequestMapping("/getData/{name}")
-    List<List<PointData>> home(@PathVariable String name) {
+    PointArrayData home(@PathVariable String name) {
         NetCDFReader reader = new NetCDFReader();
         if(name.equals("test")){
-            return reader.read();
+            reader.loadDataFromFile("test1.nc");
+            return reader.getCoordinates();
+        //            return reader.read();
         }
         else{
             return null;
