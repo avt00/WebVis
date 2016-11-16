@@ -12,4 +12,9 @@ public class MainController {
     public String index() {
         return "hello.html";
     }
+
+    @RequestMapping("/point")
+    public String medExample() {
+        return "PointMed.html";
+    }
 }

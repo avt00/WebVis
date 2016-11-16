@@ -94,6 +94,7 @@ public class NetCDFReader {
         mapDataNcDF = new HashMap<String, Array>();
         NetcdfFile dataFile = null;
         try {
+            System.out.println(url.toURI().getPath());
             dataFile = NetcdfFile.open(url.toURI().getPath(), null);
             // Retrieve the variable named "data"
             List<Variable> vi = dataFile.getVariables();
