@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<script src="JsLib/RenderClass.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="JsLib/three.js"></script>
+<script src="JsLib/OrbitControls.js"></script>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body >
+<div id="render">
+</div>
+</body >
+</html>
+
+<script>
+    var texturePoint = THREE.ImageUtils.loadTexture("../content/disc.png");
+    var texture = THREE.ImageUtils.loadTexture("../content/times.jpg");
+    var r = new RenderSystem(document.getElementById('render'));
+    r.addMeshToScene(createSphere(60));
+    r.addMeshToScene(drawPoints(60));
+    render = function () {
+        r.controls.update();
+        r.renderer.render( r.scene, r.camera );
+        requestAnimationFrame(render);
+    };
+
+    render();
+</script>
+
+

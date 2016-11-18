@@ -13,6 +13,12 @@ public class MainController {
         return "hello.html";
     }
 
+
+    @RequestMapping("/maintest")
+    public String Page() {
+        return "test.html";
+    }
+
     @RequestMapping("/point")
     public String medExample() {
         return "PointMed.html";
