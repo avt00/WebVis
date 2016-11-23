@@ -1,6 +1,7 @@
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * Created by user on 28.09.2016.
@@ -19,7 +20,7 @@ public class MainController {
         return "test.html";
     }
 
-    @RequestMapping("/point")
+    @RequestMapping(value = "/point", method = RequestMethod.GET)
     public String medExample() {
         return "PointMed.html";
     }

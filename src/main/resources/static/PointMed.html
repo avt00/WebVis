@@ -30,7 +30,12 @@
 </head>
 <body>
 
-<input id="InputFile" type="file" style="visibility:hidden" />
+<form method="POST" action="/upload" id="data" enctype="multipart/form-data">
+    <input type="file" id="InputFile" name="file" style="visibility:hidden">
+    <input type="submit" id="submit" value="Upload" style="visibility:hidden">
+</form>
+
+<!--<input id="InputFile" type="file" style="visibility:hidden" />-->
 
 
 <script type="x-shader/x-vertex" id="vertexshader">
@@ -111,6 +116,27 @@
         add:function(){ console.log("clicked")},
         loadFile:function(){
             var inputFile = document.getElementById('InputFile');
+            var submit = document.getElementById('submit');
+            var data = $("form#data");
+            data.submit(function () {
+
+                var formData = new FormData($(this)[0]);
+
+                $.ajax({
+                    url: "/upload",
+                    type: 'POST',
+                    data: formData,
+                    async: false,
+                    success: function (data) {
+//                        alert(data)
+                    },
+                    cache: false,
+                    contentType: false,
+                    processData: false
+                });
+
+                return false;
+            });
             inputFile.addEventListener('change', function() {
                 var file = inputFile.files[0];
                 effectController['fileName'] = file.name;
@@ -119,7 +145,8 @@
                 for (var i in gui.__controllers) {
                     gui.__controllers[i].updateDisplay();
                 }
-                upload(file);
+//                upload(file);
+                submit.click();
             });
             inputFile.click();
         }
@@ -401,27 +428,20 @@
         model[2].material.needsUpdate = true;
     }
 
-    function upload(file) {
+    function upload(formData) {
 
-        var xhr = new XMLHttpRequest();
-
-        // обработчик для закачки
-        xhr.upload.onprogress = function(event) {
-            console.log(event.loaded + ' / ' + event.total);
-        };
-
-        // обработчики успеха и ошибки
-        // если status == 200, то это успех, иначе ошибка
-        xhr.onload = xhr.onerror = function() {
-            if (this.status == 200) {
-                console.log("success");
-            } else {
-                console.log("error " + this.status);
-            }
-        };
-
-        xhr.open("POST", "upload", true);
-        xhr.send(file);
+//        $.ajax({
+//            url: window.location.pathname,
+//            type: 'POST',
+//            data: formData,
+//            async: false,
+//            success: function (data) {
+//                alert(data)
+//            },
+//            cache: false,
+//            contentType: false,
+//            processData: false
+//        });
 
     }
 

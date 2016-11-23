@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @EnableAutoConfiguration
-public class Example {
+public class Example  {
 
     @RequestMapping("/getData/{name}")
     PointArrayData home(@PathVariable String name) {
@@ -40,6 +40,38 @@ public class Example {
     public static void main(String[] args) throws Exception {
         SpringApplication.run(new Object[]{Example.class, MainController.class}, args);
     }
-    
+
+    @Autowired
+    private HttpServletRequest request;
+
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public
+    @ResponseBody
+    ResponseEntity handleFileUpload(@RequestParam("file") MultipartFile file) {
+        if (!file.isEmpty()) {
+            try {
+                System.out.println(file.getOriginalFilename());
+                String uploadsDir = "/uploads/";
+                String realPathtoUploads = request.getServletContext().getRealPath(uploadsDir);
+                System.out.println(realPathtoUploads);
+                if (!new File(realPathtoUploads).exists()) {
+                    new File(realPathtoUploads).mkdir();
+                }
+
+//                log.info("realPathtoUploads = {}", realPathtoUploads);
+
+
+                String orgName = file.getOriginalFilename();
+                String filePath = realPathtoUploads + orgName;
+                File dest = new File("C:\\Users\\user\\Downloads\\DELETEME\\"+orgName); //filePath);
+                file.transferTo(dest);
+            }
+            catch (Exception e){
+                System.out.println(e);
+            }
+        }
+        return null;
+    }
 
 }
