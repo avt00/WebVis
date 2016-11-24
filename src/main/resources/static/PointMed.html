@@ -60,8 +60,11 @@
     uniform sampler2D texture;
     varying vec3 vColor;
     void main() {
-        gl_FragColor = vec4( color * vColor, 1 );
-        gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
+        vec4 outColor = texture2D( texture, gl_PointCoord );
+
+        if ( outColor.a < 0.5 ) discard;
+
+        gl_FragColor = outColor * vec4( color * vColor, 1 );
         gl_FragColor.a = vAlpha;
     }
 </script>
@@ -76,6 +79,68 @@
 <script src="JsLib/stats.min.js"></script>
 
 <script>
+
+
+    var palette = [
+        new THREE.Color("rgb(255,176,46)"),
+        new THREE.Color("rgb(205,127,50)"),
+        new THREE.Color("rgb(144,0,32)"),
+        new THREE.Color("rgb(69,22,28)"),
+        new THREE.Color("rgb(52,59,41)"),
+
+        new THREE.Color("rgb(213,113,63)"),
+        new THREE.Color("rgb(100,149,237)"),
+        new THREE.Color("rgb(154,206,235)"),
+        new THREE.Color("rgb(218,216,113)"),
+        new THREE.Color("rgb(52,201,36)"),
+
+        new THREE.Color("rgb(222,76,138)"),
+        new THREE.Color("rgb(0,255,127)"),
+        new THREE.Color("rgb(236,234,190)"),
+        new THREE.Color("rgb(167,252,0)"),
+        new THREE.Color("rgb(189,51,164)"),
+
+        new THREE.Color("rgb(112,41,99)"),
+        new THREE.Color("rgb(94,33,41)"),
+        new THREE.Color("rgb(65,72,51)"),
+        new THREE.Color("rgb(145,30,66)"),
+        new THREE.Color("rgb(37,109,123)"),
+
+
+        new THREE.Color("rgb(0,149,182)"),
+        new THREE.Color("rgb(255,207,72)"),
+        new THREE.Color("rgb(204,85,0)"),
+        new THREE.Color("rgb(184,183,153)"),
+        new THREE.Color("rgb(220,220,220)"),
+
+
+        new THREE.Color("rgb(223,115,255)"),
+        new THREE.Color("rgb(243,165,5)"),
+        new THREE.Color("rgb(115,66,34)"),
+        new THREE.Color("rgb(201,160,220)"),
+        new THREE.Color("rgb(193,84,193)"),
+
+        new THREE.Color("rgb(66,94,23)"),
+        new THREE.Color("rgb(181,121,0)"),
+        new THREE.Color("rgb(0,84,31)"),
+        new THREE.Color("rgb(89,51,21)"),
+        new THREE.Color("rgb(202,55,103)"),
+
+        new THREE.Color("rgb(21,96,189)"),
+        new THREE.Color("rgb(255,67,164)"),
+        new THREE.Color("rgb(252,108,133)"),
+        new THREE.Color("rgb(162,173,208)"),
+        new THREE.Color("rgb(245,245,245)"),
+
+
+        new THREE.Color("rgb(244,169,0)"),
+        new THREE.Color("rgb(253,188,180)"),
+        new THREE.Color("rgb(237,255,33)"),
+        new THREE.Color("rgb(225,204,79)"),
+        new THREE.Color("rgb(154,205,50)"),
+        new THREE.Color("rgb(197,227,132)"),
+    ];
+
 
     var gui;
 
@@ -162,8 +227,24 @@
 
         gui = new dat.GUI();
 
-//        gui.add( effectController, "showDots" ).onChange( function( value ) { pointCloud.visible = value; } );
-//        gui.add( effectController, "showLines" ).onChange( function( value ) { linesMesh.visible = value; } );
+        gui.add( effectController, "showDots" ).onChange( function( value ) {
+
+            for (var key in mapMesh) {
+                if(previousValue==key)
+                    continue;
+                var meshArray = mapMesh[key];
+                meshArray[0].visible = value;
+            }
+        } );
+        gui.add( effectController, "showLines" ).onChange( function( value ) {
+            for (var key in mapMesh) {
+//                if(previousValue==key)
+//                    continue;
+                var meshArray = mapMesh[key];
+                meshArray[1].visible = value;
+                meshArray[2].visible = value;
+            }
+        } );
 //        gui.add( effectController, "minDistance", 10, 300 );
 //        gui.add( effectController, "limitConnections" );
 //        gui.add( effectController, "maxConnections", 0, 30, 1 );
@@ -193,22 +274,26 @@
             }
             previousValue = value;
         }); // controller 1
-        gui.add( effectController, "particleCount", 0, maxParticleCount, 1 ).onChange( function( value ) {
-            particleCount = parseInt( value );
-            particles.setDrawRange( 0, particleCount );
-        });
+//        gui.add( effectController, "particleCount", 0, maxParticleCount, 1 ).onChange( function( value ) {
+//            particleCount = parseInt( value );
+//            particles.setDrawRange( 0, particleCount );
+//        });
 
         gui.add( effectController, "add");
 
     }
 
     function initAll(allObject) {
+        var indexColor = 0;
         for (var key1 in allObject) {
-            initModel(allObject[key1], key1);
+//            if(key1!=="chr1_B")
+//                continue;
+            initModel(allObject[key1], key1, palette[indexColor]);
+            indexColor++;
         }
     }
 
-    function initModel(obj, modelName) {
+    function initModel(obj, modelName, color) {
 
 
         maxParticleCount = obj.points.length;
@@ -218,23 +303,26 @@
         positions = new Float32Array( segments * 3 );
         colorsLine = new Float32Array( segments * 3 );
 
-        particlePositions = new Float32Array( maxParticleCount * 3 );
+        particlePositions = new Float32Array( maxParticleCount * 3);
         colorsPoints = new Float32Array( maxParticleCount * 3 );
         particleSize = new Float32Array( maxParticleCount);
         alphaPoint = new Float32Array( maxParticleCount);
 
         var opacity = 0.2;
 
+
+
+        var texture = new THREE.TextureLoader().load( "../content/ball.png" );
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
         var pMaterial = new THREE.ShaderMaterial( {
             uniforms: {
                 amplitude: { value: 1.0 },
-                color:     { value: new THREE.Color( 0xff0000 ) },
-                texture:   { value: new THREE.TextureLoader().load( "../content/disc.png" ) }
+                color:     { value: new THREE.Color( 0xffffff ) },
+                texture:   { value: texture}
             },
             vertexShader:   document.getElementById( 'vertexshader' ).textContent,
             fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-            blending:       THREE.AdditiveBlending,
-            depthTest:      false,
             transparent:    true
         });
 
@@ -255,12 +343,12 @@
             particlePositions[ i * 3 + 1 ] = y;
             particlePositions[ i * 3 + 2 ] = z;
 
-            colorsPoints[i * 3     ] = 1;
-            colorsPoints[i * 3 + 1 ] = 1;
-            colorsPoints[i * 3 + 2 ] = 1;
+            colorsPoints[i * 3     ] = color.r;
+            colorsPoints[i * 3 + 1 ] = color.g;
+            colorsPoints[i * 3 + 2 ] = color.b;
 
             alphaPoint[ i ] = opacity;
-            particleSize[i] = obj.points[i].r*2;
+            particleSize[i] = obj.points[i].r*10;
 
 
             points.push(new THREE.Vector3(x, y, z));
@@ -281,17 +369,17 @@
 
 
 
-            colorsLine[ colorpos++ ] = 1;
-            colorsLine[ colorpos++ ] = 1;
-            colorsLine[ colorpos++ ] = 1;
+            colorsLine[ colorpos++ ] = color.r;
+            colorsLine[ colorpos++ ] = color.g;
+            colorsLine[ colorpos++ ] = color.b;
 
-            colorsLine[ colorpos++ ] = 1;
-            colorsLine[ colorpos++ ] = 1;
-            colorsLine[ colorpos++ ] = 1;
+            colorsLine[ colorpos++ ] = color.r;
+            colorsLine[ colorpos++ ] = color.g;
+            colorsLine[ colorpos++ ] = color.b;
 
         }
 
-        particles.setDrawRange( 0, particleCount );
+        particles.setDrawRange( 0, maxParticleCount );
         particles.addAttribute( 'position', new THREE.BufferAttribute( particlePositions, 3 ).setDynamic( true ) );
         particles.addAttribute( 'customColor', new THREE.BufferAttribute( colorsPoints, 3 ) );
         particles.addAttribute( 'size', new THREE.BufferAttribute( particleSize, 1 ).setDynamic( true ) );
@@ -318,13 +406,12 @@
             blending: THREE.AdditiveBlending,
             transparent: true,
             opacity : opacity,
-//            color: 0x00ffff
         } );
 
         linesMesh = new THREE.LineSegments( geometry, material );
 
         linesMesh.geometry.setDrawRange( 0, maxParticleCount * 2 );
-        group.add( linesMesh );
+//        group.add( linesMesh );
 
 
 
@@ -427,35 +514,6 @@
         model[2].material.opacity = value;
         model[2].material.needsUpdate = true;
     }
-
-    function upload(formData) {
-
-//        $.ajax({
-//            url: window.location.pathname,
-//            type: 'POST',
-//            data: formData,
-//            async: false,
-//            success: function (data) {
-//                alert(data)
-//            },
-//            cache: false,
-//            contentType: false,
-//            processData: false
-//        });
-
-    }
-
-    //        positions = new Float32Array( splinePoints.length * 3);
-    //        colorsLine = new Float32Array( splinePoints.length * 3 );
-    //        splinePoints.forEach(function (item, i, arr) {
-    //            positions[i] = item.x;
-    //            positions[i+1] = item.y;
-    //            positions[i+2] = item.z;
-    //
-    //            colorsLine[i]   = 1;
-    //            colorsLine[i+1] = 1;
-    //            colorsLine[i+2] = 1;
-    //        });
 </script>
 </body>
 </html>
