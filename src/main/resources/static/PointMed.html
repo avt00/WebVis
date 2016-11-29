@@ -74,6 +74,7 @@
 
 <script src="JsLib/dat.gui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!--<script type="text/javascript" src="https://raw.github.com/dataarts/dat.gui/master/build/dat.gui.min.js"></script>-->
 <script src="JsLib/three.js"></script>
 <script src="JsLib/OrbitControls.js"></script>
 <script src="JsLib/stats.min.js"></script>
@@ -146,7 +147,7 @@
 
     var group;
     var container, controls, stats;
-    var particlesData = [];
+
     var camera, scene, renderer;
     var positions, colorsLine, colorsPoints, alphaPoint;
     var particles;
@@ -163,9 +164,6 @@
 
     var opacityColor = 1;
     var maxOpacity = 1;
-    var particleCount = 500;
-    var r = 800;
-    var rHalf = r / 2;
 
     var filesName = getFilesName();
 
@@ -179,6 +177,7 @@
         particleCount: 500,
         fileNameList:filesName,
         template: [],
+        message: [],
         fileName : "Name",
         add:function(){ console.log("clicked")},
         loadFile:function(){
@@ -195,38 +194,94 @@
                     data: formData,
                     async: false,
                     success: function (data) {
-//                        alert(data)
                     },
                     cache: false,
                     contentType: false,
                     processData: false
                 });
-
                 return false;
             });
             inputFile.addEventListener('change', function() {
                 var file = inputFile.files[0];
                 effectController['fileName'] = file.name;
                 // update all controllers
-
                 for (var i in gui.__controllers) {
                     gui.__controllers[i].updateDisplay();
                 }
-//                upload(file);
+                filesName.push(file.name);
+                effectController.fileNameList = filesName;
+                gui.__controllers[4].remove();
+                gui.__controllers[4].remove();
+                gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(onChangeFileName);
+                gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
                 submit.click();
             });
             inputFile.click();
         }
     };
 
+    var onChangeFileName = function (value) {
+        previousValue = null;
+        scene.remove(group);
+        group = new THREE.Group();
+        mapMesh = {};
+        var data = getData(value);
+        initAll(data);
+        animate();
+        scene.add( group );
+
+        var keys = Object.keys(data);
+        keys.push("All");
+
+        effectController['template'] = keys;
+        gui.__controllers[5].remove();
+        gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
+    };
+
+    var onChangeList = function( value ) {
+        if(previousValue==="All"){
+            for (var key in mapMesh) {
+                var meshArray = mapMesh[key];
+                updateAlpha(meshArray, effectController.maxOpacity);
+            }
+            previousValue=null;
+        }
+        if(value==="All"){
+            for (var key in mapMesh) {
+                var meshArray = mapMesh[key];
+                updateAlpha(meshArray, 1);
+            }
+        }
+        else{
+            var meshArray = mapMesh[value];
+            if(effectController.showDots==false){
+                meshArray[0].visible = true;
+            }
+            updateAlpha(meshArray, 1);
+            if(previousValue!=null){
+                var meshArrayPrev = mapMesh[previousValue];
+                if(effectController.showDots==false){
+                    meshArrayPrev[0].visible = false;
+                }
+                updateAlpha(meshArrayPrev, effectController.maxOpacity);
+            }
+        }
+        previousValue = value;
+    };
+
+
     initGUI();
     init();
+    onChangeFileName(filesName[0]);
+
+
+
 
     function initGUI() {
 
         gui = new dat.GUI();
-
-        gui.add( effectController, "showDots" ).onChange( function( value ) {
+        gui.add( effectController, 'loadFile').name('Load CSV file');
+        gui.add( effectController, "showDots" ).name("Show Dots").onChange( function( value ) {
 
             for (var key in mapMesh) {
                 if(previousValue==key)
@@ -235,27 +290,17 @@
                 meshArray[0].visible = value;
             }
         } );
-        gui.add( effectController, "showLines" ).onChange( function( value ) {
+        gui.add( effectController, "showLines" ).name("Show Lines").onChange( function( value ) {
             for (var key in mapMesh) {
-//                if(previousValue==key)
-//                    continue;
+                if(previousValue==key)
+                    continue;
                 var meshArray = mapMesh[key];
                 meshArray[1].visible = value;
                 meshArray[2].visible = value;
             }
         } );
-//        gui.add( effectController, "minDistance", 10, 300 );
-//        gui.add( effectController, "limitConnections" );
-//        gui.add( effectController, "maxConnections", 0, 30, 1 );
 
-        gui.add( effectController, 'fileName');
-        gui.add( effectController, 'loadFile'). name('Load CSV file');
-
-//        gui.add( effectController, "particleCount", 0, maxParticleCount, 1 ).onChange( function( value ) {
-//            particleCount = parseInt( value );
-//            particles.setDrawRange( 0, particleCount );
-//        });
-        gui.add( effectController, "maxOpacity", 0, maxOpacity, 0.05 ).onChange( function( value ) {
+        gui.add( effectController, "maxOpacity", 0, maxOpacity, 0.05 ).name('Opacity').onChange( function( value ) {
             opacityColor = parseFloat( value );
             for (var key in mapMesh) {
                 if(previousValue==key)
@@ -265,28 +310,8 @@
             }
         });
 
-        gui.add( effectController, 'fileNameList', effectController.fileNameList).onChange(function (value) {
-            scene.remove(group);
-            group = new THREE.Group();
-            mapMesh = {};
-            var data = getData(value);
-            initAll(data);
-            animate();
-            scene.add( group );
-
-            var keys = Object.keys(data);
-            keys.push("All");
-
-            effectController['template'] = keys;
-            // update all controllers
-
-//            updateDisplay(gui);
-
-            gui.__controllers[6].remove();
-            gui.add( effectController, 'template', effectController.template).onChange(onChangeList); // controller 1
-        });
-
-        gui.add( effectController, 'template', effectController.template).onChange(onChangeList); // controller 1
+        gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(onChangeFileName);
+        gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
     }
 
 
@@ -330,12 +355,10 @@
             fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
             transparent:    true,
             depthTest:      true,
-            depthWrite:     true, // changed <==========================================
-//            renderDepth: 100
+            depthWrite:     true,
         });
 
         particles = new THREE.BufferGeometry();
-//        particles.sortParticles = true;
 
         var colorpos = 0;
         var vertexpos = 0;
@@ -454,19 +477,11 @@
         group = new THREE.Group();
         scene.add( group );
 
-        var helper = new THREE.BoxHelper( new THREE.Mesh( new THREE.BoxGeometry( r, r, r ) ) );
-        helper.material.color.setHex( 0x080808 );
-        helper.material.blending = THREE.AdditiveBlending;
-        helper.material.transparent = true;
-        group.add( helper );
-
         renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true} );
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
-
         renderer.gammaInput = true;
         renderer.gammaOutput = true;
-//        renderer.sortObjects = true;
 
         container.appendChild( renderer.domElement );
 
@@ -535,37 +550,6 @@
             }
         });
         return jsonDataR;
-    }
-
-    var onChangeList = function( value ) {
-        if(previousValue==="All"){
-            for (var key in mapMesh) {
-                var meshArray = mapMesh[key];
-                updateAlpha(meshArray, effectController.maxOpacity);
-            }
-            previousValue=null;
-        }
-        if(value==="All"){
-            for (var key in mapMesh) {
-                var meshArray = mapMesh[key];
-                updateAlpha(meshArray, 1);
-            }
-        }
-        else{
-            var meshArray = mapMesh[value];
-            if(effectController.showDots==false){
-                meshArray[0].visible = true;
-            }
-            updateAlpha(meshArray, 1);
-            if(previousValue!=null){
-                var meshArrayPrev = mapMesh[previousValue];
-                if(effectController.showDots==false){
-                    meshArrayPrev[0].visible = false;
-                }
-                updateAlpha(meshArrayPrev, effectController.maxOpacity);
-            }
-        }
-        previousValue = value;
     }
 </script>
 
