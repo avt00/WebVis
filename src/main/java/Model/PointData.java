@@ -12,6 +12,12 @@ public class PointData  implements Serializable {
     private double Latitude;
     private double Longitude;
 
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    private double Value;
+
     public PointData(double latitude, double longitude) {
         Latitude = latitude;
         Longitude = longitude;

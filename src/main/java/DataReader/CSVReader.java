@@ -1,5 +1,6 @@
 package DataReader;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
@@ -17,15 +18,17 @@ import java.util.stream.Stream;
  */
 public class CSVReader {
 
+    public static String FOLDER_UPLOAD = "C:\\Users\\user\\Downloads\\DELETEME\\";
+
     public Map<String, ObjectMed> readPoints(String filename) {
-        URL url = this.getClass().getClassLoader().getResource(filename);
+//        URL url = this.getClass().getClassLoader().getResource(filename);
         Map<String, ObjectMed> points = new HashMap<>();
 //        try {
 //            System.out.println(Paths.get(url.toURI().getPath()));
 //        } catch (URISyntaxException e) {
 //            e.printStackTrace();
 //        }
-        try (Stream<String> stream = Files.lines(Paths.get(url.toURI()))) {
+        try (Stream<String> stream = Files.lines(Paths.get(FOLDER_UPLOAD + filename))) {
             stream.forEach(line -> {
                 String[] parts = line.split("\t");
                 String id = parts[0].split(":")[0];
@@ -41,10 +44,23 @@ public class CSVReader {
             });
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
         return points;
+    }
+
+    public List<String> getFilesName() {
+        List<String> results = new ArrayList<String>();
+
+
+        File[] files = new File(FOLDER_UPLOAD).listFiles();
+
+        for (File file : files) {
+            if (file.isFile()) {
+                results.add(file.getName());
+            }
+        }
+
+        return results;
     }
 
 

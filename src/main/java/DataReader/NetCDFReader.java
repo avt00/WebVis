@@ -119,9 +119,11 @@ public class NetCDFReader {
     public PointArrayData getCoordinates(){
         double[][] arrayLatitude = (double[][])mapDataNcDF.get("latitude").copyToNDJavaArray();
         double[][] arrayLongitude = (double[][])mapDataNcDF.get("longitude").copyToNDJavaArray();
+        int[][][] arrayIce = (int[][][])mapDataNcDF.get("MultIce").copyToNDJavaArray();
         PointArrayData data = new PointArrayData();
         data.setLatitudeArray(arrayLatitude);
         data.setLongitudeArray(arrayLongitude);
+        data.setIceArray(arrayIce);
         return data;
     }
 }

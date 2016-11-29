@@ -62,7 +62,7 @@
     void main() {
         vec4 outColor = texture2D( texture, gl_PointCoord );
 
-        if ( outColor.a < 0.5 ) discard;
+        if ( outColor.a < 0.5) discard;
 
         gl_FragColor = outColor * vec4( color * vColor, 1 );
         gl_FragColor.a = vAlpha;
@@ -159,24 +159,26 @@
     var previousValue;
 
     var maxParticleCount = 1000;
+
+
+    var opacityColor = 1;
+    var maxOpacity = 1;
     var particleCount = 500;
     var r = 800;
     var rHalf = r / 2;
 
-
-
-    var data = getData();
-    var keys = Object.keys(data);
-    keys.push("All");
+    var filesName = getFilesName();
 
     var effectController = {
         showDots: true,
         showLines: true,
+        maxOpacity: 1,
         minDistance: 150,
         limitConnections: false,
         maxConnections: 20,
         particleCount: 500,
-        template:keys,
+        fileNameList:filesName,
+        template: [],
         fileName : "Name",
         add:function(){ console.log("clicked")},
         loadFile:function(){
@@ -220,9 +222,6 @@
     initGUI();
     init();
 
-    initAll(data);
-    animate();
-
     function initGUI() {
 
         gui = new dat.GUI();
@@ -248,46 +247,52 @@
 //        gui.add( effectController, "minDistance", 10, 300 );
 //        gui.add( effectController, "limitConnections" );
 //        gui.add( effectController, "maxConnections", 0, 30, 1 );
+
         gui.add( effectController, 'fileName');
         gui.add( effectController, 'loadFile'). name('Load CSV file');
-        gui.add( effectController, 'template', effectController.template).onChange( function( value ) {
-            if(previousValue==="All"){
-                for (var key in mapMesh) {
-                    var meshArray = mapMesh[key];
-                    updateAlpha(meshArray, 0.2);
-                }
-                previousValue=null;
-            }
-            if(value==="All"){
-                for (var key in mapMesh) {
-                    var meshArray = mapMesh[key];
-                    updateAlpha(meshArray, 1);
-                }
-            }
-            else{
-                var meshArray = mapMesh[value];
-                updateAlpha(meshArray, 1);
-                if(previousValue!=null){
-                    var meshArrayPrev = mapMesh[previousValue];
-                    updateAlpha(meshArrayPrev, 0.2);
-                }
-            }
-            previousValue = value;
-        }); // controller 1
+
 //        gui.add( effectController, "particleCount", 0, maxParticleCount, 1 ).onChange( function( value ) {
 //            particleCount = parseInt( value );
 //            particles.setDrawRange( 0, particleCount );
 //        });
+        gui.add( effectController, "maxOpacity", 0, maxOpacity, 0.05 ).onChange( function( value ) {
+            opacityColor = parseFloat( value );
+            for (var key in mapMesh) {
+                if(previousValue==key)
+                    continue;
+                var meshArray = mapMesh[key];
+                updateAlpha(meshArray, opacityColor);
+            }
+        });
 
-        gui.add( effectController, "add");
+        gui.add( effectController, 'fileNameList', effectController.fileNameList).onChange(function (value) {
+            scene.remove(group);
+            group = new THREE.Group();
+            mapMesh = {};
+            var data = getData(value);
+            initAll(data);
+            animate();
+            scene.add( group );
 
+            var keys = Object.keys(data);
+            keys.push("All");
+
+            effectController['template'] = keys;
+            // update all controllers
+
+//            updateDisplay(gui);
+
+            gui.__controllers[6].remove();
+            gui.add( effectController, 'template', effectController.template).onChange(onChangeList); // controller 1
+        });
+
+        gui.add( effectController, 'template', effectController.template).onChange(onChangeList); // controller 1
     }
+
 
     function initAll(allObject) {
         var indexColor = 0;
         for (var key1 in allObject) {
-//            if(key1!=="chr1_B")
-//                continue;
             initModel(allObject[key1], key1, palette[indexColor]);
             indexColor++;
         }
@@ -308,7 +313,7 @@
         particleSize = new Float32Array( maxParticleCount);
         alphaPoint = new Float32Array( maxParticleCount);
 
-        var opacity = 0.2;
+        var opacity = effectController.maxOpacity;
 
 
 
@@ -323,11 +328,14 @@
             },
             vertexShader:   document.getElementById( 'vertexshader' ).textContent,
             fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
-            transparent:    true
+            transparent:    true,
+            depthTest:      true,
+            depthWrite:     true, // changed <==========================================
+//            renderDepth: 100
         });
 
         particles = new THREE.BufferGeometry();
-
+//        particles.sortParticles = true;
 
         var colorpos = 0;
         var vertexpos = 0;
@@ -416,8 +424,8 @@
 
 
         var material = new THREE.LineBasicMaterial({
-            color: 0xff00f0,
-            opacity: 0.2,
+            color: color,
+            opacity: opacity,
             transparent: true,
         });
 
@@ -428,7 +436,7 @@
         }
 
         var line = new THREE.Line(geometry, material);
-        scene.add(line);
+        group.add(line);
 
         mapMesh[modelName] = [pointCloud, linesMesh, line];
     }
@@ -452,12 +460,13 @@
         helper.material.transparent = true;
         group.add( helper );
 
-        renderer = new THREE.WebGLRenderer( { antialias: true } );
+        renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true} );
         renderer.setPixelRatio( window.devicePixelRatio );
         renderer.setSize( window.innerWidth, window.innerHeight );
 
         renderer.gammaInput = true;
         renderer.gammaOutput = true;
+//        renderer.sortObjects = true;
 
         container.appendChild( renderer.domElement );
 
@@ -487,12 +496,12 @@
         renderer.render( scene, camera );
     }
 
-    function getData() {
+    function getData(value) {
         var jsonDataR;
         $.ajax({
             dataType: 'json',
             async: false,
-            url: '/getPoints/test',
+            url: '/getPoints/'+value,
             success: function(jsondata){
                 console.log("Data was received");
                 console.log(Object.keys(jsondata));
@@ -514,6 +523,53 @@
         model[2].material.opacity = value;
         model[2].material.needsUpdate = true;
     }
+
+    function getFilesName() {
+        var jsonDataR;
+        $.ajax({
+            dataType: 'json',
+            async: false,
+            url: '/getFiles',
+            success: function(jsondata){
+                jsonDataR = jsondata;
+            }
+        });
+        return jsonDataR;
+    }
+
+    var onChangeList = function( value ) {
+        if(previousValue==="All"){
+            for (var key in mapMesh) {
+                var meshArray = mapMesh[key];
+                updateAlpha(meshArray, effectController.maxOpacity);
+            }
+            previousValue=null;
+        }
+        if(value==="All"){
+            for (var key in mapMesh) {
+                var meshArray = mapMesh[key];
+                updateAlpha(meshArray, 1);
+            }
+        }
+        else{
+            var meshArray = mapMesh[value];
+            if(effectController.showDots==false){
+                meshArray[0].visible = true;
+            }
+            updateAlpha(meshArray, 1);
+            if(previousValue!=null){
+                var meshArrayPrev = mapMesh[previousValue];
+                if(effectController.showDots==false){
+                    meshArrayPrev[0].visible = false;
+                }
+                updateAlpha(meshArrayPrev, effectController.maxOpacity);
+            }
+        }
+        previousValue = value;
+    }
 </script>
+
+
+
 </body>
 </html>

@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,8 +35,16 @@ public class Example  {
     @RequestMapping("/getPoints/{name}")
     Map<String, CSVReader.ObjectMed> getPoints(@PathVariable String name) {
         CSVReader reader = new CSVReader();
-        return reader.readPoints("lmna.csv");
+        return reader.readPoints(name+".csv");
     }
+
+
+    @RequestMapping("/getFiles")
+    List<String> getFiles() {
+        CSVReader reader = new CSVReader();
+        return reader.getFilesName();
+    }
+
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(new Object[]{Example.class, MainController.class}, args);
@@ -64,7 +73,7 @@ public class Example  {
 
                 String orgName = file.getOriginalFilename();
                 String filePath = realPathtoUploads + orgName;
-                File dest = new File("C:\\Users\\user\\Downloads\\DELETEME\\"+orgName); //filePath);
+                File dest = new File(CSVReader.FOLDER_UPLOAD+orgName); //filePath);
                 file.transferTo(dest);
             }
             catch (Exception e){

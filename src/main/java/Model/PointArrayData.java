@@ -11,6 +11,7 @@ public class PointArrayData implements Serializable {
 
     private double[][] latitudeArray;
     private double[][] longitudeArray;
+    private int[][][] iceArray;
 
     public double[][] getLatitudeArray() {
         return latitudeArray;
@@ -26,5 +27,13 @@ public class PointArrayData implements Serializable {
 
     public void setLongitudeArray(double[][] longitudeArray) {
         this.longitudeArray = longitudeArray;
+    }
+
+    public void setIceArray(int[][][] iceArray) {
+        this.iceArray = iceArray;
+    }
+
+    public int[][][] getIceArray() {
+        return iceArray;
     }
 }

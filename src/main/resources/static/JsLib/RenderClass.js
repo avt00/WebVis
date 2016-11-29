@@ -3,7 +3,8 @@
  */
 function RenderSystem (domElement){
 
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true} );
+    this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
     domElement.appendChild( this.renderer.domElement );
 
@@ -24,7 +25,16 @@ function RenderSystem (domElement){
     this.addMeshToScene = function(mesh) {
         this.scene.add( mesh );
     };
+
+    this.onWindowResize = function(){
+
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+
+        this.renderer.setSize( window.innerWidth, window.innerHeight );
+    };
 }
+
 
 
 
