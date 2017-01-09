@@ -32,8 +32,8 @@ public class Example  {
         }
     }
 
-    @RequestMapping("/getPoints/{name}")
-    Map<String, CSVReader.ObjectMed> getPoints(@PathVariable String name) {
+    @RequestMapping("/getGenome/{name}")
+    Map<String, CSVReader.ObjectMed> getGenome(@PathVariable String name) {
         CSVReader reader = new CSVReader();
         return reader.readPoints(name+".csv");
     }
@@ -73,6 +73,9 @@ public class Example  {
 
                 String orgName = file.getOriginalFilename();
                 String filePath = realPathtoUploads + orgName;
+                if (!new File(CSVReader.FOLDER_UPLOAD).exists()) {
+                    new File(CSVReader.FOLDER_UPLOAD).mkdir();
+                }
                 File dest = new File(CSVReader.FOLDER_UPLOAD+orgName); //filePath);
                 file.transferTo(dest);
             }

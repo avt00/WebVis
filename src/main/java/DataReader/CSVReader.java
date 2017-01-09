@@ -18,7 +18,7 @@ import java.util.stream.Stream;
  */
 public class CSVReader {
 
-    public static String FOLDER_UPLOAD = "C:\\Users\\user\\Downloads\\DELETEME\\";
+    public static String FOLDER_UPLOAD = "C:\\Users\\amois\\Downloads\\DELETEME\\";
 
     public Map<String, ObjectMed> readPoints(String filename) {
 //        URL url = this.getClass().getClassLoader().getResource(filename);
@@ -53,6 +53,9 @@ public class CSVReader {
 
 
         File[] files = new File(FOLDER_UPLOAD).listFiles();
+
+        if(files==null)
+            return new ArrayList<>();
 
         for (File file : files) {
             if (file.isFile()) {
