@@ -1,5 +1,5 @@
 body {
-    color: #cccccc;
+    /*color: #cccccc;*/
     font-family:Monospace;
     font-size:13px;
     text-align:center;
@@ -17,4 +17,40 @@ body {
 
 a {
     color: #0080ff;
+}
+
+*{
+    font-family: Areal;
+}
+.b-container{
+    width:300px;
+    height:400px;
+    background-color: #ccc;
+    margin:0px auto;
+    padding:10px;
+    font-size:30px;
+
+    /*color: #fff;*/
+}
+.b-popup{
+    width:100%;
+    min-height:100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow:hidden;
+    position:fixed;
+    top:0px;
+}
+.b-popup .b-popup-content{
+    margin:40px auto 0px auto;
+    width:200px;
+    height: 100%;
+    padding:10px;
+    background-color: #c5c5c5;
+    border-radius:5px;
+    box-shadow: 0px 0px 10px #000;
+}
+
+.special-select {
+    width: 40%;
+    height: 150px;
 }

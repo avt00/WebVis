@@ -13,6 +13,19 @@
     <input type="submit" id="submit" value="Upload" style="visibility:hidden">
 </form>
 
+<div class="b-popup" id="popup1">
+    <div class="b-popup-content">
+        <div>Text in Popup</div>
+        <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">
+        </select>
+        <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">
+        </select>
+
+        <div><a href="javascript:PopUpHide()">Hide</a></div>
+
+    </div>
+</div>
+
 <script type="x-shader/x-vertex" id="vertexshader">
     attribute float size;
     attribute float alpha;
@@ -45,6 +58,63 @@
 </script>
 
 
+<script id="vertexShader" type="x-shader/x-vertex">
+		precision highp float;
+
+
+		uniform mat4 modelViewMatrix;
+		uniform mat4 projectionMatrix;
+
+        attribute vec3 position;
+        attribute vec2 uv;
+
+		attribute vec3 offset;
+		attribute vec3 scale;
+
+		varying vec2 vUv;
+		varying vec3 vPosition;
+		varying vec3 positionEye;
+
+        attribute vec3 customColor;
+        varying vec3 vColor;
+
+		void main() {
+
+		    positionEye = ( modelViewMatrix * vec4( position, 1.0 ) ).xyz;
+
+            vColor = customColor;
+
+			vPosition = vec3( offset.x + position.x*scale.x, offset.y + position.y*scale.y, offset.z + position.z*scale.z);
+
+			vUv = uv;
+
+			gl_Position = projectionMatrix * modelViewMatrix * vec4( vPosition, 1.0 );
+
+		}
+
+	</script>
+
+<script id="fragmentShader" type="x-shader/x-fragment">
+        #extension GL_OES_standard_derivatives : enable
+		precision highp float;
+
+
+        uniform sampler2D map;
+		varying vec2 vUv;
+
+		varying vec3 vColor;
+		varying vec3 vPosition;
+		varying vec3 positionEye;
+
+		void main() {
+            vec3 fdx = dFdx( positionEye );
+            vec3 fdy = dFdy( positionEye );
+            vec3 normal = normalize( cross( fdx, fdy ) );
+            float diffuse = dot( normal, vec3( 0.0, 0.0, 1.0 ) );
+            gl_FragColor = vec4( diffuse * vColor, 1.0 );
+		}
+
+	</script>
 <div id="container"></div>
 
 <script src="JsLib/dat.gui.min.js"></script>
@@ -54,6 +124,20 @@
 <script src="JsLib/stats.min.js"></script>
 <script src="JsLib/Genome/PaletteColor.js"></script>
 <script src="JsLib/Genome/RestFunction.js"></script>
+<script src="JsLib/Genome/shaders/EffectComposer.js"></script>
+<script src="JsLib/Genome/shaders/CopyShader.js"></script>
+<script src="JsLib/Genome/shaders/SSAOShader.js"></script>
+<script src="JsLib/Genome/shaders/ShaderPass.js"></script>
+<script src="JsLib/Genome/shaders/RenderPass.js"></script>
+<script scr="JsLib/Genome/shaders/MaskPass.js"></script>
+<script src="JsLib/Genome/UIController.js"></script>
+<script src="JsLib/Genome/RenderBead.js"></script>
+<script src="JsLib/Genome/RenderingGenome.js"></script>
+<script src="JsLib/Genome/MainControllerJS.js"></script>
 
+
+<script>
+//    RenderManySphere();
+</script>
 </body>
 </html>

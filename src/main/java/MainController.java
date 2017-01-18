@@ -20,6 +20,11 @@ public class MainController {
         return "test.html";
     }
 
+    @RequestMapping("/mtest2")
+    public String Page2() {
+        return "test2.html";
+    }
+
     @RequestMapping(value = "/point", method = RequestMethod.GET)
     public String medExample() {
         return "PointMed.html";
