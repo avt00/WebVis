@@ -140,11 +140,13 @@ function PopUpHide(){
         })
     }
     $.each(deletedOptions, function (index, element) {
-        updateAlpha(mapMesh[element], 0);
+        // updateAlpha(mapMesh[element], 0);
+        updateAlphaMesh(meshSpheres, element, 0);
     });
     previousPartofGene = newOptions;
     $.each(previousPartofGene, function(index, element){
-        updateAlpha(mapMesh[element], 1);
+        // updateAlpha(mapMesh[element], 1);
+        updateAlphaMesh(meshSpheres, element, 1);
     });
 }
 

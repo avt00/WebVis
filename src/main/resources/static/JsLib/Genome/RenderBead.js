@@ -1,6 +1,7 @@
 /**
  * Created by user on 16.01.2017.
  */
+var mapping = {};
 function getMeshPoints(listChains, pallete) {
     var countAllPoint = 0 ;
     for(var key in listChains){
@@ -27,7 +28,7 @@ function getMeshPoints(listChains, pallete) {
     // 5. offset
     var offsets = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 3 ), 3, 1 );
     // 6. color
-    var colors = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 3 ), 3, 1 );
+    var colors = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 4 ), 4, 1 ).setDynamic( true );
     // 7. radius
     var scaleValues =  new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint*3 ), 3, 1 );
     var currentIndex = 0;
@@ -36,9 +37,10 @@ function getMeshPoints(listChains, pallete) {
         var points = listChains[key].points;
         for ( var i = 0, ul = points.length; i < ul; i++ ) {
             offsets.setXYZ( currentIndex + i, points[i].x, points[i].y, points[i].z);
-            colors.setXYZ ( currentIndex + i, pallete[colorId].r, pallete[colorId].g, pallete[colorId].b);
+            colors.setXYZW ( currentIndex + i, pallete[colorId].r, pallete[colorId].g, pallete[colorId].b, 1.0);
             scaleValues.setXYZ( currentIndex + i, points[i].r,  points[i].r,  points[i].r);
         }
+        mapping[key] = {start: currentIndex, count: points.length};
         currentIndex += points.length;
         colorId++;
     }
@@ -58,12 +60,23 @@ function getMeshPoints(listChains, pallete) {
         },
         vertexShader: document.getElementById( 'vertexShader' ).textContent,
         fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-        transparent: false,
-
+        alphaTest: 0.5,
+        transparent: true
     } );
 
     var mesh = new THREE.Mesh( geometry, material );
     return mesh;
+}
+
+function updateAlphaMesh(mesh, name, value) {
+    var attributeColor = mesh.geometry.getAttribute("customColor");
+    var dataInformation = mapping[name];
+    for ( var i = dataInformation.start, ul = dataInformation.start + dataInformation.count; i < ul; i++ ) {
+        var index = i * 4;
+        var vector4 = new THREE.Vector4( attributeColor.array[index], attributeColor.array[index + 1], attributeColor.array[index + 2], attributeColor.array[index + 3] );
+        attributeColor.setXYZW( i, vector4.x, vector4.y, vector4.z, value );
+    }
+    attributeColor.needsUpdate = true;
 }
 
 // function RenderManySphere() {

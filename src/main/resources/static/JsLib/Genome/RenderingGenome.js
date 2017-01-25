@@ -9,7 +9,9 @@ var positions,  colorsPoints, alphaPoint, particleSize, particlePositions;
 var linesMesh, colorsLine;
 var mapMesh = {};
 var maxParticleCount;
-var raycaster, mouse;;
+var raycaster, mouse;
+
+var meshSpheres;
 
 function init() {
 
@@ -28,6 +30,7 @@ function init() {
     // renderer.setClearColor( 0xa0a0a0 );
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.sortObjects = true;
     // renderer.gammaInput = true;
     // renderer.gammaOutput = true;
     // renderer.shadowMap.enabled = true;
@@ -266,8 +269,8 @@ function initAll(allObject) {
     //     indexColor++;
     // }
 
-    var meshPoints = getMeshPoints(allObject, palette)
-    scene.add(meshPoints);
+    meshSpheres = getMeshPoints(allObject, palette)
+    scene.add(meshSpheres);
 
 
     // group = new THREE.Object3D();
