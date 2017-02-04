@@ -82,7 +82,7 @@ function initGUI() {
 
     gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(onChangeFileName);
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
-    updatePartsGenome(effectController.template);
+    updatePartsGenome(effectController.template, "parts2");
     $(document).ready(function(){
         //Скрыть PopUp при загрузке страницы
         PopUpHide();
@@ -115,10 +115,10 @@ function UpdatePartGenome(selectElement) {
     }));
 }
 
-function updatePartsGenome(parts) {
-    document.getElementById("parts").options.length = 0;
+function updatePartsGenome(parts, idSelector) {
+    document.getElementById(idSelector).options.length = 0;
     $.each(parts, function (i, part) {
-        $('#parts').append($('<option>', {
+        $('#'+idSelector).append($('<option>', {
             value: part,
             text : part
         }));
@@ -141,12 +141,14 @@ function PopUpHide(){
     }
     $.each(deletedOptions, function (index, element) {
         // updateAlpha(mapMesh[element], 0);
-        updateAlphaMesh(meshSpheres, element, 0);
+        // updateAlphaMesh(meshSpheres, element, 0);
+        updateAlphaBead(mapBeads[element], 0);
     });
     previousPartofGene = newOptions;
     $.each(previousPartofGene, function(index, element){
-        // updateAlpha(mapMesh[element], 1);
-        updateAlphaMesh(meshSpheres, element, 1);
+        //updateAlpha(mapMesh[element], 1);
+        // updateAlphaMesh(meshSpheres, element, 1);
+        updateAlphaBead(mapBeads[element], 1);
     });
 }
 
@@ -162,5 +164,5 @@ var onChangeFileName = function (value) {
     var keys = Object.keys(data);
 
     effectController['template'] = keys;
-    updatePartsGenome(effectController.template);
+    updatePartsGenome(effectController.template, "parts2");
 };

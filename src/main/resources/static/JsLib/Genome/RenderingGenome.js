@@ -261,7 +261,7 @@ function render() {
         renderer.render( scene, camera );
     }
 }
-
+var mapBeads = {};
 function initAll(allObject) {
     // var indexColor = 0;
     // for (var key1 in allObject) {
@@ -269,8 +269,17 @@ function initAll(allObject) {
     //     indexColor++;
     // }
 
-    meshSpheres = getMeshPoints(allObject, palette)
-    scene.add(meshSpheres);
+    // meshSpheres = getMeshPoints(allObject, palette)
+
+    var indexColor = 0;
+    var group = new THREE.Object3D();
+    for (var key1 in allObject) {
+        var part = getMeshPointsSeparate(allObject[key1], palette[indexColor]);
+        group.add(part);
+        mapBeads[key1] = part;
+        indexColor++;
+    }
+    scene.add(group);
 
 
     // group = new THREE.Object3D();
