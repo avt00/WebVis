@@ -82,7 +82,7 @@ function initGUI() {
 
     gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(onChangeFileName);
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
-    updatePartsGenome(effectController.template, "parts2");
+    updatePartsGenome(effectController.template, "parts");
     $(document).ready(function(){
         //Скрыть PopUp при загрузке страницы
         PopUpHide();
@@ -91,26 +91,26 @@ function initGUI() {
 
 function UpdatePartGenome(selectElement) {
     var selectedValue = selectElement.value;
-    if(selectElement.id === "parts"){
-        $('#parts :selected').remove();
-        $("#parts2").append($('<option>', {
-            value: selectedValue,
-            text: selectedValue
-        }));
-    }
-    else if(selectElement.id === "parts2"){
+    if(selectElement.id === "parts2"){
         $('#parts2 :selected').remove();
         $("#parts").append($('<option>', {
             value: selectedValue,
             text: selectedValue
         }));
     }
+    else if(selectElement.id === "parts"){
+        $('#parts :selected').remove();
+        $("#parts2").append($('<option>', {
+            value: selectedValue,
+            text: selectedValue
+        }));
+    }
 
-    $("#parts").html($("#parts option").sort(function (a, b) {
+    $("#parts2").html($("#parts2 option").sort(function (a, b) {
         return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
     }));
 
-    $("#parts2").html($("#parts2 option").sort(function (a, b) {
+    $("#parts").html($("#parts option").sort(function (a, b) {
         return a.text == b.text ? 0 : a.text < b.text ? -1 : 1
     }));
 }
@@ -128,7 +128,7 @@ function updatePartsGenome(parts, idSelector) {
 //Функция скрытия PopUp
 function PopUpHide(){
     $("#popup1").hide();
-    var newOptions = $('#parts2 option').map(function () {
+    var newOptions = $('#parts option').map(function () {
         return $( this ).val();
     }).toArray();
     var deletedOptions = [];
@@ -153,8 +153,6 @@ function PopUpHide(){
 }
 
 var onChangeFileName = function (value) {
-    scene.remove(group);
-    group = new THREE.Group();
     mapMesh = {};
     var data = getData(value);
     initAll(data);
@@ -164,5 +162,5 @@ var onChangeFileName = function (value) {
     var keys = Object.keys(data);
 
     effectController['template'] = keys;
-    updatePartsGenome(effectController.template, "parts2");
+    updatePartsGenome(effectController.template, "parts");
 };

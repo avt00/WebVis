@@ -58,12 +58,12 @@ function getMeshPoints(listChains, pallete) {
         uniforms: {
             map: { value: texture }
         },
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
-        alphaTest: 0.5,
-        transparent: true,
-        depthWrite: false,
-        depthTest: false,
+        vertexShader: PointTextureShader.vertexShader,
+        fragmentShader: PointTextureShader.fragmentShader,
+        // alphaTest: 0.5,
+        // transparent: true,
+        // depthWrite: false,
+        // depthTest: false,
     } );
 
     var mesh = new THREE.Mesh( geometry, material );
@@ -136,8 +136,8 @@ function getMeshPointsSeparate(chain, color) {
         uniforms: {
             map: { value: texture }
         },
-        vertexShader: document.getElementById( 'vertexShader' ).textContent,
-        fragmentShader: document.getElementById( 'fragmentShader' ).textContent,
+        vertexShader: SphereShader.vertexShader,
+        fragmentShader: SphereShader.fragmentShader,
         alphaTest: 0.5,
         transparent: true,
         // depthWrite: false,
@@ -148,79 +148,168 @@ function getMeshPointsSeparate(chain, color) {
     return mesh;
 }
 
-// function RenderManySphere() {
-//
-//
-//     var countSphere = 1000;
-//     var sizeCube = 10;
-//     var geometry = new THREE.BufferGeometry();
-//     var basicGeometrySphere = new THREE.SphereBufferGeometry( 0.5, 2, 2 );
-//
-//     var position = Array.prototype.slice.call(basicGeometrySphere.getAttribute("position").array);
-//     var indexes = Array.prototype.slice.call(basicGeometrySphere.getIndex().array);
-//
-//     var allPosition = [];
-//     var allIndexes = [];
-//
-//     for(var i = 0; i < countSphere; i++) {
-//         // 1. position
-//         var newPosition = [];
-//
-//         for (var j in position) {
-//             if ( j % 3 == 0) {
-//                 // x:
-//                 var rowNumber = i % sizeCube;
-//
-// //                    while(rowNumber > sizeCube)
-// //                    {
-// //                        rowNumber = Math.floor(rowNumber / sizeCube);
-// //                    }
-//                 newPosition[j] = position[j] + (rowNumber*2);
-//             }
-//             else if((j+1) % 3 == 0){
-//                 // y:
-//                 var columnNumber = Math.floor(i / sizeCube) % sizeCube;
-// //                    while(columnNumber > sizeCube)
-// //                    {
-// //                        columnNumber = Math.floor(columnNumber / sizeCube);
-// //                    }
-//                 newPosition[j] = position[j] + (columnNumber*2);
-//             }
-//             else{
-//                 var heightNumber = Math.floor(i / sizeCube / sizeCube) % sizeCube;
-//                 newPosition[j] = position[j] + (heightNumber * 2);
-//             }
-//         }
-// //            console.log(allPosition.concat(newPosition));
-//         allPosition = allPosition.concat(newPosition);
-//         // 2. indexes
-//
-//         var newIndexes =[];
-//         for(var j in indexes){
-//             newIndexes.push(indexes[j] + i*(position.length/3));
-//         }
-//         allIndexes = allIndexes.concat(newIndexes);
-//     }
-//
-//     var arr = Array(allPosition.count).fill(1);
-//     var colors = new Float32Array( arr );
-//
-//     var material = new THREE.MeshBasicMaterial( {
-//         color: 0xaaaaaa
-//     } );
-//
-//     geometry.addAttribute( 'position', new THREE.BufferAttribute( new Float32Array(allPosition), 3 ) );
-// //        geometry.addAttribute( 'normal', basicGeometrySphere.getAttribute("normal") );
-//     geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ) );
-//     geometry.setIndex( new THREE.BufferAttribute( new Uint32Array(allIndexes), 1 ) );
-//
-//     var mesh = new THREE.Mesh( geometry, material );
-//     var newMesh = new THREE.Mesh(basicGeometrySphere, material);
-//     scene.add(newMesh);
-//     scene.add( mesh );
-//
-//     // scene.add( new THREE.AmbientLight( 0x444444 ) );
-// }
+
+// render with texture
+function initModel(obj, modelName, color) {
+
+    maxParticleCount = obj.points.length;
+
+    var segments = maxParticleCount * maxParticleCount;
+
+    positions = new Float32Array( segments * 3 );
+    colorsLine = new Float32Array( segments * 3 );
+
+    particlePositions = new Float32Array( maxParticleCount * 3);
+    colorsPoints = new Float32Array( maxParticleCount * 3 );
+    particleSize = new Float32Array( maxParticleCount);
+    alphaPoint = new Float32Array( maxParticleCount);
+
+    var opacity = 0;
+
+    var texture = new THREE.TextureLoader().load( "../content/ball.png" );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    var pMaterial = new THREE.ShaderMaterial( {
+        uniforms: {
+            amplitude: { value: 1.0 },
+            color:     { value: new THREE.Color( 0xffffff ) },
+            texture:   { value: texture}
+        },
+        vertexShader:   document.getElementById( 'vertexshader' ).textContent,
+        fragmentShader: document.getElementById( 'fragmentshader' ).textContent,
+        transparent:    true,
+        depthTest:      true,
+        depthWrite:     true,
+    });
+
+    particles = new THREE.BufferGeometry();
+
+    var colorpos = 0;
+    var vertexpos = 0;
+    var points = [];
+
+    for ( var i = 0; i < maxParticleCount; i++ ) {
+
+        var x = obj.points[i].x;
+        var y = obj.points[i].y;
+        var z = obj.points[i].z;
+
+        particlePositions[ i * 3     ] = x;
+        particlePositions[ i * 3 + 1 ] = y;
+        particlePositions[ i * 3 + 2 ] = z;
+
+        colorsPoints[i * 3     ] = color.r;
+        colorsPoints[i * 3 + 1 ] = color.g;
+        colorsPoints[i * 3 + 2 ] = color.b;
+
+        alphaPoint[ i ] = opacity;
+        particleSize[i] = obj.points[i].r*10;
+
+
+        points.push(new THREE.Vector3(x, y, z));
+
+        if(i==0){
+            continue;
+        }
+
+
+
+        positions[ vertexpos++ ] = particlePositions[ i * 3     ];
+        positions[ vertexpos++ ] = particlePositions[ i * 3 + 1 ];
+        positions[ vertexpos++ ] = particlePositions[ i * 3 + 2 ];
+
+        positions[ vertexpos++ ] = particlePositions[ (i-1) * 3     ];
+        positions[ vertexpos++ ] = particlePositions[ (i-1) * 3 + 1 ];
+        positions[ vertexpos++ ] = particlePositions[ (i-1) * 3 + 2 ];
+
+
+
+        colorsLine[ colorpos++ ] = color.r;
+        colorsLine[ colorpos++ ] = color.g;
+        colorsLine[ colorpos++ ] = color.b;
+
+        colorsLine[ colorpos++ ] = color.r;
+        colorsLine[ colorpos++ ] = color.g;
+        colorsLine[ colorpos++ ] = color.b;
+
+    }
+
+    particles.setDrawRange( 0, maxParticleCount );
+    particles.addAttribute( 'position', new THREE.BufferAttribute( particlePositions, 3 ).setDynamic( true ) );
+    particles.addAttribute( 'customColor', new THREE.BufferAttribute( colorsPoints, 3 ) );
+    particles.addAttribute( 'size', new THREE.BufferAttribute( particleSize, 1 ).setDynamic( true ) );
+    particles.addAttribute( 'alpha', new THREE.BufferAttribute( alphaPoint, 1 ).setDynamic( true ) );
+
+    // create the particle system
+    pointCloud = new THREE.Points( particles, pMaterial );
+    group.add( pointCloud );
+
+    var geometry = new THREE.BufferGeometry();
+
+    var spline = new THREE.CatmullRomCurve3(points);
+    var splinePoints = spline.getPoints(points.length*5);
+
+    geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ).setDynamic( true ) );
+    geometry.addAttribute( 'color', new THREE.BufferAttribute( colorsLine, 3 ).setDynamic( true ) );
+
+    geometry.computeBoundingSphere();
+
+    geometry.setDrawRange( 0, 0 );
+
+    var material = new THREE.LineBasicMaterial( {
+        vertexColors: THREE.VertexColors,
+        blending: THREE.AdditiveBlending,
+        transparent: true,
+        opacity : opacity,
+    } );
+
+    linesMesh = new THREE.LineSegments( geometry, material );
+
+    linesMesh.geometry.setDrawRange( 0, maxParticleCount * 2 );
+//        group.add( linesMesh );
+
+
+
+    var material = new THREE.LineBasicMaterial({
+        color: color,
+        opacity: opacity,
+        transparent: true,
+    });
+
+    var geometry = new THREE.Geometry();
+
+    for(var i = 0; i < splinePoints.length; i++){
+        geometry.vertices.push(splinePoints[i]);
+    }
+
+    var line = new THREE.Line(geometry, material);
+    group.add(line);
+    mapMesh[modelName] = [pointCloud, linesMesh, line];
+    mapMesh[modelName][0].visible = false;
+    mapMesh[modelName][1].visible = false;
+    mapMesh[modelName][2].visible = false;
+}
+
+
+var visibleModel;
+function updateAlpha(model, value) {
+    var points = model[0].geometry.attributes.alpha;
+    for( var i = 0; i < points.array.length; i++ ) {
+        points.array[ i ] = value;
+    }
+    points.needsUpdate = true;
+    model[1].material.opacity = value;
+    model[1].material.needsUpdate = true;
+
+    model[2].material.opacity = value;
+    model[2].material.needsUpdate = true;
+
+    model[0].visible = true;
+    model[1].visible = true;
+    model[2].visible = true;
+
+    visibleModel = model[0];
+}
 
 
 

@@ -1,5 +1,8 @@
 <link rel='stylesheet' type='text/css' href='css/genome.css'>
 <!DOCTYPE html>
+
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+
 <html lang="en">
 <head>
     <title>Draw elements</title>
@@ -8,112 +11,36 @@
 </head>
 <body>
 
-<form method="POST" action="/upload" id="data" enctype="multipart/form-data">
+
+<form method="POST" action="/upload" id="data" enctype="multipart/form-data" class="hidden">
     <input type="file" id="InputFile" name="file" style="visibility:hidden">
     <input type="submit" id="submit" value="Upload" style="visibility:hidden">
 </form>
 
 <div class="b-popup" id="popup1">
-    <div class="b-popup-content">
+    <div class="b-popup-content container">
         <div>Text in Popup</div>
-        <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">
-        </select>
-        <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">
-        </select>
-
+        <div class="row">
+            <div class="col-sm-6">
+                Selected:
+                <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">
+                </select>
+            </div>
+            <div class="col-sm-6">
+                Unselected:
+                <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">
+                </select>
+            </div>
+        </div>
         <div><a href="javascript:PopUpHide()">Hide</a></div>
 
     </div>
 </div>
 
-<script type="x-shader/x-vertex" id="vertexshader">
-    attribute float size;
-    attribute float alpha;
-    varying float vAlpha;
-
-    attribute vec3 customColor;
-    varying vec3 vColor;
-    void main() {
-        vAlpha = alpha;
-        vColor = customColor;
-        vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-        gl_PointSize = size * ( 300.0 / -mvPosition.z );
-        gl_Position = projectionMatrix * mvPosition;
-    }
-</script>
-
-<script type="x-shader/x-fragment" id="fragmentshader">
-    varying float vAlpha;
-    uniform vec3 color;
-    uniform sampler2D texture;
-    varying vec3 vColor;
-    void main() {
-        vec4 outColor = texture2D( texture, gl_PointCoord );
-
-        if ( outColor.a < 0.5) discard;
-
-        gl_FragColor = outColor * vec4( color * vColor, 1 );
-        gl_FragColor.a = vAlpha;
-    }
-</script>
-
-
-<script id="vertexShader" type="x-shader/x-vertex">
-		precision highp float;
-
-
-		uniform mat4 modelViewMatrix;
-		uniform mat4 projectionMatrix;
-
-        attribute vec3 position;
-        attribute vec2 uv;
-
-		attribute vec3 offset;
-		attribute vec3 scale;
-
-		varying vec2 vUv;
-		varying vec3 positionEye;
-
-
-
-        attribute vec4 customColor;
-        varying vec4 vColor;
-
-		void main() {
-
-		    positionEye = ( modelViewMatrix * vec4( vec3( offset.x + position.x*scale.x, offset.y + position.y*scale.y, offset.z + position.z*scale.z), 1.0 ) ).xyz;
-
-            vColor = customColor;
-
-			vUv = uv;
-
-			gl_Position = projectionMatrix * vec4( positionEye, 1.0 );
-
-		}
-
-	</script>
-
-<script id="fragmentShader" type="x-shader/x-fragment">
-        #extension GL_OES_standard_derivatives : enable
-		precision highp float;
-
-
-        uniform sampler2D map;
-		varying vec2 vUv;
-
-		varying vec4 vColor;
-		varying vec3 positionEye;
-
-		void main() {
-            vec3 fdx = dFdx( positionEye );
-            vec3 fdy = dFdy( positionEye );
-            vec3 normal = normalize( cross( fdx, fdy ) );
-            float diffuse = dot( normal, vec3( 0.0, 0.0, 1.0 ) );
-            gl_FragColor = vec4( diffuse * vColor.xyz, vColor.w );
-		}
-
-	</script>
 <div id="container"></div>
+<script src="JsLib/Genome/Shaders/PointTextureShader.js"></script>
+<script src="JsLib/Genome/Shaders/SphereShader.js"></script>
+<script src="JsLib/Genome/Shaders/LineShader.js"></script>
 
 <script src="JsLib/dat.gui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -122,20 +49,11 @@
 <script src="JsLib/stats.min.js"></script>
 <script src="JsLib/Genome/PaletteColor.js"></script>
 <script src="JsLib/Genome/RestFunction.js"></script>
-<script src="JsLib/Genome/shaders/EffectComposer.js"></script>
-<script src="JsLib/Genome/shaders/CopyShader.js"></script>
-<script src="JsLib/Genome/shaders/SSAOShader.js"></script>
-<script src="JsLib/Genome/shaders/ShaderPass.js"></script>
-<script src="JsLib/Genome/shaders/RenderPass.js"></script>
-<script scr="JsLib/Genome/shaders/MaskPass.js"></script>
 <script src="JsLib/Genome/UIController.js"></script>
+<script src="JsLib/Genome/RenderLine.js"></script>
 <script src="JsLib/Genome/RenderBead.js"></script>
 <script src="JsLib/Genome/RenderingGenome.js"></script>
 <script src="JsLib/Genome/MainControllerJS.js"></script>
 
-
-<script>
-//    RenderManySphere();
-</script>
 </body>
 </html>
