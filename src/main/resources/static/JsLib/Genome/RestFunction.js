@@ -3,6 +3,7 @@
  */
 function getData(value) {
     var jsonDataR;
+    value = value.split('.').join("_");
     $.ajax({
         dataType: 'json',
         async: false,

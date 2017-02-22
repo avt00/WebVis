@@ -40,16 +40,29 @@ function init() {
 
     window.addEventListener( 'resize', onWindowResize, false );
     // window.addEventListener( 'mousemove', onDocumentMouseMove, false );
-    window.addEventListener( 'click', onClick, false );
+    // window.addEventListener( 'click', onClick, false );
 
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
     textureLoader = new THREE.TextureLoader();
+
+
+    renderer.domElement.addEventListener('click', function(e) {
+        if (e.target !== this)
+            return;
+        PopUpHide();
+        onClick(e);
+    });
+
+    var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+    scene.add( light );
+    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 0.2, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
+    scene.add(selectedBead);
 }
 
 function createGlRenderer() {
-    var glRenderer = new THREE.WebGLRenderer( { alpha:true} );
+    var glRenderer = new THREE.WebGLRenderer( { antialias:true, alpha:true} );
     glRenderer.setClearColor(0x000000);
     glRenderer.setPixelRatio(window.devicePixelRatio);
     glRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -85,7 +98,7 @@ function onClick(event) {
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     var minDistToCamera = 1000;
-    var key = null;
+    var pointInfo = null;
     var positionSelected;
     if(group.children.length > 0) {
         raycaster.setFromCamera(mouse, camera);
@@ -99,17 +112,17 @@ function onClick(event) {
                 var distanceToCamera = raycaster.ray.origin.distanceTo(point);
                 if(distance<0.07 && minDistToCamera > distanceToCamera){
                     minDistToCamera = distanceToCamera;
-                    key = mapPoints[key1].points[i].id;
+                    pointInfo = mapPoints[key1].points[i];
                     positionSelected = point;
                 }
             }
         }
         if(minDistToCamera < 1000){
             selectedBead.position.set(positionSelected.x, positionSelected.y, positionSelected.z);
-            console.log(key);
+            console.log(pointInfo);
             console.log(positionSelected);
             cssScene.remove(selectedCssObject);
-            selectedCssObject = createCssObject(key, positionSelected, camera.position);
+            selectedCssObject = createCssObject(pointInfo, positionSelected, camera.position);
             cssScene.add(selectedCssObject);
             // createPopup(key, event);
             // redirectToBead(key);
@@ -138,6 +151,8 @@ var mapBeads = {};
 var mapPoints = {};
 var selectedBead;
 function initAll(allObject) {
+    scene.remove(group);
+    mapBeads = {};
     var indexColor = 0;
     mapPoints = allObject;
     group = new THREE.Group();
@@ -151,12 +166,7 @@ function initAll(allObject) {
         mapBeads[key1] = part;
         indexColor++;
     }
-
-    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 0.2, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
-    var light = new THREE.AmbientLight( 0x404040 ); // soft white light
-    scene.add( light );
     scene.add(group);
-    scene.add(selectedBead);
 }
 
 

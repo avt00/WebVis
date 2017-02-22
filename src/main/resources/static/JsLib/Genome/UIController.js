@@ -4,7 +4,7 @@
 
 var gui;
 var previousPartofGene = [];
-
+// var filesName = [];
 var effectController = {
     showDots: true,
     showLines: true,
@@ -33,9 +33,9 @@ var effectController = {
             for (var i in gui.__controllers) {
                 gui.__controllers[i].updateDisplay();
             }
-            filesName.push(file.name);
-            effectController.fileNameList = filesName;
-            gui.__controllers[4].remove();
+            effectController.fileNameList.push(file.name);
+            // effectController.fileNameList = filesName;
+            gui.__controllers[2].remove();
             // gui.__controllers[4].remove();
             gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(onChangeFileName);
             // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
@@ -161,10 +161,13 @@ function PopUpHide(){
 }
 
 var onChangeFileName = function (value) {
+    document.getElementById("parts").options.length = 0;
+    document.getElementById("parts2").options.length = 0;
     mapMesh = {};
     var data = getData(value);
     initAll(data);
     animate();
+
 
     var keys = Object.keys(data);
 
@@ -228,7 +231,7 @@ function createPopup(id, position) {
 
 }
 
-function createCssObject(id, position, cameraPosition) {
+function createCssObject(pointInfo, position, cameraPosition) {
 
     var element = document.createElement( 'div' );
     element.className = "element";
@@ -236,9 +239,21 @@ function createCssObject(id, position, cameraPosition) {
     var html = [
         // '<div style="width:' + 1 + 'px; height:' + 1 + 'px;">',
         // id,
-        '<div id='+ id +'>'+ id +'</div>'
+        '<div id='+ pointInfo.beadName +'>',
+        pointInfo.beadName,
+
+        '</div>',
+        ''
     ].join('\n');
     var newDiv = $(html);
+    $.each(pointInfo.geneInfos, function(i)
+    {
+        $('<p/>')
+        // .addClass('LabelBead')
+            .text(pointInfo.geneInfos[i].genomeName)
+            .appendTo(newDiv[0])
+            .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-'+pointInfo.geneInfos[i].endGene)});
+    });
     newDiv[0].className = 'LabelBead';
     element.append(newDiv[0]);
     $('#container').append(element);

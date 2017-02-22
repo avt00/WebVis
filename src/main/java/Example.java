@@ -35,7 +35,10 @@ public class Example  {
     @RequestMapping("/getGenome/{name}")
     Map<String, CSVReader.ObjectMed> getGenome(@PathVariable String name) {
         CSVReader reader = new CSVReader();
-        return reader.readPoints(name+".csv");
+        int positionLast = name.lastIndexOf("_");
+        if(positionLast>0)
+           name = name.substring(0, positionLast) + "." +  name.substring(positionLast+1, name.length());
+        return reader.readPoints(name);
     }
 
 
