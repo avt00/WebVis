@@ -87,6 +87,14 @@ function initGUI() {
         //Скрыть PopUp при загрузке страницы
         PopUpHide();
     });
+
+
+    $('#closeButton').on('click', function(e) {
+        if (e.target !== this)
+            return;
+        PopUpHide();
+    });
+
 }
 
 function UpdatePartGenome(selectElement) {
@@ -157,10 +165,93 @@ var onChangeFileName = function (value) {
     var data = getData(value);
     initAll(data);
     animate();
-    scene.add( group );
 
     var keys = Object.keys(data);
 
     effectController['template'] = keys;
     updatePartsGenome(effectController.template, "parts");
 };
+
+function searchKeyUp() {
+    var input = document.getElementById("searcher");
+    var filterText = input.value.toUpperCase();
+    var selectedOption = $('#parts option');
+    var unSelectedOption = $('#parts2 option');
+    for(var i = 0; i < selectedOption.length; i++) {
+        if(selectedOption[i].value.toUpperCase().indexOf(filterText) > -1) {
+            selectedOption[i].style.display = "";
+        }
+        else{
+            selectedOption[i].style.display = "none";
+        }
+    }
+
+    for(var i = 0; i < unSelectedOption.length; i++) {
+        if(unSelectedOption[i].value.toUpperCase().indexOf(filterText) > -1) {
+            unSelectedOption[i].style.display = "";
+        }
+        else{
+            unSelectedOption[i].style.display = "none";
+        }
+    }
+}
+
+function MoveOptionTo(idFrom, idTo) {
+    var fromOption = document.getElementById(idFrom).options;
+
+    $.each(fromOption, function (i, part) {
+        $('#'+idTo).append($('<option>', {
+            value: part.value,
+            text : part.text
+        }));
+    });
+    document.getElementById(idFrom).options.length = 0;
+}
+
+function redirectToBead(id) {
+    var url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position='+id;
+    console.log(url);
+    var win = window.open(url, '_blank');
+    if (win) {
+        win.focus();
+    } else {
+        alert('Please allow popups for this website');
+    }
+}
+
+function createPopup(id, position) {
+    var newLabel = $('<div class="LabelBead" id='+ id +'>'+ id +'</div>');
+    newLabel.click(function() {redirectToBead(id);});
+    $('body').append(newLabel);
+    newLabel.offset({top:position.clientY,left:position.clientX});
+    newLabel.show();
+
+}
+
+function createCssObject(id, position, cameraPosition) {
+
+    var element = document.createElement( 'div' );
+    element.className = "element";
+    // element.style.backgroundColor = 'rgba(0,127,127,' + ( Math.random() * 0.5 + 0.25 ) + ')';
+    var html = [
+        // '<div style="width:' + 1 + 'px; height:' + 1 + 'px;">',
+        // id,
+        '<div id='+ id +'>'+ id +'</div>'
+    ].join('\n');
+    var newDiv = $(html);
+    newDiv[0].className = 'LabelBead';
+    element.append(newDiv[0]);
+    $('#container').append(element);
+    var cssObject = new THREE.CSS3DObject(element);
+    cssObject.scale.set(0.003,0.003,0.003);
+    cssObject.position.x = position.x;
+    cssObject.position.y = position.y;
+    cssObject.position.z = position.z;
+    cssObject.lookAt(cameraPosition);
+    // cssObject.rotation.x = direction.x;
+    // cssObject.rotation.y = direction.y;
+    // cssObject.rotation.z = direction.z;
+
+
+    return cssObject;
+}

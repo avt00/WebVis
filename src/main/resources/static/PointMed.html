@@ -17,36 +17,47 @@
     <input type="submit" id="submit" value="Upload" style="visibility:hidden">
 </form>
 
+<div id="container"></div>
+
 <div class="b-popup" id="popup1">
     <div class="b-popup-content container">
-        <div>Text in Popup</div>
+        <div class="title-text">List of genes</div>
+        <div class="searcher-st">Search
+            <input type="text" onkeyup="searchKeyUp()" id="searcher" placeholder="Search by name">
+        </div>
         <div class="row">
             <div class="col-sm-6">
                 Selected:
                 <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">
                 </select>
             </div>
+
             <div class="col-sm-6">
                 Unselected:
                 <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">
                 </select>
             </div>
         </div>
-        <div><a href="javascript:PopUpHide()">Hide</a></div>
-
+        <div class="row">
+            <div class="btn col-sm-4 col-md-offset-1" onclick="MoveOptionTo('parts','parts2')">>></div>
+            <div class="btn col-sm-4 col-md-offset-2" onclick="MoveOptionTo('parts2','parts')"><<</div>
+        </div>
+        <div id="closeButton" class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>
     </div>
 </div>
-
-<div id="container"></div>
+<script src="JsLib/external/three.js"></script>
+<script src="JsLib/external/CSS3DRenderer.js"></script>
 <script src="JsLib/Genome/Shaders/PointTextureShader.js"></script>
 <script src="JsLib/Genome/Shaders/SphereShader.js"></script>
 <script src="JsLib/Genome/Shaders/LineShader.js"></script>
 
-<script src="JsLib/dat.gui.min.js"></script>
+
+<script src="JsLib/external/dat.gui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="JsLib/three.js"></script>
-<script src="JsLib/OrbitControls.js"></script>
-<script src="JsLib/stats.min.js"></script>
+
+<script src="JsLib/external/TypedArrayUtils.js"></script>
+<script src="JsLib/external/OrbitControls.js"></script>
+<script src="JsLib/external/stats.min.js"></script>
 <script src="JsLib/Genome/PaletteColor.js"></script>
 <script src="JsLib/Genome/RestFunction.js"></script>
 <script src="JsLib/Genome/UIController.js"></script>

@@ -82,8 +82,8 @@ function updateAlphaMesh(mesh, name, value) {
 }
 
 function updateAlphaBead(model, value) {
-    model.material.opacity = value;
-    model.material.needsUpdate = true;
+    // model.material.opacity = value;
+    // model.material.needsUpdate = true;
     if(value > 0)
         model.visible = true;
     else
@@ -112,19 +112,19 @@ function getMeshPointsSeparate(chain, color) {
     // 5. offset
     var offsets = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 3 ), 3, 1 );
     // 6. color
-    var colors = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 4 ), 4, 1 ).setDynamic( true );
+    // var colors = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 4 ), 4, 1 ).setDynamic( true );
     // 7. radius
     var scaleValues =  new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint*3 ), 3, 1 );
     var currentIndex = 0;
     var points = chain.points;
     for ( var i = 0, ul = points.length; i < ul; i++ ) {
         offsets.setXYZ( currentIndex + i, points[i].x, points[i].y, points[i].z);
-        colors.setXYZW ( currentIndex + i, color.r, color.g, color.b, 1.0);
+        // colors.setXYZW ( currentIndex + i, color.r, color.g, color.b, 1.0);
         scaleValues.setXYZ( currentIndex + i, points[i].r,  points[i].r,  points[i].r);
     }
     
     geometry.addAttribute( 'offset', offsets ); // per mesh translation
-    geometry.addAttribute( 'customColor', colors );
+    // geometry.addAttribute( 'customColor', colors );
     geometry.addAttribute( 'scale', scaleValues );
 
     // material
@@ -134,7 +134,8 @@ function getMeshPointsSeparate(chain, color) {
     var material = new THREE.RawShaderMaterial( {
 
         uniforms: {
-            map: { value: texture }
+            map: { value: texture },
+            color:{ value: color },
         },
         vertexShader: SphereShader.vertexShader,
         fragmentShader: SphereShader.fragmentShader,
@@ -290,8 +291,6 @@ function initModel(obj, modelName, color) {
     mapMesh[modelName][2].visible = false;
 }
 
-
-var visibleModel;
 function updateAlpha(model, value) {
     var points = model[0].geometry.attributes.alpha;
     for( var i = 0; i < points.array.length; i++ ) {
@@ -307,8 +306,31 @@ function updateAlpha(model, value) {
     model[0].visible = true;
     model[1].visible = true;
     model[2].visible = true;
+}
 
-    visibleModel = model[0];
+
+// not fast it will be best decision
+function getGenomeSeparateSphere(chain, color) {
+
+    var countAllPoint = chain.points.length;
+
+    var sphereMaterial = new THREE.MeshLambertMaterial({color: color});
+    var group = new THREE.Group();
+
+    var points = chain.points;
+    var sphereThree = [];
+
+    for ( var i = 0, ul = points.length; i < ul; i++ ) {
+        var basicGeometrySphere = new THREE.SphereBufferGeometry( points[i].r, 10, 10 );
+        sphereThree[i] = new THREE.Mesh(basicGeometrySphere, sphereMaterial);
+
+        sphereThree[i].position.x = points[i].x;
+        sphereThree[i].position.y = points[i].y;
+        sphereThree[i].position.z = points[i].z;
+
+        group.add(sphereThree[i]);
+    }
+    return group;
 }
 
 

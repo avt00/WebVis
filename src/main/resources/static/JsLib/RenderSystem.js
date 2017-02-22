@@ -5,8 +5,6 @@
 var radius = 60;
 var zoom = 4;
 
-var textureLoader = new THREE.TextureLoader();
-
 var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true});
 renderer.setPixelRatio( window.devicePixelRatio );
 this.renderer.setSize( window.innerWidth, window.innerHeight );
@@ -57,6 +55,7 @@ render();
 
 var particles, uniforms;
 var PARTICLE_SIZE = 50;
+var textureLoader = new THREE.TextureLoader();
 var texturePoint = textureLoader.load("../content/disc.png");
 function drawPoints(listPoint, lenX, lenY, len2X, len2Y) {
     scene.remove(particles);
@@ -189,7 +188,8 @@ function drawEarth()
     var materials = [];
     for(var j=0;j<vertical;j++)
         for(var i=0;i<horizontal;i++){
-            var texture = textureLoader.load("http://b.tile.openstreetmap.org/"+zoom+"/"+i+"/"+j+".png");
+            THREE.ImageUtils.crossOrigin = '';
+            var texture = THREE.ImageUtils.loadTexture("http://b.tile.openstreetmap.org/"+zoom+"/"+i+"/"+j+".png");
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
             texture.repeat.set( horizontal, vertical );
             var material1 = new THREE.MeshBasicMaterial( { map:texture});

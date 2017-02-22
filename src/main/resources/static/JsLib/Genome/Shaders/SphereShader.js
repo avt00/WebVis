@@ -10,6 +10,7 @@ var SphereShader ={
 
         "uniform mat4 modelViewMatrix;",
         "uniform mat4 projectionMatrix;",
+        "uniform vec3 color;",
 
         "attribute vec3 position;",
         "attribute vec2 uv;",
@@ -20,12 +21,12 @@ var SphereShader ={
         "varying vec2 vUv;",
         "varying vec3 positionEye;",
 
-        "attribute vec4 customColor;",
-        "varying vec4 vColor;",
+
+        "varying vec3 vColor;",
 
         "void main() {",
             "positionEye = ( modelViewMatrix * vec4( vec3( offset.x + position.x*scale.x, offset.y + position.y*scale.y, offset.z + position.z*scale.z), 1.0 ) ).xyz;",
-            "vColor = customColor;",
+            "vColor = color;",
             "vUv = uv;",
             "gl_Position = projectionMatrix * vec4( positionEye, 1.0 );",
         "}",
@@ -39,7 +40,7 @@ var SphereShader ={
         "uniform sampler2D map;",
         "varying vec2 vUv;",
 
-        "varying vec4 vColor;",
+        "varying vec3 vColor;",
         "varying vec3 positionEye;",
 
         "void main() {",
@@ -47,7 +48,7 @@ var SphereShader ={
             "vec3 fdy = dFdy( positionEye );",
             "vec3 normal = normalize( cross( fdx, fdy ) );",
             "float diffuse = dot( normal, vec3( 0.0, 0.0, 1.0 ) );",
-            "gl_FragColor = vec4( diffuse * vColor.xyz, vColor.w );",
+            "gl_FragColor = vec4( diffuse * vColor.xyz, 1.0 );",
         "}",
     ].join("\n")
 

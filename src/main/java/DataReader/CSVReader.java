@@ -34,11 +34,11 @@ public class CSVReader {
                 String id = parts[0].split(":")[0];
                 if(points.containsKey(id)){
                     ObjectMed obj = points.get(id);
-                    obj.points.add(new PointMed(Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                    obj.points.add(new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
                 }
                 else{
                     ObjectMed obj = new ObjectMed();
-                    obj.points.add(new PointMed(Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                    obj.points.add(new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
                     points.put(id, obj);
                 }
             });
@@ -70,13 +70,15 @@ public class CSVReader {
     class PointMed implements Serializable {
 
         private static final long serialVersionUID = -5527566248002293042L;
+        public String id;
         public float x;
         public float y;
         public float z;
 
         public float r;
 
-        public PointMed(float x, float y, float z, float r) {
+        public PointMed(String id, float x, float y, float z, float r) {
+            this.id = id;
             this.x = x;
             this.y = y;
             this.z = z;
