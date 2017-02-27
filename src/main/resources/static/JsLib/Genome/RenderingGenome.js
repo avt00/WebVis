@@ -14,17 +14,35 @@ var maxParticleCount;
 var raycaster, mouse;
 var textureLoader;
 
-function init() {
+function init(state) {
 
     container = document.getElementById( 'container' );
 
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1500 );
     camera.position.z = 50;
+    scene = new THREE.Scene();
+    cssScene = new THREE.Scene();
+
+    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 0.2, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
+    if(state!=null){
+        if(state.camera != null){
+            var cameraObject = loader.parse( jsonState.camera );
+
+            camera.copy( cameraObject );
+            // camera.aspect = this.DEFAULT_CAMERA.aspect;
+            camera.updateProjectionMatrix();
+        }
+        if(state.pointInfo){
+            selectedCssObject = createCssObject(state.pointInfo, state.pointInfo, camera.position);
+            cssScene.add(selectedCssObject);
+            selectedBead.position.set(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z);
+        }
+    }
+
 
     controls = new THREE.OrbitControls( camera, container, container);
 
-    scene = new THREE.Scene();
-    cssScene = new THREE.Scene();
+
     // group = new THREE.Group();
     // scene.add( group );
 
@@ -57,7 +75,7 @@ function init() {
 
     var light = new THREE.AmbientLight( 0x404040 ); // soft white light
     scene.add( light );
-    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 0.2, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
+
     scene.add(selectedBead);
 }
 
@@ -99,7 +117,6 @@ function onClick(event) {
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     var minDistToCamera = 1000;
     var pointInfo = null;
-    var positionSelected;
     if(group.children.length > 0) {
         raycaster.setFromCamera(mouse, camera);
         for (var key1 in mapPoints){
@@ -113,16 +130,16 @@ function onClick(event) {
                 if(distance<0.07 && minDistToCamera > distanceToCamera){
                     minDistToCamera = distanceToCamera;
                     pointInfo = mapPoints[key1].points[i];
-                    positionSelected = point;
                 }
             }
         }
         if(minDistToCamera < 1000){
-            selectedBead.position.set(positionSelected.x, positionSelected.y, positionSelected.z);
-            console.log(pointInfo);
-            console.log(positionSelected);
+            currentPointInfo = pointInfo;
+            selectedBead.position.set(currentPointInfo.x, currentPointInfo.y, currentPointInfo.z);
+            console.log(currentPointInfo);
+
             cssScene.remove(selectedCssObject);
-            selectedCssObject = createCssObject(pointInfo, positionSelected, camera.position);
+            selectedCssObject = createCssObject(pointInfo, camera.position);
             cssScene.add(selectedCssObject);
             // createPopup(key, event);
             // redirectToBead(key);
@@ -150,6 +167,7 @@ function render() {
 var mapBeads = {};
 var mapPoints = {};
 var selectedBead;
+var currentPointInfo;
 function initAll(allObject) {
     scene.remove(group);
     mapBeads = {};

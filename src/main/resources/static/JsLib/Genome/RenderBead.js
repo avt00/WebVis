@@ -56,7 +56,7 @@ function getMeshPoints(listChains, pallete) {
     var material = new THREE.RawShaderMaterial( {
 
         uniforms: {
-            map: { value: texture }
+            // map: { value: texture }
         },
         vertexShader: PointTextureShader.vertexShader,
         fragmentShader: PointTextureShader.fragmentShader,
@@ -128,13 +128,13 @@ function getMeshPointsSeparate(chain, color) {
     geometry.addAttribute( 'scale', scaleValues );
 
     // material
-    var texture = new THREE.TextureLoader().load( '../content/moon.gif' );
+    // var texture = new THREE.TextureLoader().load( '../content/moon.gif' );
     // texture.anisotropy = renderer.getMaxAnisotropy();
 
     var material = new THREE.RawShaderMaterial( {
 
         uniforms: {
-            map: { value: texture },
+            // map: { value: texture },
             color:{ value: color },
         },
         vertexShader: SphereShader.vertexShader,

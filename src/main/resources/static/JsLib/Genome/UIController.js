@@ -46,13 +46,17 @@ var effectController = {
     popup : function () {
         //Функция отображения PopUp
         $("#popup1").show();
+    },
+    saveState : function () {
+        saveState(effectController.fileName, camera);
     }
 };
 
 function initGUI() {
 
     gui = new dat.GUI();
-    gui.add( effectController, 'popup').name("Select parts")
+    gui.add( effectController, 'popup').name("Select parts");
+    gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');
     // gui.add( effectController, "showDots" ).name("Show Dots").onChange( function( value ) {
     //     for (var key in mapMesh) {
@@ -160,20 +164,36 @@ function PopUpHide(){
     });
 }
 
-var onChangeFileName = function (value) {
+var onChangeFileName = function (value, state) {
     document.getElementById("parts").options.length = 0;
     document.getElementById("parts2").options.length = 0;
     mapMesh = {};
+    effectController['fileName'] = value;
     var data = getData(value);
     initAll(data);
     animate();
 
 
     var keys = Object.keys(data);
-
     effectController['template'] = keys;
-    updatePartsGenome(effectController.template, "parts");
+    if(state!=null && state.selected!=null){
+        effectController['template'] = state.selected;
+    }
+    var invisibleObjKeys = keys.diff(effectController['template']);
+    updatePartsGenome(effectController['template'], "parts");
+    updatePartsGenome(invisibleObjKeys, "parts2");
+    $.each(effectController['template'], function (index, element) {
+        updateAlphaBead(mapBeads[element], 1);
+    });
+    $.each(invisibleObjKeys, function (index, element) {
+        updateAlphaBead(mapBeads[element], 0);
+    });
 };
+
+Array.prototype.diff = function(a) {
+    return this.filter(function(i) {return a.indexOf(i) < 0;});
+};
+
 
 function searchKeyUp() {
     var input = document.getElementById("searcher");
@@ -231,7 +251,7 @@ function createPopup(id, position) {
 
 }
 
-function createCssObject(pointInfo, position, cameraPosition) {
+function createCssObject(pointInfo, cameraPosition) {
 
     var element = document.createElement( 'div' );
     element.className = "element";
@@ -259,14 +279,19 @@ function createCssObject(pointInfo, position, cameraPosition) {
     $('#container').append(element);
     var cssObject = new THREE.CSS3DObject(element);
     cssObject.scale.set(0.003,0.003,0.003);
-    cssObject.position.x = position.x;
-    cssObject.position.y = position.y;
-    cssObject.position.z = position.z;
+    cssObject.position.x = pointInfo.x;
+    cssObject.position.y = pointInfo.y;
+    cssObject.position.z = pointInfo.z;
     cssObject.lookAt(cameraPosition);
-    // cssObject.rotation.x = direction.x;
-    // cssObject.rotation.y = direction.y;
-    // cssObject.rotation.z = direction.z;
-
-
     return cssObject;
+}
+
+function saveState(filename, camera) {
+    // scene.name = "test";
+    var options = document.getElementById("parts").options;
+    var selectedOptions = [];
+    for(var i = 0; i< options.length; i++){
+        selectedOptions.push(options[i].value);
+    }
+    sendPost({filename: filename, selected: selectedOptions, pointInfo: currentPointInfo, camera: camera.toJSON()}, '/saveState');
 }

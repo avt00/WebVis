@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -89,4 +91,17 @@ public class Example  {
         return null;
     }
 
+    @RequestMapping(value = "/saveState", method = RequestMethod.POST)
+    public void saveNewState(@RequestBody String json) throws Exception {
+        System.out.println("New state: " + json);
+        if (!new File(CSVReader.FOLDER_UPLOAD+"/states/").exists()) {
+            new File(CSVReader.FOLDER_UPLOAD+"/states/").mkdir();
+        }
+        Files.write(Paths.get(CSVReader.FOLDER_UPLOAD + "/states/default"), json.getBytes());
+    }
+
+    @RequestMapping("/getState/{name}")
+    public String getState(@PathVariable String name) throws Exception {
+        return new String(Files.readAllBytes(Paths.get(CSVReader.FOLDER_UPLOAD + "/states/"+name)));
+    }
 }
