@@ -6,6 +6,8 @@ var jsonState = null;
 if(state!=null) {
     var loader = new THREE.ObjectLoader()
     jsonState = getRequest('/getState/' + state);
+    if(jsonState!=null)
+        jsonState = JSON.parse(jsonState.file);
     console.log(jsonState);
 }
 effectController.fileNameList =  getRequest('/getFiles');

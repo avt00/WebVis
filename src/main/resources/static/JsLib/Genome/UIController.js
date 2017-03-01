@@ -248,7 +248,18 @@ function createPopup(id, position) {
     $('body').append(newLabel);
     newLabel.offset({top:position.clientY,left:position.clientX});
     newLabel.show();
+}
 
+function showShortLink(link, position) {
+    var currentUrl = window.location;
+    var newLabel = $('<div class="ShortLink"><a href="/point?state='+link +'">'+currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link+'</a></div>');
+    // newLabel.click(function() {redirectToBead(id);});
+    $('body').append(newLabel);
+    if(position!=null)
+        newLabel.offset({top:position.Y, left:position.X});
+    else
+        newLabel.offset({top:30, left:30});
+    newLabel.show();
 }
 
 function createCssObject(pointInfo, cameraPosition) {
@@ -293,5 +304,6 @@ function saveState(filename, camera) {
     for(var i = 0; i< options.length; i++){
         selectedOptions.push(options[i].value);
     }
-    sendPost({filename: filename, selected: selectedOptions, pointInfo: currentPointInfo, camera: camera.toJSON()}, '/saveState');
+
+    sendPost({filename: filename, selected: selectedOptions, pointInfo: currentPointInfo, camera: camera.toJSON()}, '/saveState', showShortLink);
 }

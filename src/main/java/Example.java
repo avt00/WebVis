@@ -4,9 +4,12 @@
 import DataReader.CSVReader;
 import DataReader.NetCDFReader;
 import Model.PointArrayData;
+import Model.State;
+import MyService.StateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.*;
 import org.springframework.boot.autoconfigure.*;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +23,13 @@ import java.util.Map;
 
 @RestController
 @EnableAutoConfiguration
+@EntityScan(basePackages={"Model"})
+@ComponentScan({"MyService"})
 public class Example  {
+
+
+    @Autowired
+    StateService stateService;
 
     @RequestMapping("/getData/{name}")
     PointArrayData home(@PathVariable String name) {
@@ -50,14 +59,8 @@ public class Example  {
         return reader.getFilesName();
     }
 
-
-    public static void main(String[] args) throws Exception {
-        SpringApplication.run(new Object[]{Example.class, MainController.class}, args);
-    }
-
     @Autowired
     private HttpServletRequest request;
-
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public
@@ -92,16 +95,19 @@ public class Example  {
     }
 
     @RequestMapping(value = "/saveState", method = RequestMethod.POST)
-    public void saveNewState(@RequestBody String json) throws Exception {
+    public long saveNewState(@RequestBody String json) throws Exception {
         System.out.println("New state: " + json);
         if (!new File(CSVReader.FOLDER_UPLOAD+"/states/").exists()) {
             new File(CSVReader.FOLDER_UPLOAD+"/states/").mkdir();
         }
         Files.write(Paths.get(CSVReader.FOLDER_UPLOAD + "/states/default"), json.getBytes());
+        State st = new State(json);
+        stateService.create(st);
+        return st.getId();
     }
 
-    @RequestMapping("/getState/{name}")
-    public String getState(@PathVariable String name) throws Exception {
-        return new String(Files.readAllBytes(Paths.get(CSVReader.FOLDER_UPLOAD + "/states/"+name)));
+    @RequestMapping("/getState/{id}")
+    public State getState(@PathVariable long id) throws Exception {
+        return stateService.getById(id);
     }
 }

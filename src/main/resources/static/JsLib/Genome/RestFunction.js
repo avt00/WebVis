@@ -49,7 +49,7 @@ function uploadNewGenome(formData) {
     return false;
 }
 
-function sendPost(json, url) {
+function sendPost(json, url, action) {
     console.log(json);
     $.ajax({
         headers: {
@@ -60,6 +60,11 @@ function sendPost(json, url) {
         'url': url,
         'data': JSON.stringify(json),
         'dataType': 'json',
+        success: function (msg) {
+            if(action!=null){
+                action(msg);
+            }
+        },
         async: true,
     });
 }
