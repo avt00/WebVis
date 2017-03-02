@@ -252,8 +252,13 @@ function createPopup(id, position) {
 
 function showShortLink(link, position) {
     var currentUrl = window.location;
-    var newLabel = $('<div class="ShortLink"><a href="/point?state='+link +'">'+currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link+'</a></div>');
-    // newLabel.click(function() {redirectToBead(id);});
+    var newLabel = $('<div class="ShortLink" id="'+link+'"><a href="/point?state='+link +'">'+currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link+'</a>'+
+                '</div>');
+    var closeButton = $('<div class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>');
+    closeButton.click(function () {
+        newLabel.remove();
+    });
+    newLabel.append(closeButton);
     $('body').append(newLabel);
     if(position!=null)
         newLabel.offset({top:position.Y, left:position.X});

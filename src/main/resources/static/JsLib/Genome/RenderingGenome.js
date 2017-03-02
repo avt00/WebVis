@@ -23,7 +23,7 @@ function init(state) {
     scene = new THREE.Scene();
     cssScene = new THREE.Scene();
 
-    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 0.2, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
+    selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 1, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
     if(state!=null){
         if(state.camera != null){
             var cameraObject = loader.parse( jsonState.camera );
@@ -36,6 +36,7 @@ function init(state) {
             selectedCssObject = createCssObject(state.pointInfo, state.pointInfo, camera.position);
             cssScene.add(selectedCssObject);
             selectedBead.position.set(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z);
+            selectedBead.scale.set(state.pointInfo.r +0.01, state.pointInfo.r +0.01, state.pointInfo.r+0.01 );
         }
     }
 
@@ -57,7 +58,11 @@ function init(state) {
     container.appendChild( stats.dom );
 
     window.addEventListener( 'resize', onWindowResize, false );
-    // window.addEventListener( 'mousemove', onDocumentMouseMove, false );
+
+
+    window.addEventListener( 'mousemove', onDocumentMouseMove, false );
+    window.addEventListener( 'mouseup', onDocumentMouseUp, false );
+    window.addEventListener( 'mousedown', onDocumentMouseDown, false );
     // window.addEventListener( 'click', onClick, false );
 
     raycaster = new THREE.Raycaster();
@@ -77,6 +82,21 @@ function init(state) {
     scene.add( light );
 
     scene.add(selectedBead);
+}
+var isMouseDrag = false;
+var isMouseDown = false;
+function onDocumentMouseMove() {
+    if(isMouseDown){
+        isMouseDrag = true;
+    }
+}
+
+function onDocumentMouseUp() {
+    isMouseDown = false;
+    isMouseDrag = false;
+}
+function onDocumentMouseDown() {
+    isMouseDown = true;
 }
 
 function createGlRenderer() {
@@ -98,11 +118,6 @@ function createCssRenderer() {
     // cssRenderer.domElement.style.top = 0;
     return cssRenderer;
 }
-// function onDocumentMouseMove( event ) {
-//     event.preventDefault();
-//     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-//     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-// }
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -113,6 +128,8 @@ function onWindowResize() {
 }
 var selectedCssObject;
 function onClick(event) {
+    if(isMouseDrag)
+        return;
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
     var minDistToCamera = 1000;
@@ -136,6 +153,7 @@ function onClick(event) {
         if(minDistToCamera < 1000){
             currentPointInfo = pointInfo;
             selectedBead.position.set(currentPointInfo.x, currentPointInfo.y, currentPointInfo.z);
+            selectedBead.scale.set(currentPointInfo.r+0.01, currentPointInfo.r+0.01, currentPointInfo.r+0.01);
             console.log(currentPointInfo);
 
             cssScene.remove(selectedCssObject);
