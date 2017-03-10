@@ -53,7 +53,6 @@
     <div id="results">
     </div>
 
-
     <input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
     <input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">
 
@@ -88,11 +87,22 @@
     </input>
 </div>
 
+
+<div id="plot" class="plot">
+</div>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="JsLib/external/three.js"></script>
 <script src="JsLib/external/OrbitControls.js"></script>
 <script src="JsLib/external/stats.min.js"></script>
-<script src="JsLib/Weather/RenderSystem.js"></script>
+<script src="JsLib/Weather/DrawerEarth.js"></script>
+<script src="JsLib/Weather/GeoUtils.js"></script>
+<script src="JsLib/Weather/HeatMap.js"></script>
+<script src="JsLib/Weather/RenderClass.js"></script>
+<script src="JsLib/Weather/MainJS.js"></script>
+<script src="JsLib/Weather/PlotController.js"></script>
+
 
 <script type="x-shader/x-vertex" id="vertexshader">
     attribute float size;

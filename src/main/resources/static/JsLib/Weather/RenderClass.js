@@ -1,20 +1,17 @@
 /**
  * Created by user on 27.10.2016.
  */
-function RenderSystem (domElement){
+function RenderSystem (){
 
     this.renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true} );
     this.renderer.setPixelRatio( window.devicePixelRatio );
     this.renderer.setSize( window.innerWidth, window.innerHeight );
-    domElement.appendChild( this.renderer.domElement );
 
     this.scene = new THREE.Scene();
     this.scene.add( new THREE.AmbientLight( 0x505050 ) );
 
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.z = 100;
-
-    this.controls = new THREE.OrbitControls( this.camera, this.renderer.domElement, this.renderer.domElement);
 
 
     this.addElementToScene = function(geometry, material) {
@@ -27,15 +24,17 @@ function RenderSystem (domElement){
     };
 
     this.onWindowResize = function(){
-
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
-
         this.renderer.setSize( window.innerWidth, window.innerHeight );
     };
+    
+    this.update = function () {
+        // this.camera.update();
+        this.renderer.render( this.scene, this.camera );
+        // this.controls.update();
+    }
 }
-
-
 
 
 function createSphere(radius) {
@@ -60,14 +59,4 @@ function drawPoints(radius) {
     material.color.setHSL( 1.0, 0.3, 0.7 );
     var particles = new THREE.Points( geometry, material );
     return particles;
-}
-
-function getXYZ(lat, lon) {
-    var phi   = (90-lat)*(Math.PI/180),
-        theta = (lon+180)*(Math.PI/180),
-        x = (Math.sin(phi)*Math.cos(theta)),
-        z = (Math.sin(phi)*Math.sin(theta)),
-        y = (Math.cos(phi));
-
-    return new THREE.Vector3(x,y,z);
 }
