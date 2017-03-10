@@ -14,7 +14,7 @@ renderer.domElement.style.zIndex = 1;
 
 container.appendChild( renderer.domElement );
 
-var camera = new THREE.PerspectiveCamera(  60, window.innerWidth / window.innerHeight, 0.2, 1000 );
+var camera = new THREE.PerspectiveCamera(  60, window.innerWidth / window.innerHeight, 1, 1000 );
 camera.position.z = 100;
 var controls = new THREE.OrbitControls( camera, container, container);
 var scene = new THREE.Scene();
@@ -250,17 +250,32 @@ function drawPointsAnother(timeIndex, latArray, lonArray, valueArray, lonFrom, l
         }
     }
     var count = 0;
-    for ( var i = 0; i < lengthLat; i++ ) {
+    for ( var i = 0; i < lengthLat-1; i++ ) {
         for (var j = 0; j < lengthLon; j++) {
             var first = i*lengthLon+j;
             var second = first + lengthLon;
-            indices[count++] = first;
-            indices[count++] = second;
-            indices[count++] = first + 1;
+            if(j==lengthLon-1){
+                indices[count++] = first;
+                indices[count++] = second;
+                indices[count++] = first - lengthLon + 1;
 //
-            indices[count++] = second;
-            indices[count++] = second + 1;
-            indices[count++] = first + 1;
+                indices[count++] = second;
+                indices[count++] = first + 1;
+                indices[count++] = first - lengthLon + 1;
+            }
+            else{
+                indices[count++] = first;
+                indices[count++] = second;
+                indices[count++] = first + 1;
+//
+                indices[count++] = second;
+                indices[count++] = second + 1;
+                indices[count++] = first + 1;
+            }
+
+        }
+        if(i==lengthLat-1){
+
         }
     }
     var geometry = new THREE.BufferGeometry();
