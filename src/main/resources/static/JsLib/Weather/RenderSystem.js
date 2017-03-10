@@ -223,7 +223,7 @@ function drawPointsAnother(timeIndex, latArray, lonArray, valueArray, lonFrom, l
 
     var positions = new Float32Array( countPoint * 3);
     colors = new Float32Array( countPoint * 3 );
-    var indices = new Uint32Array( 6*(lengthLat-1)*(lengthLon-1));
+    var indices = new Uint32Array( 6*(lengthLat-1)*(lengthLon));
     var normals = new Float32Array( countPoint * 3);
     var color = new THREE.Color();
 
@@ -250,7 +250,7 @@ function drawPointsAnother(timeIndex, latArray, lonArray, valueArray, lonFrom, l
         }
     }
     var count = 0;
-    for ( var i = 0; i < lengthLat-1; i++ ) {
+    for ( var i = 0; i < lengthLat; i++ ) {
         for (var j = 0; j < lengthLon; j++) {
             var first = i*lengthLon+j;
             var second = first + lengthLon;
@@ -274,15 +274,12 @@ function drawPointsAnother(timeIndex, latArray, lonArray, valueArray, lonFrom, l
             }
 
         }
-        if(i==lengthLat-1){
-
-        }
     }
     var geometry = new THREE.BufferGeometry();
     geometry.addAttribute('normal', new THREE.BufferAttribute(normals, 3));
     geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
     geometry.addAttribute( 'color', new THREE.BufferAttribute( colors, 3 ).setDynamic( true ) );
-    geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
+
 
     if ($('#drawCustomPoint').is(":checked"))
     {
@@ -291,6 +288,7 @@ function drawPointsAnother(timeIndex, latArray, lonArray, valueArray, lonFrom, l
         particles = new THREE.Points( geometry, material );
     }
     if($('#drawFromFile').is(":checked")){
+        geometry.setIndex(new THREE.BufferAttribute( indices, 1 ) );
         var material = new THREE.MeshBasicMaterial( {transparent: true, opacity: 0.5, side: THREE.FrontSide, vertexColors: THREE.FaceColors, wireframe: $('#wireFrame').is(":checked") } );
         particles = new THREE.Mesh( geometry, material );
     }
