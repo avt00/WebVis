@@ -36,4 +36,43 @@ public class PointArrayData implements Serializable {
     public int[][][] getIceArray() {
         return iceArray;
     }
+
+
+    private float[] lat;
+    private float[] lon;
+    private double[] time;
+
+    public float[] getLat() {
+        return lat;
+    }
+
+    public void setLat(float[] lat) {
+        this.lat = lat;
+    }
+
+    public float[] getLon() {
+        return lon;
+    }
+
+    public void setLon(float[] lon) {
+        this.lon = lon;
+    }
+
+    public double[] getTime() {
+        return time;
+    }
+
+    public void setTime(double[] time) {
+        this.time = time;
+    }
+
+    public float[][][] getDataValue() {
+        return dataValue;
+    }
+
+    public void setDataValue(float[][][] dataValue) {
+        this.dataValue = dataValue;
+    }
+
+    private float[][][] dataValue;
 }

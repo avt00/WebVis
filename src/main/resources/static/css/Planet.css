@@ -1,0 +1,29 @@
+.rightPanelButtonMain {
+    width:40px;
+    height:30px;
+    right: 0;
+    overflow: hidden;
+    /*padding: 10px;*/
+    border: 1px solid #353535;
+    text-align: center;
+}
+
+.rightPanel {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width:200px;
+    height:100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    /*opacity: 0.2;*/
+    /*border-left: 1px solid #353535;*/
+    /*padding: 10px;*/
+    -webkit-transition: right 2s, height 2s; /* Safari */
+    transition: right 2s, height 2s;
+}
+
+.rightPanel.clicked {
+    right: -160px;
+    height: 30px;
+}

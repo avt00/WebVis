@@ -49,13 +49,19 @@ public class NetCDFReader {
     }
 
     public PointArrayData getCoordinates(){
-        double[][] arrayLatitude = (double[][])mapDataNcDF.get("latitude").copyToNDJavaArray();
-        double[][] arrayLongitude = (double[][])mapDataNcDF.get("longitude").copyToNDJavaArray();
-        int[][][] arrayIce = (int[][][])mapDataNcDF.get("MultIce").copyToNDJavaArray();
+        float[] arrayLatitude = (float[])mapDataNcDF.get("lat").copyToNDJavaArray();
+        float[] arrayLongitude = (float[])mapDataNcDF.get("lon").copyToNDJavaArray();
+        double[] arrayTime = (double[])mapDataNcDF.get("time").copyToNDJavaArray();
+        float[][][] arrayAir = (float[][][])mapDataNcDF.get("air").copyToNDJavaArray();
+        //        int[][][] arrayIce = (int[][][])mapDataNcDF.get("MultIce").copyToNDJavaArray();
         PointArrayData data = new PointArrayData();
-        data.setLatitudeArray(arrayLatitude);
-        data.setLongitudeArray(arrayLongitude);
-        data.setIceArray(arrayIce);
+        data.setLat(arrayLatitude);
+        data.setLon(arrayLongitude);
+        data.setDataValue(arrayAir);
+        data.setTime(arrayTime);
+//        data.setLatitudeArray(arrayLatitude);
+//        data.setLongitudeArray(arrayLongitude);
+//        data.setIceArray(arrayIce);
         return data;
     }
 }

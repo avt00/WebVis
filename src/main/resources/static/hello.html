@@ -1,63 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+    <link rel='stylesheet' type='text/css' href='css/Planet.css'>
+    <title>three.js webgl - indexed instancing (single box), dynamic updates</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            color: #ffffff;
+            font-family: Monospace;
+            font-size: 13px;
+            text-align: center;
+            font-weight: bold;
+            background-color: #000000;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #info {
+            position: absolute;
+            top: 0px;
+            width: 100%;
+            padding: 5px;
+        }
+
+        a {
+            color: #ffffff;
+        }
+
+        #oldie a {
+            color: #da0;
+        }
+
+        #notSupported {
+            width: 50%;
+            margin: auto;
+            border: 2px red solid;
+            margin-top: 20px;
+            padding: 10px;
+        }
+    </style>
+</head>
 <body>
-<h2>Hello world!</h2>
 
-<div id="render">
+<div id="container"></div>
+<div class="rightPanel">
+    <div class="rightPanelButtonMain" onclick="$('.rightPanel').toggleClass('clicked');">Open</div>
+    <button id="getData">
+        Get data
+    </button>
+
+    <div id="results">
+    </div>
+
+
+    <input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
+    <input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">
+
+    <input type="number" name="3" id="lenght2X" size="40" min="1" value="0">
+    <input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">
+
+    <button id="drawButton">
+        Draw Data
+    </button>
+
+    <input type="checkbox" id="drawPoint">
+    Draw Point
+    </input>
+
+    <input type="checkbox" id="drawFromFile" checked>
+    drawFromFile
+    </input>
+
+    <input type="checkbox" id="drawCustomPoint">
+    drawCustomPoint
+    </input>
+
+    <input type="checkbox" id="wireFrame">
+    wireFrame
+    </input>
+
+    <input type="checkbox" id="updateMeshColor">
+    updateMeshColor
+    </input>
+
+    <input type="text" id="textField" value="air">
+    </input>
 </div>
-
-<button id="getData">
-    Get data
-</button>
-
-<div id="results">
-</div>
-
-
-<input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
-<input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">
-
-<input type="number" name="3" id="lenght2X" size="40" min="1" value="0">
-<input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">
-
-<button id="drawButton">
-    Draw Data
-</button>
-
-<input type="checkbox" id="drawPoint">
-Draw Point
-</input>
-
-<input type="checkbox" id="drawFromFile" checked>
-drawFromFile
-</input>
-
-<input type="checkbox" id="drawCustomPoint">
-drawCustomPoint
-</input>
-
-<input type="checkbox" id="wireFrame">
-wireFrame
-</input>
-
-</body>
-</html>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="JsLib/external/three.js"></script>
 <script src="JsLib/external/OrbitControls.js"></script>
-<script src="JsLib/RenderSystem.js"></script>
+<script src="JsLib/external/stats.min.js"></script>
+<script src="JsLib/Weather/RenderSystem.js"></script>
 
 <script type="x-shader/x-vertex" id="vertexshader">
     attribute float size;
 attribute vec3 customColor;
-
 varying vec3 vColor;
-
 void main() {
-
     vColor = customColor;
-
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
     gl_PointSize = size * ( 300.0 / -mvPosition.z );
     gl_Position = projectionMatrix * mvPosition;
@@ -67,12 +109,17 @@ void main() {
 <script type="x-shader/x-fragment" id="fragmentshader">
     uniform vec3 color;
 uniform sampler2D texture;
-
 varying vec3 vColor;
-
 void main() {
     gl_FragColor = vec4( color * vColor, 1.0 );
     gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
     if ( gl_FragColor.a < ALPHATEST ) discard;
 }
 </script>
+
+
+</body>
+
+
+
+</html>

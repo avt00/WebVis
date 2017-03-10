@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel='stylesheet' type='text/css' href='css/Planet.css'>
     <title>three.js webgl - indexed instancing (single box), dynamic updates</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
@@ -47,12 +48,52 @@
     <a href="http://threejs.org" target="_blank">three.js</a> - indexed instancing (single box), dynamic updates
     <div id="notSupported" style="display:none">Sorry your graphics card + browser does not support hardware instancing</div>
 </div>
+<div class="rightPanel">
+    <div class="rightPanelButtonMain" onclick="$('.rightPanel').toggleClass('clicked');">Open</div>
+    <button id="getData">
+        Get data
+    </button>
 
-<script src="JsLib/dat.gui.min.js"></script>
+    <div id="results">
+    </div>
+
+
+    <input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
+    <input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">
+
+    <input type="number" name="3" id="lenght2X" size="40" min="1" value="0">
+    <input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">
+
+    <button id="drawButton">
+        Draw Data
+    </button>
+
+    <input type="checkbox" id="drawPoint">
+    Draw Point
+    </input>
+
+    <input type="checkbox" id="drawFromFile" checked>
+    drawFromFile
+    </input>
+
+    <input type="checkbox" id="drawCustomPoint">
+    drawCustomPoint
+    </input>
+
+    <input type="checkbox" id="wireFrame">
+    wireFrame
+    </input>
+
+    <input type="checkbox" id="updateMeshColor">
+    updateMeshColor
+    </input>
+</div>
+
+<script src="JsLib/external/dat.gui.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script src="JsLib/three.js"></script>
-<script src="JsLib/OrbitControls.js"></script>
-<script src="JsLib/stats.min.js"></script>
+<script src="JsLib/external/three.js"></script>
+<script src="JsLib/external/OrbitControls.js"></script>
+<script src="JsLib/external/stats.min.js"></script>
 
 <script id="vertexShader" type="x-shader/x-vertex">
 		precision highp float;

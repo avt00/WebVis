@@ -39,7 +39,8 @@ public class Example  {
             return reader.getCoordinates();
         }
         else{
-            return null;
+            reader.loadDataFromFile(name+".nc");
+            return reader.getCoordinates();
         }
     }
 
