@@ -13,7 +13,7 @@ public class MainController {
 
     @RequestMapping("/main")
     public String index() {
-        return "hello.html";
+        return "Weather.html";
     }
 
 

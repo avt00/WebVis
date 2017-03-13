@@ -37,7 +37,9 @@ var effectController = {
             // effectController.fileNameList = filesName;
             gui.__controllers[2].remove();
             // gui.__controllers[4].remove();
-            gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(onChangeFileName);
+            gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(function (value) {
+                onChangeFileName(value);
+            });
             // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
             submit.click();
         });
@@ -48,9 +50,15 @@ var effectController = {
         $("#popup1").show();
     },
     saveState : function () {
-        saveState(effectController.fileName, camera);
+        saveState(effectController.fileName, genome);
     }
 };
+
+function onChangeFileName(value){
+    var data = getData(value);
+    genome.createMesh(data);
+    updateSelectedParts(data, value)
+}
 
 function initGUI() {
 
@@ -84,7 +92,10 @@ function initGUI() {
     //     }
     // });
 
-    gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(onChangeFileName);
+    gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(function (value) {
+        // var data = getData(value);
+        onChangeFileName(value);
+    });
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
     updatePartsGenome(effectController.template, "parts");
     $(document).ready(function(){
@@ -152,26 +163,21 @@ function PopUpHide(){
         })
     }
     $.each(deletedOptions, function (index, element) {
-        // updateAlpha(mapMesh[element], 0);
-        // updateAlphaMesh(meshSpheres, element, 0);
-        updateAlphaBead(mapBeads[element], 0);
+        genome.changeVisible(element, 0);
     });
     previousPartofGene = newOptions;
     $.each(previousPartofGene, function(index, element){
-        //updateAlpha(mapMesh[element], 1);
-        // updateAlphaMesh(meshSpheres, element, 1);
-        updateAlphaBead(mapBeads[element], 1);
+        genome.changeVisible(element, 1);
     });
 }
 
-var onChangeFileName = function (value, state) {
+function updateSelectedParts (data, value, state) {
     document.getElementById("parts").options.length = 0;
     document.getElementById("parts2").options.length = 0;
-    mapMesh = {};
     effectController['fileName'] = value;
-    var data = getData(value);
-    initAll(data);
-    animate();
+
+    // initAll(data);
+    // animate();
 
 
     var keys = Object.keys(data);
@@ -183,10 +189,10 @@ var onChangeFileName = function (value, state) {
     updatePartsGenome(effectController['template'], "parts");
     updatePartsGenome(invisibleObjKeys, "parts2");
     $.each(effectController['template'], function (index, element) {
-        updateAlphaBead(mapBeads[element], 1);
+        genome.changeVisible(element, 1);
     });
     $.each(invisibleObjKeys, function (index, element) {
-        updateAlphaBead(mapBeads[element], 0);
+        genome.changeVisible(element, 0);
     });
 };
 
@@ -302,7 +308,7 @@ function createCssObject(pointInfo, cameraPosition) {
     return cssObject;
 }
 
-function saveState(filename, camera) {
+function saveState(filename) {
     // scene.name = "test";
     var options = document.getElementById("parts").options;
     var selectedOptions = [];
@@ -310,5 +316,5 @@ function saveState(filename, camera) {
         selectedOptions.push(options[i].value);
     }
 
-    sendPost({filename: filename, selected: selectedOptions, pointInfo: currentPointInfo, camera: camera.toJSON()}, '/saveState', showShortLink);
+    sendPost({filename: filename, selected: selectedOptions, pointInfo: genome.beadInfo, camera: genome.renderSystem.camera.toJSON()}, '/saveState', showShortLink);
 }

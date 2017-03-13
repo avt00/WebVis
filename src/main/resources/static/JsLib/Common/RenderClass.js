@@ -3,9 +3,10 @@
  */
 function RenderSystem (){
 
-    this.renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true} );
-    this.renderer.setPixelRatio( window.devicePixelRatio );
-    this.renderer.setSize( window.innerWidth, window.innerHeight );
+    this.renderer = createGlRenderer();
+
+    this.cssRender = null;
+    this.cssScene = null;
 
     this.scene = new THREE.Scene();
     this.scene.add( new THREE.AmbientLight( 0x505050 ) );
@@ -27,15 +28,44 @@ function RenderSystem (){
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize( window.innerWidth, window.innerHeight );
+        if(this.cssRender!=null)
+            this.cssRender.setSize( window.innerWidth, window.innerHeight );
     };
-    
+
     this.update = function () {
         // this.camera.update();
         this.renderer.render( this.scene, this.camera );
         // this.controls.update();
+    };
+
+    this.initCssRender = function () {
+        this.cssRender = createCssRenderer();
+        this.cssScene = new THREE.Scene();
+    };
+
+    this.render = function () {
+        this.renderer.render( this.scene, this.camera );
+        if(this.cssRender!=null)
+            this.cssRender.render(this.cssScene, this.camera);
     }
 }
 
+function createGlRenderer() {
+    var glRenderer = new THREE.WebGLRenderer( { antialias:true, alpha:true} );
+    glRenderer.setClearColor(0x000000);
+    glRenderer.setPixelRatio(window.devicePixelRatio);
+    glRenderer.setSize(window.innerWidth, window.innerHeight);
+    return glRenderer;
+}
+
+function createCssRenderer() {
+    var cssRenderer = new THREE.CSS3DRenderer();
+    cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    // cssRenderer.domElement.style.position = 'absolute';
+    cssRenderer.domElement.style.zIndex = 0;
+    // cssRenderer.domElement.style.top = 0;
+    return cssRenderer;
+}
 
 function createSphere(radius) {
     var geometry = new THREE.SphereGeometry( radius, 24, 18 );
