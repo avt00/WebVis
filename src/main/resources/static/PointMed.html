@@ -1,7 +1,10 @@
 <link rel='stylesheet' type='text/css' href='css/genome.css'>
 <!DOCTYPE html>
 
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 
 <html lang="en">
 <head>
@@ -12,7 +15,7 @@
 <body>
 
 
-<form method="POST" action="/upload" id="data" enctype="multipart/form-data" class="hidden">
+<form method="POST" action="/upload" id="data" enctype="multipart/form-data" style="visibility:hidden;position: absolute">
     <input type="file" id="InputFile" name="file" style="visibility:hidden">
     <input type="submit" id="submit" value="Upload" style="visibility:hidden">
 </form>
@@ -44,6 +47,11 @@
         </div>
         <div id="closeButton" class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>
     </div>
+</div>
+
+<div class="leftPanel">
+    <div>List of Beads:</div>
+    <div id="beads" class="btn-group-vertical" data-toggle="buttons"></div>
 </div>
 <script src="JsLib/external/three.js"></script>
 <script src="JsLib/external/CSS3DRenderer.js"></script>

@@ -100,13 +100,13 @@ function Genome() {
         this.group = new THREE.Group();
         for (var key in this.allObjects){
             var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
-            var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
+            // var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
 
             this.group.add(chain);
-            this.group.add(spline);
+            // this.group.add(spline);
 
             this.beads[key] = chain;
-            this.bonds[key] = spline;
+            // this.bonds[key] = spline;
             indexColor++;
         }
         this.renderSystem.scene.add(this.group);
@@ -114,6 +114,10 @@ function Genome() {
 
     this.changeVisible = function(key, value) {
         this.beads[key].visible = value > 0;
+    };
+
+    this.changeVisibleNew = function(key) {
+        this.beads[key].visible = !this.beads[key].visible;
     }
 }
 

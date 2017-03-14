@@ -49,7 +49,6 @@ window.addEventListener( 'resize', function () {
 }, false );
 
 window.addEventListener( 'click', function (event) {
-    console.log("click");
     if(!mouseDrag)
         genome.onClick(event);
     mouseDown=false;

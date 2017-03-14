@@ -47,7 +47,8 @@ var effectController = {
     },
     popup : function () {
         //Функция отображения PopUp
-        $("#popup1").show();
+        // $("#popup1").show();
+        $(".leftPanel").toggleClass('clicked');
     },
     saveState : function () {
         saveState(effectController.fileName, genome);
@@ -58,6 +59,7 @@ function onChangeFileName(value){
     var data = getData(value);
     genome.createMesh(data);
     updateSelectedParts(data, value)
+    addNewCheckboxs(data);
 }
 
 function initGUI() {
@@ -98,6 +100,7 @@ function initGUI() {
     });
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
     updatePartsGenome(effectController.template, "parts");
+    addNewCheckboxs(effectController.template);
     $(document).ready(function(){
         //Скрыть PopUp при загрузке страницы
         PopUpHide();
@@ -317,4 +320,18 @@ function saveState(filename) {
     }
 
     sendPost({filename: filename, selected: selectedOptions, pointInfo: genome.beadInfo, camera: genome.renderSystem.camera.toJSON()}, '/saveState', showShortLink);
+}
+
+
+function addNewCheckboxs(data, state) {
+    var beads = $('#beads');
+    var keys = Object.keys(data);
+    if(keys!=null && keys.length>1){
+        keys.sort();
+    }
+
+    $.each(keys, function (i, key) {
+        var beads = document.getElementById('beads');
+        beads.innerHTML += '<label class="btn btn-primary " onclick="genome.changeVisibleNew(this.textContent);"><input type="checkbox" autocomplete="off">'+key+'</label>';
+    });
 }
