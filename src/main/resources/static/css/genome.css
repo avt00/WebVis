@@ -60,7 +60,7 @@ a {
 }
 
 .LabelBead{
-    border:1px solid;
+    border: 1px solid;
     background:#ffffff;
     font-size: 40px;
     width:530px;
@@ -68,6 +68,53 @@ a {
     text-align: center;
     /*display:none;*/
     position:absolute;
+}
+#pointInfo{
+    position:absolute;
+    right: 0px;
+    top: 300px;
+    bottom: 0px;
+    /*height: 300px;*/
+    overflow-y: scroll;
+}
+
+#pointInfo.empty::-webkit-scrollbar {
+    display: none;
+}
+
+.LabelGenTitle{
+    border:3px solid;
+    background:#ffffff;
+    font-size: 15px;
+    text-align: center;
+}
+
+.LabelGenInfo{
+    border: 5px #ddaa00;
+    background:#ffffff;
+    font-size: 12px;
+    width:200px;
+    position:absolute;
+}
+
+
+.LabelBeadInfo{
+    /*height: 100px;*/
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
+.LabelBeadInfo::-webkit-scrollbar {
+    display: none;
+}
+
+.ButtonLock {
+    /*width: 50%;*/
+    height: 20px;
+    text-align: center;
+    display: table;
+    margin: 5px auto ;
+    /*padding: 10px;*/
 }
 
 .ShortLink{
@@ -90,7 +137,6 @@ a {
     padding: 10px;
     -webkit-transition: left 1s; /* Safari */
     transition: left 1s;
-
 }
 
 .leftPanel::-webkit-scrollbar {

@@ -31,6 +31,33 @@ function getMeshSpline(obj, color) {
     return tubeMesh;
 }
 
+function drawSimpleLine(p1, p2) {
+    var material = new THREE.LineBasicMaterial({
+        color: 0x0000ff
+    });
+
+    var geometry = new THREE.Geometry();
+    geometry.vertices.push(
+        p1,
+        p2
+    );
+    geometry.dynamic = true;
+    var line = new THREE.Line( geometry, material );
+    return line;
+}
+
+function updatePositionLine(line, p1, p2){
+    line.geometry.vertices[ 0 ].x=p1.x;
+    line.geometry.vertices[ 0 ].y=p1.y;
+    line.geometry.vertices[ 0 ].z=p1.z;
+
+    line.geometry.vertices[ 1 ].x=p2.x;
+    line.geometry.vertices[ 1 ].y=p2.y;
+    line.geometry.vertices[ 1 ].z=p2.z;
+
+    line.geometry.verticesNeedUpdate = true;
+}
+
 
 // var spline = new THREE.CatmullRomCurve3(points.map(function(point) {
 //     return  new THREE.Vector3(point.x, point.y, point.z);

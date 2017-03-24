@@ -250,13 +250,51 @@ function redirectToBead(id) {
         alert('Please allow popups for this website');
     }
 }
+function clearPopupObject(element) {
+    $(element).remove();
+}
+function createPopup(pointInfo, screenPosition) {
+    var html = [
+        '<div id='+ pointInfo.beadName +' class="LabelGenInfo">',
+        '<div class="LabelGenTitle">'+pointInfo.beadName+'</div>',
+        '</div>',
+    ].join('\n');
+    var genInfo = $(html);
+    var beadInfo = $('<div class="LabelBeadInfo"></div>')
+    $.each(pointInfo.geneInfos, function(i)
+    {
+        $('<p/>')
+        // .addClass('LabelBead')
+            .append($('<a href="#"></a>').text(pointInfo.geneInfos[i].genomeName))
+            .appendTo(beadInfo)
+            .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-' +pointInfo.geneInfos[i].endGene)});
+    });
+    genInfo.append(beadInfo);
+    addListeners(genInfo[0]);
+    genInfo.append($('<button class="ButtonLock">Lock</button>').click(function () {
 
-function createPopup(id, position) {
-    var newLabel = $('<div class="LabelBead" id='+ id +'>'+ id +'</div>');
-    newLabel.click(function() {redirectToBead(id);});
-    $('body').append(newLabel);
-    newLabel.offset({top:position.clientY,left:position.clientX});
-    newLabel.show();
+        genInfo[0].style.left = 'auto';
+        genInfo[0].style.top = 'auto';
+        genInfo[0].style.position = 'static';
+        genInfo.css({right: 0});
+        genInfo.detach();
+        genome.OnLock();
+        // clearPopupObject(genInfo);
+        // genInfo.appendTo($('#pointInfo'));
+        attachPopup(genInfo);
+    }));
+    genInfo.offset({top:screenPosition.y, left:screenPosition.x});
+    // genInfo.draggable();
+    // element.append(newDiv[0]);
+    // element.offset({top:position.clientY,left:position.clientX});
+    // element.show();
+    $('#container').append(genInfo);
+    return genInfo;
+}
+
+function attachPopup(element) {
+    $('#pointInfo').removeClass('empty');
+    $('#pointInfo').append(element);
 }
 
 function showShortLink(link, position) {
@@ -277,30 +315,7 @@ function showShortLink(link, position) {
 }
 
 function createCssObject(pointInfo, cameraPosition) {
-
-    var element = document.createElement( 'div' );
-    element.className = "element";
-    // element.style.backgroundColor = 'rgba(0,127,127,' + ( Math.random() * 0.5 + 0.25 ) + ')';
-    var html = [
-        // '<div style="width:' + 1 + 'px; height:' + 1 + 'px;">',
-        // id,
-        '<div id='+ pointInfo.beadName +'>',
-        pointInfo.beadName,
-
-        '</div>',
-        ''
-    ].join('\n');
-    var newDiv = $(html);
-    $.each(pointInfo.geneInfos, function(i)
-    {
-        $('<p/>')
-        // .addClass('LabelBead')
-            .text(pointInfo.geneInfos[i].genomeName)
-            .appendTo(newDiv[0])
-            .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-'+pointInfo.geneInfos[i].endGene)});
-    });
-    newDiv[0].className = 'LabelBead';
-    element.append(newDiv[0]);
+    var element =createPopup(pointInfo);
     $('#container').append(element);
     var cssObject = new THREE.CSS3DObject(element);
     cssObject.scale.set(0.003,0.003,0.003);
@@ -335,3 +350,90 @@ function addNewCheckboxs(data, state) {
         beads.innerHTML += '<label class="btn btn-primary " onclick="genome.changeVisibleNew(this.textContent);"><input type="checkbox" autocomplete="off">'+key+'</label>';
     });
 }
+
+function SphericalToScreen(x, y, z, camera, width, height) {
+    // console.log(camera);
+    var p = new THREE.Vector3(x, y, z);
+    // console.log(p);
+    var vector = p.project(camera);
+    // console.log(vector);
+
+    vector.x = (vector.x + 1) / 2 * width;
+    vector.y = (-vector.y + 1) / 2 * height;
+    // console.log(vector);
+    return vector;
+}
+
+function ObjectSphericalToScreen(element, camera, width, height ) {
+
+    var screenVector = new THREE.Vector3();
+    element.localToWorld( screenVector );
+
+    screenVector.project( camera );
+
+    var posx = Math.round(( screenVector.x + 1 ) * width / 2 );
+    var posy = Math.round(( 1 - screenVector.y ) * height / 2 );
+    console.log(new THREE.Vector2(posx, posy));
+    return new THREE.Vector2(posx, posy);
+}
+
+function ScreenToSpherical(x, y, camera, width, height) {
+    // var x = ( x / width ) * 2 - 1;
+    // var y = - ( y / height ) * 2 + 1;
+    // var p = new THREE.Vector3(x, y, 1);
+    // var vector = p.unproject( camera );
+    // return vector;
+    var vector = new THREE.Vector3();
+
+    vector.set(
+        ( x / width ) * 2 - 1,
+        - ( y / height ) * 2 + 1,
+        0 );
+
+    vector.unproject( camera );
+
+    // var dir = vector.sub( -camera.position ).normalize();
+    //
+    // var distance = - camera.position.z / dir.z;
+    //
+    // var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+    return vector;
+};
+
+function addListeners(obj){
+    obj.addEventListener('mousedown', function (e) {
+        mouseDownDrag(obj);
+        firstPosition = e;
+        controllerCamera.enableRotate = false;
+    }, false);
+    obj.addEventListener('mouseup', function (e) {
+        mouseUpDrag(obj);
+        firstPosition = null;
+        controllerCamera.enableRotate = true;
+    }, false);
+};
+
+function mouseUpDrag(obj)
+{
+    obj.removeEventListener('mousemove', function (e) {
+        moveAction(obj, e);
+    }, true);
+};
+
+function mouseDownDrag(obj){
+    obj.addEventListener('mousemove', function (e) {
+        moveAction(obj, e);
+    }, true);
+};
+var firstPosition;
+var moveAction = function moveElement(obj, e) {
+    if(firstPosition==null)
+        return;
+
+    var rect = obj.getBoundingClientRect();
+    obj.position = "absolute";
+    obj.style.top = (rect.top + e.clientY - firstPosition.clientY)+'px';
+    obj.style.left = (rect.left + e.clientX - firstPosition.clientX) + 'px';
+    firstPosition = e;
+    genome.moveHtmlBlock();
+};
