@@ -42,15 +42,9 @@ function animate() {
         genome.renderSystem.cssScene.children[i].lookAt(genome.renderSystem.camera.position);
     }
 
-    // if(genome.line!=null && genome.htmlObject!=null){
-    //     var pos = SphericalToScreen(genome.line.geometry.vertices[ 0 ].x, genome.line.geometry.vertices[ 0 ].y, genome.line.geometry.vertices[ 0 ].z, genome.renderSystem.camera, window.innerWidth, window.innerHeight);
-    //     genome.htmlObject.offset({top:pos.y,left:pos.x});
-    //     // genome.line.geometry.verticesNeedUpdate = true;
-    // }
     genome.renderSystem.camera.updateMatrixWorld(true);
     genome.moveHtmlBlock();
     genome.renderSystem.render();
-
 }
 
 

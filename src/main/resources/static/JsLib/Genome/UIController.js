@@ -58,7 +58,7 @@ var effectController = {
 function onChangeFileName(value){
     var data = getData(value);
     genome.createMesh(data);
-    updateSelectedParts(data, value)
+    updateSelectedParts(data, value);
     addNewCheckboxs(data);
 }
 
@@ -254,42 +254,45 @@ function clearPopupObject(element) {
     $(element).remove();
 }
 function createPopup(pointInfo, screenPosition) {
-    var html = [
-        '<div id='+ pointInfo.beadName +' class="LabelGenInfo">',
-        '<div class="LabelGenTitle">'+pointInfo.beadName+'</div>',
-        '</div>',
-    ].join('\n');
-    var genInfo = $(html);
-    var beadInfo = $('<div class="LabelBeadInfo"></div>')
+    // all forms
+    var BeadInfoForm =  $('<div/>')
+        .attr("id", pointInfo.beadName)
+        .addClass("FormGenInfo")
+        .css('top', screenPosition.y)
+        .css('left', screenPosition.x)
+        .appendTo($('#container'));
+    // title
+     $('<div/>')
+        .attr("id", pointInfo.beadName)
+        .addClass("FormGenTitle")
+        .text(pointInfo.beadName)
+        .appendTo(BeadInfoForm);
+    // list gene
+    var ListGene = $('<div/>')
+        .addClass("ListGen")
+        .appendTo(BeadInfoForm);
+
     $.each(pointInfo.geneInfos, function(i)
     {
+        var link = $('<a/>')
+            .attr("href", "#")
+            .text(pointInfo.geneInfos[i].genomeName);
         $('<p/>')
-        // .addClass('LabelBead')
-            .append($('<a href="#"></a>').text(pointInfo.geneInfos[i].genomeName))
-            .appendTo(beadInfo)
+            .append(link)
+            .appendTo(ListGene)
             .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-' +pointInfo.geneInfos[i].endGene)});
     });
-    genInfo.append(beadInfo);
-    addListeners(genInfo[0]);
-    genInfo.append($('<button class="ButtonLock">Lock</button>').click(function () {
-
-        genInfo[0].style.left = 'auto';
-        genInfo[0].style.top = 'auto';
-        genInfo[0].style.position = 'static';
-        genInfo.css({right: 0});
-        genInfo.detach();
-        genome.OnLock();
-        // clearPopupObject(genInfo);
-        // genInfo.appendTo($('#pointInfo'));
-        attachPopup(genInfo);
-    }));
-    genInfo.offset({top:screenPosition.y, left:screenPosition.x});
-    // genInfo.draggable();
-    // element.append(newDiv[0]);
-    // element.offset({top:position.clientY,left:position.clientX});
-    // element.show();
-    $('#container').append(genInfo);
-    return genInfo;
+    addListeners(BeadInfoForm[0]);
+    BeadInfoForm.append($('<button/>')
+        .addClass("ButtonLock")
+        .text("Lock")
+        .click(function () {
+            BeadInfoForm.addClass('lock');
+            BeadInfoForm.detach();
+            genome.OnLock();
+            attachPopup(BeadInfoForm);
+        }));
+    return BeadInfoForm;
 }
 
 function attachPopup(element) {
@@ -299,19 +302,29 @@ function attachPopup(element) {
 
 function showShortLink(link, position) {
     var currentUrl = window.location;
-    var newLabel = $('<div class="ShortLink" id="'+link+'"><a href="/point?state='+link +'">'+currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link+'</a>'+
-                '</div>');
-    var closeButton = $('<div class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>');
+    // <a href="/point?state='+link +'">'+currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link+'</a>
+    var formLink = $('<div/>')
+        .attr("id", link)
+        .addClass("ShortLink")
+        .appendTo($('body'));
+    var link = $('<a/>')
+        .attr("href", "/point?state="+link)
+        .text(currentUrl.protocol + "//" + currentUrl.host +'/point?state='+link)
+        .appendTo(formLink);
+
+    var closeButton = $('<div/>')
+        .text("Close")
+        .addClass("btn btn col-sm-2 col-md-offset-5 text-center")
+        .appendTo(formLink);
     closeButton.click(function () {
-        newLabel.remove();
+        formLink.remove();
     });
-    newLabel.append(closeButton);
-    $('body').append(newLabel);
+
     if(position!=null)
-        newLabel.offset({top:position.Y, left:position.X});
+        formLink.offset({top:position.Y, left:position.X});
     else
-        newLabel.offset({top:30, left:30});
-    newLabel.show();
+        formLink.offset({top:30, left:30});
+    formLink.show();
 }
 
 function createCssObject(pointInfo, cameraPosition) {
@@ -346,8 +359,21 @@ function addNewCheckboxs(data, state) {
     }
 
     $.each(keys, function (i, key) {
-        var beads = document.getElementById('beads');
-        beads.innerHTML += '<label class="btn btn-primary " onclick="genome.changeVisibleNew(this.textContent);"><input type="checkbox" autocomplete="off">'+key+'</label>';
+        var row = $('<div/>')
+            .addClass("row")
+            .appendTo($('#beads'));
+        var checkboxLabel = $("<div/>")
+            .addClass("btn btn-primary col-6")
+            .append('<input type="checkbox" autocomplete="off">')
+            .text(key)
+            .appendTo(row)
+            .click(function () {
+                genome.changeVisibleNew(this.textContent);
+            });
+        var colorFrame = $('<div/>')
+            .addClass("square col-6")
+            .css("background-color", '\#'+ genome.beads[key].colorBead.getHexString())
+            .appendTo(row);
     });
 }
 
@@ -378,25 +404,12 @@ function ObjectSphericalToScreen(element, camera, width, height ) {
 }
 
 function ScreenToSpherical(x, y, camera, width, height) {
-    // var x = ( x / width ) * 2 - 1;
-    // var y = - ( y / height ) * 2 + 1;
-    // var p = new THREE.Vector3(x, y, 1);
-    // var vector = p.unproject( camera );
-    // return vector;
     var vector = new THREE.Vector3();
-
     vector.set(
         ( x / width ) * 2 - 1,
         - ( y / height ) * 2 + 1,
         0 );
-
     vector.unproject( camera );
-
-    // var dir = vector.sub( -camera.position ).normalize();
-    //
-    // var distance = - camera.position.z / dir.z;
-    //
-    // var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
     return vector;
 };
 

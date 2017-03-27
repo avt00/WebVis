@@ -82,29 +82,36 @@ a {
     display: none;
 }
 
-.LabelGenTitle{
+.FormGenTitle{
     border:3px solid;
     background:#ffffff;
     font-size: 15px;
     text-align: center;
 }
 
-.LabelGenInfo{
+.FormGenInfo{
     border: 5px #ddaa00;
     background:#ffffff;
     font-size: 12px;
     width:200px;
     position:absolute;
 }
+.FormGenInfo.lock{
+    left : auto;
+    top : auto;
+    position: static;
+}
 
 
-.LabelBeadInfo{
+.ListGen{
     /*height: 100px;*/
     max-height: 200px;
     overflow-y: scroll;
 }
 
-.LabelBeadInfo::-webkit-scrollbar {
+
+
+.ListGen::-webkit-scrollbar {
     display: none;
 }
 
@@ -145,4 +152,9 @@ a {
 
 .leftPanel.clicked {
     left: 0px;
+}
+
+.square {
+    width: 30px;
+    height: 30px;
 }

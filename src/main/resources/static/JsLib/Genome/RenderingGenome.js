@@ -8,21 +8,19 @@ function Genome() {
     this.beads = {};
     this.bonds = {};
     this.group = null;
-    this.htmlObject=null;
-    this.selectedBead = null;
+    this.SelectedBeadInfo = null;
+    this.LocledBeadInfo = {};
     this.selectedCSSObject = null;
-    this.beadInfo = null;
     this.state = null;
     this.rayCaster = new THREE.Raycaster();
-    this.line = null;
+    // this.line = null;
 
     this.init = function (IsCssRender) {
-        this.selectedBead =  new THREE.Mesh( new THREE.SphereBufferGeometry( 1, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
-        this.renderSystem.scene.add(this.selectedBead);
-
-        this.line = drawSimpleLine(new THREE.Vector3(), new THREE.Vector3());
-        this.renderSystem.scene.add(this.line);
-
+        var selectedBead = new THREE.Mesh( new THREE.SphereBufferGeometry( 1, 20, 20 ), new THREE.MeshBasicMaterial( { color: new THREE.Color( 0xff0000 ) } ) );
+        this.renderSystem.scene.add(selectedBead);
+        this.SelectedBeadInfo = new PairGenomeAndHtml(selectedBead, null, drawSimpleLine(new THREE.Vector3(), new THREE.Vector3()));
+        this.renderSystem.scene.add(this.SelectedBeadInfo.line);
+        //
         this.renderSystem.camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1500 );
         this.renderSystem.camera.position.z = 50;
         this.renderSystem.camera.updateMatrixWorld(true);
@@ -46,16 +44,21 @@ function Genome() {
                 // this.selectedCssObject = createCssObject(this.state.pointInfo, this.renderSystem.camera.position);
                 // this.renderSystem.cssScene.add(this.selectedCssObject);
 
-                this.selectedBead.position.set(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z);
+                this.SelectedBeadInfo.selectedBead.position.set(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z);
+                this.SelectedBeadInfo.selectedBead.scale.set(state.pointInfo.r +0.01, state.pointInfo.r +0.01, state.pointInfo.r+0.01 );
+
                 this.renderSystem.camera.updateMatrixWorld(true);
                 // var position = SphericalToScreen(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-                var position = ObjectSphericalToScreen(this.selectedBead, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-                var screenPosition = ScreenToSpherical(position.x, position.y, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-                this.line = drawSimpleLine(screenPosition, this.selectedBead.position);
-                this.renderSystem.scene.add(this.line);
+
+                // var position = ObjectSphericalToScreen(this.SelectedBeadInfo.selectedBead, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
+                // var screenPosition = ScreenToSpherical(position.x, position.y, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
+
+                this.SelectedBeadInfo.line = updatePositionLine(this.SelectedBeadInfo.line, this.SelectedBeadInfo.selectedBead.position, this.SelectedBeadInfo.selectedBead.position);
+                // this.renderSystem.scene.add(this.line);
+                this.SelectedBeadInfo.selectedBeadHtml = createPopup(state.pointInfo, position);
                 // var position = SphericalToScreen(state.pointInfo.x, state.pointInfo.y, state.pointInfo.z, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-                this.htmlObject = createPopup(state.pointInfo, position);
-                this.selectedBead.scale.set(state.pointInfo.r +0.01, state.pointInfo.r +0.01, state.pointInfo.r+0.01 );
+                // this.htmlObject = createPopup(state.pointInfo, position);
+
             }
         }
     };
@@ -85,32 +88,14 @@ function Genome() {
         }
         // need fixed this!!!
         if(minDistToCamera < 1000){
-            // if(this.line!=null)
-            //     this.renderSystem.scene.remove(this.line);
-            this.line.visible = true;
-            this.selectedBead.visible = true;
-            this.selectedBead.position.set(pointInfo.x, pointInfo.y, pointInfo.z);
-            this.selectedBead.scale.set(pointInfo.r+0.01, pointInfo.r+0.01, pointInfo.r+0.01);
-            console.log(pointInfo);
-            this.beadInfo = pointInfo;
-            clearPopupObject(this.htmlObject);
-            // this.renderSystem.cssScene.remove(this.selectedCssObject);
-            this.htmlObject = createPopup(this.beadInfo, {x:event.clientX, y:event.clientY});
-            var pos = SphericalToScreen(pointInfo.x, pointInfo.y, pointInfo.z, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-            var screenPosition = ScreenToSpherical(pos.x, pos.y, this.renderSystem.camera, this.renderSystem.renderer.domElement.width, this.renderSystem.renderer.domElement.height);
-            updatePositionLine(this.line, screenPosition, this.selectedBead.position);
-            // this.selectedCSSObject = createCssObject(this.beadInfo, this.renderSystem.camera.position);
-            // this.renderSystem.cssScene.add(this.selectedCssObject);
-            // createPopup(key, event);
-            // redirectToBead(key);
-            // scene.updateMatrix();
-            // mapBeads[key].visible = false;
+            this.SelectedBeadInfo.activate(pointInfo);
+            clearPopupObject(this.SelectedBeadInfo.selectedBeadHtml);
+            this.SelectedBeadInfo.selectedBeadHtml = createPopup(pointInfo, {x:event.clientX, y:event.clientY});
+            updatePositionLine(this.SelectedBeadInfo.line, new THREE.Vector3(pointInfo.x, pointInfo.y, pointInfo.z), this.SelectedBeadInfo.selectedBead.position);
         }
         else {
-            clearPopupObject(this.htmlObject);
-            this.line.visible = false;
-            this.selectedBead.visible = false;
-            this.beadInfo = null;
+            clearPopupObject(this.SelectedBeadInfo.selectedBeadHtml);
+            this.SelectedBeadInfo.deactivate();
             this.renderSystem.cssScene.remove(this.selectedCssObject);
         }
     };
@@ -125,6 +110,7 @@ function Genome() {
         this.group = new THREE.Group();
         for (var key in this.allObjects){
             var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
+            chain.colorBead = palette[indexColor];
             // var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
 
             this.group.add(chain);
@@ -143,30 +129,31 @@ function Genome() {
 
     this.changeVisibleNew = function(key) {
         this.beads[key].visible = !this.beads[key].visible;
-    }
+    };
 
     this.moveHtmlBlock = function () {
-        if(this.htmlObject==null || this.line==null || !this.line.visible){
+        if(this.SelectedBeadInfo.selectedBeadHtml==null || this.SelectedBeadInfo.line==null || !this.SelectedBeadInfo.line.visible){
             return;
         }
-        var rect = this.htmlObject[0].getBoundingClientRect();
+        var rect = this.SelectedBeadInfo.selectedBeadHtml[0].getBoundingClientRect();
         var screenPosition = ScreenToSpherical(rect.left, rect.top, this.renderSystem.camera,  window.innerWidth , window.innerHeight);
-        this.line.geometry.vertices[ 0 ].x=screenPosition.x;
-        this.line.geometry.vertices[ 0 ].y=screenPosition.y;
-        this.line.geometry.vertices[ 0 ].z=screenPosition.z;
-        this.line.geometry.verticesNeedUpdate = true;
-    }
+        this.SelectedBeadInfo.line.geometry.vertices[ 0 ].x=screenPosition.x;
+        this.SelectedBeadInfo.line.geometry.vertices[ 0 ].y=screenPosition.y;
+        this.SelectedBeadInfo.line.geometry.vertices[ 0 ].z=screenPosition.z;
+        this.SelectedBeadInfo.line.geometry.verticesNeedUpdate = true;
+    };
 
     this.OnLock = function () {
-        this.htmlObject = null;
-        this.line.visible = false;
-        this.selectedBead.visible = false;
-    }
+        // this.LocledBeadInfo[]
+        this.SelectedBeadInfo.selectedBeadHtml = null;
+        this.SelectedBeadInfo.line.visible = false;
+        this.SelectedBeadInfo.selectedBead.visible = false;
+    };
 
     this.OnUnlock = function (htmlObject) {
         this.htmlObject = htmlObject;
-        this.line.visible = true;
-        this.selectedBead.visible = true;
+        this.SelectedBeadInfo.line.visible = true;
+        this.SelectedBeadInfo.selectedBead.visible = true;
     }
 }
 
