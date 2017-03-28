@@ -29,7 +29,7 @@ genome.renderSystem.cssRender.domElement.appendChild(genome.renderSystem.rendere
 
 // init(jsonState);
 if(effectController.fileName){
-    onChangeFileName(effectController.fileName);
+    onChangeFileName(effectController.fileName, jsonState);
 }
 var controllerCamera = new THREE.OrbitControls( genome.renderSystem.camera, container, container);
 animate();
@@ -43,7 +43,8 @@ function animate() {
     }
 
     genome.renderSystem.camera.updateMatrixWorld(true);
-    genome.moveHtmlBlock();
+    genome.moveHtmlBlock(genome.SelectedBeadInfo);
+    genome.moveHtmlBlock(genome.SelectedLockBeadInfo);
     genome.renderSystem.render();
 }
 

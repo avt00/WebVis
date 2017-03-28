@@ -102,6 +102,10 @@ a {
     position: static;
 }
 
+.hidden{
+    display : none !important;
+}
+
 
 .ListGen{
     /*height: 100px;*/

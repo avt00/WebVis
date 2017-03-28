@@ -9,7 +9,7 @@ function RenderSystem (){
     this.cssScene = null;
 
     this.scene = new THREE.Scene();
-    this.scene.add( new THREE.AmbientLight( 0x505050 ) );
+    this.scene.add( new THREE.AmbientLight( 0xFFFFFF ) );
 
     this.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
     this.camera.position.z = 100;

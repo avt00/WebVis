@@ -24,6 +24,14 @@ function PairGenomeAndHtml(bead, htmlBead, line, beadInfo) {
     this.selectedBeadHtml = htmlBead;
     this.line = line;
 
+    this.init = function (beadInfo) {
+        this.beadInfo = beadInfo;
+        this.line = drawSimpleLine(new THREE.Vector3(beadInfo.x, beadInfo.y, beadInfo.z), new THREE.Vector3(beadInfo.x, beadInfo.y, beadInfo.z));
+        this.selectedBead = createSimpleSphere();
+        this.selectedBead.position.set(beadInfo.x, beadInfo.y, beadInfo.z);
+        this.selectedBead.scale.set(beadInfo.r+0.01, beadInfo.r+0.01, beadInfo.r+0.01);
+    };
+
     this.activate = function (beadInfo) {
         this.beadInfo = beadInfo;
         this.line.visible = true;
@@ -36,5 +44,24 @@ function PairGenomeAndHtml(bead, htmlBead, line, beadInfo) {
         this.line.visible = false;
         this.selectedBead.visible = false;
         this.beadInfo = null;
+        this.selectedBeadHtml = null;
+    };
+
+    this.export = function () {
+        var element = document.createElement('a');
+        var fileName = this.beadInfo.beadName;
+        var text = fileName+"\n";
+        $.each(this.beadInfo.geneInfos, function(index, value)
+        {
+            text += value.genomeName + ";" + value.startGene +"-"+value.endGene+"\n";
+        });
+
+
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', fileName);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 }

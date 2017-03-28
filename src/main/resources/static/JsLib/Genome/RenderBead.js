@@ -1,7 +1,7 @@
 /**
  * Created by user on 16.01.2017.
  */
-var basicGeometrySphere = new THREE.SphereBufferGeometry( 1, 20, 20 );
+var basicGeometrySphere = new THREE.SphereBufferGeometry( 1, 9, 9 );
 function getMeshPointsSeparate(chain, color) {
     var countAllPoint = chain.points.length;
 
@@ -51,6 +51,10 @@ function getMeshPointsSeparate(chain, color) {
     return mesh;
 }
 
+
+function createSimpleSphere() {
+   return new THREE.Mesh( new THREE.SphereBufferGeometry( 1, 20, 20 ), new THREE.MeshLambertMaterial({color : 0xff0000, shading: THREE.SmoothShading}) )
+}
 
 
 

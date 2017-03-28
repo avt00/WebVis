@@ -55,11 +55,11 @@ var effectController = {
     }
 };
 
-function onChangeFileName(value){
+function onChangeFileName(value, state){
     var data = getData(value);
-    genome.createMesh(data);
-    updateSelectedParts(data, value);
-    addNewCheckboxs(data);
+    genome.createMesh(data, state);
+    // updateSelectedParts(data, value);
+    addNewCheckboxs(data, state);
 }
 
 function initGUI() {
@@ -100,7 +100,7 @@ function initGUI() {
     });
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
     updatePartsGenome(effectController.template, "parts");
-    addNewCheckboxs(effectController.template);
+    // addNewCheckboxs(effectController.template);
     $(document).ready(function(){
         //Скрыть PopUp при загрузке страницы
         PopUpHide();
@@ -266,7 +266,11 @@ function createPopup(pointInfo, screenPosition) {
         .attr("id", pointInfo.beadName)
         .addClass("FormGenTitle")
         .text(pointInfo.beadName)
-        .appendTo(BeadInfoForm);
+        .appendTo(BeadInfoForm)
+         .click(function () {
+             if(BeadInfoForm.hasClass("lock"))
+                genome.selectLockElement(pointInfo.beadName);
+         });
     // list gene
     var ListGene = $('<div/>')
         .addClass("ListGen")
@@ -283,14 +287,44 @@ function createPopup(pointInfo, screenPosition) {
             .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-' +pointInfo.geneInfos[i].endGene)});
     });
     addListeners(BeadInfoForm[0]);
-    BeadInfoForm.append($('<button/>')
+    var buttonLock = $('<button/>')
         .addClass("ButtonLock")
         .text("Lock")
         .click(function () {
+            buttonUnLock.removeClass('hidden');
+            buttonLock.addClass('hidden');
             BeadInfoForm.addClass('lock');
             BeadInfoForm.detach();
             genome.OnLock();
             attachPopup(BeadInfoForm);
+        })
+        .appendTo(BeadInfoForm);
+
+    var buttonUnLock = $('<button/>')
+        .addClass("ButtonLock hidden")
+        .text("Unlock")
+        .click(function () {
+            buttonLock.removeClass('hidden');
+            buttonUnLock.addClass('hidden');
+            BeadInfoForm.removeClass('lock');
+            BeadInfoForm.detach();
+            $('#container').append(BeadInfoForm);
+            genome.OnUnlock(pointInfo.beadName);
+        })
+        .appendTo(BeadInfoForm);
+
+    BeadInfoForm.append($('<button/>')
+        .addClass("ButtonLock")
+        .text("Close")
+        .click(function () {
+            genome.closeForm(pointInfo.beadName);
+        }));
+
+    BeadInfoForm.append($('<button/>')
+        .addClass("ButtonLock")
+        .text("Export")
+        .click(function () {
+            genome.exportBead(pointInfo.beadName);
         }));
     return BeadInfoForm;
 }
@@ -340,14 +374,14 @@ function createCssObject(pointInfo, cameraPosition) {
 }
 
 function saveState(filename) {
-    // scene.name = "test";
-    var options = document.getElementById("parts").options;
+    var options = $("#beads").children();
     var selectedOptions = [];
     for(var i = 0; i< options.length; i++){
-        selectedOptions.push(options[i].value);
+        if(options[i].childNodes[0].classList.contains( "active" ))
+            selectedOptions.push(options[i].childNodes[0].textContent);
     }
 
-    sendPost({filename: filename, selected: selectedOptions, pointInfo: genome.beadInfo, camera: genome.renderSystem.camera.toJSON()}, '/saveState', showShortLink);
+    sendPost({filename: filename, selected: selectedOptions, pointInfo: genome.SelectedBeadInfo.beadInfo, camera: genome.renderSystem.camera.toJSON()}, '/saveState', showShortLink);
 }
 
 
@@ -370,6 +404,8 @@ function addNewCheckboxs(data, state) {
             .click(function () {
                 genome.changeVisibleNew(this.textContent);
             });
+        if(state==null || state.selected.includes(key))
+            checkboxLabel.addClass('active');
         var colorFrame = $('<div/>')
             .addClass("square col-6")
             .css("background-color", '\#'+ genome.beads[key].colorBead.getHexString())
@@ -415,11 +451,15 @@ function ScreenToSpherical(x, y, camera, width, height) {
 
 function addListeners(obj){
     obj.addEventListener('mousedown', function (e) {
+        if(obj.classList.contains("lock"))
+            return;
         mouseDownDrag(obj);
         firstPosition = e;
         controllerCamera.enableRotate = false;
     }, false);
     obj.addEventListener('mouseup', function (e) {
+        if(obj.classList.contains("lock"))
+            return;
         mouseUpDrag(obj);
         firstPosition = null;
         controllerCamera.enableRotate = true;
