@@ -40,12 +40,15 @@ function getMeshPointsSeparate(chain, color) {
     var material = new THREE.RawShaderMaterial( {
         uniforms: {
             color:{ value: color },
+            u_lightWorldPosition: {value: new THREE.Vector3(3,0,0)},
         },
         vertexShader: SphereShader.vertexShader,
         fragmentShader: SphereShader.fragmentShader,
         alphaTest: 0.5,
         transparent: true,
     } );
+
+
 
     var mesh = new THREE.Mesh( geometry, material );
     return mesh;
@@ -57,4 +60,48 @@ function createSimpleSphere() {
 }
 
 
+function drawBeads( chain, color) {
+    var geometry = new THREE.Geometry();
+    var defaultMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, shading: THREE.FlatShading, vertexColors: THREE.VertexColors, shininess: 0	} );
+    function applyVertexColors( g, c ) {
+        g.faces.forEach( function( f ) {
+            var n = ( f instanceof THREE.Face3 ) ? 3 : 4;
+            for( var j = 0; j < n; j ++ ) {
+                f.vertexColors[ j ] = c;
+            }
+        } );
+    }
+    var geom = new THREE.SphereGeometry( 1, 9, 9 );
+    var matrix = new THREE.Matrix4();
+    var quaternion = new THREE.Quaternion();
 
+    var points = chain.points;
+    for ( var i = 0, ul = points.length; i < ul; i++ ) {
+        var position = new THREE.Vector3();
+        position.x = points[i].x;
+        position.y = points[i].y;
+        position.z = points[i].z;
+
+        var rotation = new THREE.Euler();
+        rotation.x = 1;
+        rotation.y = 1;
+        rotation.z = 1;
+
+        var scale = new THREE.Vector3();
+        scale.x = points[i].r;
+        scale.y = points[i].r;
+        scale.z = points[i].r;
+
+
+        quaternion.setFromEuler( rotation, false );
+        matrix.compose( position, quaternion, scale );
+        // give the geom's vertices a random color, to be displayed
+        applyVertexColors( geom, color );
+        geometry.merge( geom, matrix );
+        // give the geom's vertices a color corresponding to the "id"
+        applyVertexColors( geom, color );
+
+    }
+    var drawnObject = new THREE.Mesh( geometry, defaultMaterial );
+    return drawnObject;
+}
