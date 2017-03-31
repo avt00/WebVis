@@ -86,14 +86,21 @@ a {
     border:3px solid;
     background:#ffffff;
     font-size: 15px;
-    text-align: center;
+    left: 0;
+    /*text-align: center;*/
+}
+
+.FormGenTitleButton{
+    width: 30px;
+    height: 30px;
+    right: 0;
+    top: 0;
 }
 
 .FormGenInfo{
     border: 5px #ddaa00;
     background:#ffffff;
     font-size: 12px;
-    width:200px;
     position:absolute;
 }
 .FormGenInfo.lock{

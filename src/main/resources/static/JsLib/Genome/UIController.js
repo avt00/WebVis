@@ -50,6 +50,9 @@ var effectController = {
         // $("#popup1").show();
         $(".leftPanel").toggleClass('clicked');
     },
+    popupSearcher : function () {
+        $("#searcherGene").show();
+    },
     saveState : function () {
         saveState(effectController.fileName, genome);
     }
@@ -60,11 +63,13 @@ function onChangeFileName(value, state){
     genome.createMesh(data, state);
     // updateSelectedParts(data, value);
     addNewCheckboxs(data, state);
+    // fillElements(data);
 }
 
 function initGUI() {
 
     gui = new dat.GUI();
+    gui.add( effectController, 'popupSearcher').name("Search...");
     gui.add( effectController, 'popup').name("Select parts");
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');
@@ -99,7 +104,9 @@ function initGUI() {
         onChangeFileName(value);
     });
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
-    updatePartsGenome(effectController.template, "parts");
+
+    // updatePartsGenome(effectController.template, "parts");
+
     // addNewCheckboxs(effectController.template);
     $(document).ready(function(){
         //Скрыть PopUp при загрузке страницы
@@ -153,6 +160,7 @@ function updatePartsGenome(parts, idSelector) {
 
 //Функция скрытия PopUp
 function PopUpHide(){
+    $("#searcherGene").hide();
     $("#popup1").hide();
     var newOptions = $('#parts option').map(function () {
         return $( this ).val();
@@ -228,6 +236,50 @@ function searchKeyUp() {
     }
 }
 
+function searchGene() {
+    $('#nav').empty();
+    var input = document.getElementById("searcherValue");
+    var filterText = input.value.toUpperCase();
+    // var children = $('#nav').children();
+    var data = genome.allObjects;
+    var keys = Object.keys(data);
+    $.each(keys, function (i, key) {
+        $.each(data[key], function (i, chrom) {
+            for(var pos = 0; pos < chrom.length; pos++){
+                var point = chrom[pos];
+                var row = $('<li/>')
+                    .append($('<a/>')
+                        .attr('href', '#')
+                        .text(point.beadName));
+
+                var ul = $('<ul/>')
+                    .appendTo(row);
+                $.each(point.geneInfos, function (j, value) {
+                    if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
+                    {
+                        // var row = $('<li/>')
+                        //     .append($('<a/>')
+                        //     // .addClass("hidden")
+                        //         .attr('href', '#')
+                        //         .text(point.beadName + " - > "+ value.genomeName))
+                        //     .appendTo($('#nav'));
+
+                        $('<li/>')
+                            .append($('<a/>')
+                                .attr('href', '#')
+                                .text(value.genomeName))
+                            .appendTo(ul);
+
+                        // return false;
+                    }
+                });
+                if(ul.children().length>0)
+                    row.appendTo($("#nav"));
+            }
+        });
+    })
+}
+
 function MoveOptionTo(idFrom, idTo) {
     var fromOption = document.getElementById(idFrom).options;
 
@@ -262,7 +314,7 @@ function createPopup(pointInfo, screenPosition) {
         .css('left', screenPosition.x)
         .appendTo($('#container'));
     // title
-     $('<div/>')
+    var title = $('<div/>')
         .attr("id", pointInfo.beadName)
         .addClass("FormGenTitle")
         .text(pointInfo.beadName)
@@ -271,6 +323,19 @@ function createPopup(pointInfo, screenPosition) {
              if(BeadInfoForm.hasClass("lock"))
                 genome.selectLockElement(pointInfo.beadName);
          });
+    title.append($('<button/>')
+        .addClass("FormGenTitleButton")
+        .text("->")
+        .click(function () {
+            redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.beadName.split(':')[1]);
+        }));
+
+    title.append($('<button/>')
+        .addClass("FormGenTitleButton")
+        .text("X")
+        .click(function () {
+            genome.closeForm(pointInfo.beadName);
+        }));
     // list gene
     var ListGene = $('<div/>')
         .addClass("ListGen")
@@ -313,12 +378,7 @@ function createPopup(pointInfo, screenPosition) {
         })
         .appendTo(BeadInfoForm);
 
-    BeadInfoForm.append($('<button/>')
-        .addClass("ButtonLock")
-        .text("Close")
-        .click(function () {
-            genome.closeForm(pointInfo.beadName);
-        }));
+
 
     BeadInfoForm.append($('<button/>')
         .addClass("ButtonLock")
@@ -386,7 +446,6 @@ function saveState(filename) {
 
 
 function addNewCheckboxs(data, state) {
-    var beads = $('#beads');
     var keys = Object.keys(data);
     if(keys!=null && keys.length>1){
         keys.sort();
@@ -490,3 +549,35 @@ var moveAction = function moveElement(obj, e) {
     firstPosition = e;
     genome.moveHtmlBlock();
 };
+
+function fillElements(data){
+    var keys = Object.keys(data);
+    $.each(keys, function (i, key) {
+        $.each(data[key], function (i, chrom) {
+            for(var pos = 0; pos < chrom.length; pos++){
+                var point = chrom[pos];
+                var row = $('<li/>')
+                    .append($('<a/>')
+                        // .addClass("hidden")
+                        .attr('href', '#')
+                        .text(point.beadName))
+                    .appendTo($('#nav'));
+
+                var ul = $('<ul/>')
+                    .appendTo(row);
+
+                $.each(point.genInfo, function (j, value) {
+                    $('<li/>')
+                        .append($('<a/>')
+                            .addClass("hidden")
+                            .attr('href', '#')
+                            .text(value.genomeName))
+                        .appendTo(ul);
+                });
+            }
+            // $.each(chrom, function (k, point) {
+            //
+            // });
+        });
+    })
+}

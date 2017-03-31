@@ -77,6 +77,11 @@ function Genome() {
         }
         // need fixed this!!!
         if(minDistToCamera < 1000){
+            if(this.LockedBeadInfo[pointInfo.beadName]!=null){
+                this.selectLockElement(pointInfo.beadName);
+                return;
+            }
+
             if(this.SelectedBeadInfo!=null)
             {
                 clearPopupObject(this.SelectedBeadInfo.selectedBeadHtml);

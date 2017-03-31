@@ -1,4 +1,5 @@
 <link rel='stylesheet' type='text/css' href='css/genome.css'>
+<link rel='stylesheet' type='text/css' href='css/ListElement.css'>
 <!DOCTYPE html>
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
@@ -24,37 +25,48 @@
 
 <div id="pointInfo" class="empty"></div>
 
-<div class="b-popup" id="popup1">
-    <div class="b-popup-content container">
-        <div class="title-text">List of genes</div>
-        <div class="searcher-st">Search
-            <input type="text" onkeyup="searchKeyUp()" id="searcher" placeholder="Search by name">
-        </div>
-        <div class="row">
-            <div class="col-sm-6">
-                Selected:
-                <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">
-                </select>
-            </div>
+<!--<div class="b-popup" id="popup1">-->
+    <!--<div class="b-popup-content container">-->
+        <!--<div class="title-text">List of genes</div>-->
+        <!--<div class="searcher-st">Search-->
+            <!--<input type="text" onkeyup="searchKeyUp()" id="searcher" placeholder="Search by name">-->
+        <!--</div>-->
+        <!--<div class="row">-->
+            <!--<div class="col-sm-6">-->
+                <!--Selected:-->
+                <!--<select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts">-->
+                <!--</select>-->
+            <!--</div>-->
 
-            <div class="col-sm-6">
-                Unselected:
-                <select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">
-                </select>
-            </div>
-        </div>
-        <div class="row">
-            <div class="btn col-sm-4 col-md-offset-1" onclick="MoveOptionTo('parts','parts2')">>></div>
-            <div class="btn col-sm-4 col-md-offset-2" onclick="MoveOptionTo('parts2','parts')"><<</div>
-        </div>
-        <div id="closeButton" class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>
-    </div>
-</div>
+            <!--<div class="col-sm-6">-->
+                <!--Unselected:-->
+                <!--<select class="special-select" multiple onchange="UpdatePartGenome(this)" id="parts2">-->
+                <!--</select>-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="row">-->
+            <!--<div class="btn col-sm-4 col-md-offset-1" onclick="MoveOptionTo('parts','parts2')">>></div>-->
+            <!--<div class="btn col-sm-4 col-md-offset-2" onclick="MoveOptionTo('parts2','parts')"><<</div>-->
+        <!--</div>-->
+        <!--<div id="closeButton" class="btn btn col-sm-2 col-md-offset-5 text-center">Close</div>-->
+    <!--</div>-->
+<!--</div>-->
 
 <div class="leftPanel">
     <div>List of Chromosomes:</div>
     <div id="beads"  data-toggle="buttons"></div>
 </div>
+
+<div id="searcherGene">
+    <label>Search gene:</label>
+    <input type="type" id="searcherValue" placeholder="Search by name">
+    <input type="button" onclick="searchGene()" value="Search">
+    <ul id="nav"></ul>
+    <input type="button" onclick="$('#searcherGene').hide();" value="Close">
+    <input type="button" onclick="" value="Select all">
+</div>
+
+
 <script src="JsLib/external/three.js"></script>
 <script src="JsLib/external/CSS3DRenderer.js"></script>
 <script src="JsLib/Genome/Shaders/PointTextureShader.js"></script>
