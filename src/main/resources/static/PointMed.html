@@ -23,7 +23,7 @@
 
 <div id="container"></div>
 
-<div id="pointInfo" class="empty"></div>
+<div id="pointInfo" class="empty" onscroll="genome.hideLockSelected();"></div>
 
 <!--<div class="b-popup" id="popup1">-->
     <!--<div class="b-popup-content container">-->
@@ -59,11 +59,13 @@
 
 <div id="searcherGene">
     <label>Search gene:</label>
-    <input type="type" id="searcherValue" placeholder="Search by name">
+    <input type="type" id="searcherValue" placeholder="Search by name" oninput="searchGene()">
+    <div id='listid'>
+    </div>
     <input type="button" onclick="searchGene()" value="Search">
-    <ul id="nav"></ul>
+    <!--<ul id="nav"></ul>-->
     <input type="button" onclick="$('#searcherGene').hide();" value="Close">
-    <input type="button" onclick="" value="Select all">
+    <!--<input type="button" onclick="" value="Select all">-->
 </div>
 
 

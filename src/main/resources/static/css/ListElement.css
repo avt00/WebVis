@@ -81,3 +81,32 @@
 #nav ul:hover {
     display:block;
 }
+
+
+#listid {
+    background-color: #c5c5c5;
+    position:absolute;
+    width: 200px;
+    top: 37px;
+    left: 97px;
+
+    max-height: 300px;
+    overflow-y: scroll;
+}
+
+#listid .element{
+    background-color: #c5c5c5;
+}
+
+#listid .element:hover{
+    background-color: #101010;
+}
+
+#searcherValue{
+    width: 200px;
+}
+
+.listOptions {
+    max-height: 400px;
+    overflow-y: scroll;
+}

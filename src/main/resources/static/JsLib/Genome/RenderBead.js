@@ -3,7 +3,7 @@
  */
 var basicGeometrySphere = new THREE.SphereBufferGeometry( 1, 9, 9 );
 function getMeshPointsSeparate(chain, color) {
-    var countAllPoint = chain.points.length;
+    var countAllPoint = Object.keys(chain.points).length;
 
     var geometry = new THREE.InstancedBufferGeometry();
     // per mesh data
@@ -28,9 +28,11 @@ function getMeshPointsSeparate(chain, color) {
     var scaleValues =  new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint*3 ), 3, 1 );
     var currentIndex = 0;
     var points = chain.points;
-    for ( var i = 0, ul = points.length; i < ul; i++ ) {
-        offsets.setXYZ( currentIndex + i, points[i].x, points[i].y, points[i].z);
-        scaleValues.setXYZ( currentIndex + i, points[i].r,  points[i].r,  points[i].r);
+
+    for ( var key in points) {
+        currentIndex++;
+        offsets.setXYZ( currentIndex, points[key].x, points[key].y, points[key].z);
+        scaleValues.setXYZ( currentIndex, points[key].r,  points[key].r,  points[key].r);
     }
     
     geometry.addAttribute( 'offset', offsets ); // per mesh translation

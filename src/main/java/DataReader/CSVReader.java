@@ -7,10 +7,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -36,13 +33,14 @@ public class CSVReader {
                     String[] position = parts[4].split(",");
                     if(chains.containsKey(id)){
                         ObjectMed obj = chains.get(id);
-                        PointMed lastPoint = obj.points.get(obj.points.size()-1);
-                        if(!lastPoint.beadName.equals(parts[3])){
+
+                        if(!obj.points.containsKey(parts[3])){
                             PointMed point = new PointMed(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
                             point.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
-                            obj.points.add(point);
+                            obj.points.put(point.beadName, point);
                         }
                         else{
+                            PointMed lastPoint = obj.points.get(parts[3]);
                             lastPoint.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
                         }
                     }
@@ -50,7 +48,7 @@ public class CSVReader {
                         ObjectMed obj = new ObjectMed();
                         PointMed point = new PointMed(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
                         point.addGeneInfo(new GeneInfo(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
-                        obj.points.add(point);
+                        obj.points.put(point.beadName, point);
                         chains.put(id, obj);
                     }
                 }
@@ -58,11 +56,11 @@ public class CSVReader {
                     String id = parts[0].split(":")[0];
                     if(chains.containsKey(id)){
                         ObjectMed obj = chains.get(id);
-                        obj.points.add(new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                        obj.points.put(parts[0], new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
                     }
                     else{
                         ObjectMed obj = new ObjectMed();
-                        obj.points.add(new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                        obj.points.put(parts[0], new PointMed(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
                         chains.put(id, obj);
                     }
                 }
@@ -141,9 +139,9 @@ public class CSVReader {
 
         private static final long serialVersionUID = -5527566241002296042L;
 
-        public List<PointMed> points;
+        public Map<String, PointMed> points;
         public ObjectMed() {
-            points = new ArrayList<PointMed>();
+            points = new HashMap<> ();
         }
     }
 }

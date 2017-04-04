@@ -60,10 +60,19 @@ var effectController = {
 
 function onChangeFileName(value, state){
     var data = getData(value);
-    genome.createMesh(data, state);
+    genome.allObjects = data;
+    setTimeout(function () {
+        fillElements(data);
+    }, 0);
+    setTimeout(function () {
+        genome.createMesh(data, state);
+    }, 0);
+    setTimeout(function () {
+        addNewCheckboxs(data, state);
+    }, 0);
     // updateSelectedParts(data, value);
-    addNewCheckboxs(data, state);
-    // fillElements(data);
+
+
 }
 
 function initGUI() {
@@ -247,36 +256,59 @@ function searchGene() {
         $.each(data[key], function (i, chrom) {
             for(var pos = 0; pos < chrom.length; pos++){
                 var point = chrom[pos];
-                var row = $('<li/>')
-                    .append($('<a/>')
-                        .attr('href', '#')
-                        .text(point.beadName));
-
-                var ul = $('<ul/>')
-                    .appendTo(row);
+                // var row = $('<li/>')
+                //     .append($('<a/>')
+                //         .attr('href', '#')
+                //         .text(point.beadName));
+                //
+                // var ul = $('<ul/>')
+                //     .appendTo(row);
                 $.each(point.geneInfos, function (j, value) {
-                    if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
-                    {
-                        // var row = $('<li/>')
-                        //     .append($('<a/>')
-                        //     // .addClass("hidden")
-                        //         .attr('href', '#')
-                        //         .text(point.beadName + " - > "+ value.genomeName))
-                        //     .appendTo($('#nav'));
-
-                        $('<li/>')
-                            .append($('<a/>')
-                                .attr('href', '#')
-                                .text(value.genomeName))
-                            .appendTo(ul);
-
-                        // return false;
-                    }
+                    // if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
+                    // {
+                    //     // var row = $('<li/>')
+                    //     //     .append($('<a/>')
+                    //     //     // .addClass("hidden")
+                    //     //         .attr('href', '#')
+                    //     //         .text(point.beadName + " - > "+ value.genomeName))
+                    //     //     .appendTo($('#nav'));
+                    //
+                    //     $('<li/>')
+                    //         .append($('<a/>')
+                    //             .attr('href', '#')
+                    //             .text(value.genomeName))
+                    //         .appendTo(ul);
+                    //
+                    //     // return false;
+                    // }
                 });
-                if(ul.children().length>0)
-                    row.appendTo($("#nav"));
+                // if(ul.children().length>0)
+                //     row.appendTo($("#nav"));
             }
         });
+    })
+}
+
+function searchGene() {
+    var input = document.getElementById("searcherValue");
+    var filterText = input.value.toUpperCase();
+    if(filterText.length === 0 ){
+        $('#listid').hide();
+    }
+    if(filterText.length <2)
+        return;
+    else{
+        $('#listid').show();
+    }
+    var children = $('#listid').children();
+    $.each(children, function (i, child) {
+        if(child.textContent.toUpperCase().indexOf(filterText) > -1) {
+            child.classList.remove('hidden');
+        }
+        else{
+            if(!child.classList.contains('hidden'))
+                child.classList+=' hidden';
+        }
     })
 }
 
@@ -305,14 +337,15 @@ function redirectToBead(id) {
 function clearPopupObject(element) {
     $(element).remove();
 }
-function createPopup(pointInfo, screenPosition) {
+function createPopup(pointInfo, screenPosition, isLocked) {
     // all forms
+    var parent =  isLocked ? $('#pointInfo') : $('body');
     var BeadInfoForm =  $('<div/>')
         .attr("id", pointInfo.beadName)
         .addClass("FormGenInfo")
         .css('top', screenPosition.y)
         .css('left', screenPosition.x)
-        .appendTo($('#container'));
+        .appendTo(parent);
     // title
     var title = $('<div/>')
         .attr("id", pointInfo.beadName)
@@ -353,7 +386,7 @@ function createPopup(pointInfo, screenPosition) {
     });
     addListeners(BeadInfoForm[0]);
     var buttonLock = $('<button/>')
-        .addClass("ButtonLock")
+        .addClass(isLocked ? "ButtonLock hidden" : "ButtonLock")
         .text("Lock")
         .click(function () {
             buttonUnLock.removeClass('hidden');
@@ -366,14 +399,14 @@ function createPopup(pointInfo, screenPosition) {
         .appendTo(BeadInfoForm);
 
     var buttonUnLock = $('<button/>')
-        .addClass("ButtonLock hidden")
+        .addClass(isLocked ? "ButtonLock" : "ButtonLock hidden")
         .text("Unlock")
         .click(function () {
             buttonLock.removeClass('hidden');
             buttonUnLock.addClass('hidden');
             BeadInfoForm.removeClass('lock');
             BeadInfoForm.detach();
-            $('#container').append(BeadInfoForm);
+            $('body').append(BeadInfoForm);
             genome.OnUnlock(pointInfo.beadName);
         })
         .appendTo(BeadInfoForm);
@@ -440,8 +473,20 @@ function saveState(filename) {
         if(options[i].childNodes[0].classList.contains( "active" ))
             selectedOptions.push(options[i].childNodes[0].textContent);
     }
-
-    sendPost({filename: filename, selected: selectedOptions, pointInfo: genome.SelectedBeadInfo.beadInfo, camera: genome.renderSystem.camera.toJSON()}, '/saveState', showShortLink);
+    var keySelected = null;
+    if(genome.SelectedBeadInfo!=null){
+        keySelected = genome.SelectedBeadInfo.beadInfo.beadName;
+    }
+    sendPost(
+        {
+            filename: filename,
+            selected: selectedOptions,
+            selectedBeadKey: keySelected,
+            camera: genome.renderSystem.camera.toJSON(),
+            lockElements: Object.keys(genome.LockedBeadInfo),
+        },
+        '/saveState',
+        showShortLink);
 }
 
 
@@ -554,25 +599,39 @@ function fillElements(data){
     var keys = Object.keys(data);
     $.each(keys, function (i, key) {
         $.each(data[key], function (i, chrom) {
-            for(var pos = 0; pos < chrom.length; pos++){
-                var point = chrom[pos];
-                var row = $('<li/>')
-                    .append($('<a/>')
-                        // .addClass("hidden")
-                        .attr('href', '#')
-                        .text(point.beadName))
-                    .appendTo($('#nav'));
+            for(var keyBead in chrom){
+                var point = chrom[keyBead];
+                // var row = $('<li/>')
+                //     .append($('<a/>')
+                //         // .addClass("hidden")
+                //         .attr('href', '#')
+                //         .text(point.beadName))
+                //     .appendTo($('#nav'));
+                //
+                // var ul = $('<ul/>')
+                //     .appendTo(row);
 
-                var ul = $('<ul/>')
-                    .appendTo(row);
+                $.each(point.geneInfos, function (j, value) {
+                    // $('<li/>')
+                    //     .append($('<a/>')
+                    //         .addClass("hidden")
+                    //         .attr('href', '#')
+                    //         .text(value.genomeName))
+                    //     .appendTo(ul);
 
-                $.each(point.genInfo, function (j, value) {
-                    $('<li/>')
-                        .append($('<a/>')
-                            .addClass("hidden")
-                            .attr('href', '#')
-                            .text(value.genomeName))
-                        .appendTo(ul);
+                    $('<div/>')
+                        .addClass('element hidden')
+                        .attr("key", key)
+                        .attr("pos", keyBead)
+                        .text(value.genomeName)
+                        .appendTo($('#listid'))
+                        .click(function () {
+                            $('#listid').hide();
+                            $('#searcherGene').hide();
+                            genome.selectByInfo(point);
+                        });
+
+                    // console.log(value.genomeName)
                 });
             }
             // $.each(chrom, function (k, point) {
