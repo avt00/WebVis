@@ -37,11 +37,10 @@ function getMeshPointsSeparate(chain, color) {
     
     geometry.addAttribute( 'offset', offsets ); // per mesh translation
     geometry.addAttribute( 'scale', scaleValues );
-
-
+    var color4 = new THREE.Vector4(color.r, color.g, color.b, 1);
     var material = new THREE.RawShaderMaterial( {
         uniforms: {
-            color:{ value: color },
+            color:{ value:  color4},
             u_lightWorldPosition: {value: new THREE.Vector3(3,0,0)},
         },
         vertexShader: SphereShader.vertexShader,

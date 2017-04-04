@@ -15,6 +15,8 @@ function Genome() {
     this.state = null;
     this.rayCaster = new THREE.Raycaster();
 
+    this.searcherBead = [];
+
     this.init = function (IsCssRender) {
         var selectedBead = createSimpleSphere();
         selectedBead.visible = false;
@@ -118,6 +120,7 @@ function Genome() {
         else {
             this.closeSelected();
             this.hideLockSelected();
+            this.clearAllFound();
         }
     };
 
@@ -252,7 +255,35 @@ function Genome() {
         this.renderSystem.scene.add(this.SelectedLockBeadInfo.line);
         this.renderSystem.scene.add(this.SelectedLockBeadInfo.selectedBead);
         this.SelectedLockBeadInfo.selectedBead.visible = true;
+    };
+
+    this.selectAllFound = function (foundKeys) {
+        this.clearAllFound();
+        this.searcherBead = new THREE.Group();
+        for(var key in foundKeys){
+            var keyBead = key.split('_')[0];
+            var pointInfo = this.allObjects[keyBead].points[key];
+            var bead = createSimpleSphere();
+            bead.position.set(pointInfo.x, pointInfo.y, pointInfo.z);
+            bead.scale.set(pointInfo.r +0.01, pointInfo.r +0.01, pointInfo.r+0.01 );
+            this.searcherBead.add(bead);
+        }
+        this.renderSystem.scene.add(this.searcherBead);
+        for(var bead in this.beads) {
+            this.beads[bead].material.uniforms.color.value.w = 0.3;
+        }
+
+    };
+
+    this.clearAllFound = function () {
+        this.renderSystem.scene.remove(this.searcherBead);
+        this.searcherBead = null;
+        for(var bead in this.beads) {
+            this.beads[bead].material.uniforms.color.value.w = 1;
+        }
+
     }
+
 }
 
 

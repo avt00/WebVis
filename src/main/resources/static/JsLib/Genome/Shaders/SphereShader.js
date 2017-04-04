@@ -10,7 +10,7 @@ var SphereShader ={
 
         "uniform mat4 modelViewMatrix;",
         "uniform mat4 projectionMatrix;",
-        "uniform vec3 color;",
+        "uniform vec4 color;",
         "uniform vec3 u_lightWorldPosition;",
 
         "attribute vec3 normal;",
@@ -25,7 +25,7 @@ var SphereShader ={
         "varying vec3 v_normal;",
         "varying vec3 v_surfaceToLight;",
 
-        "varying vec3 vColor;",
+        "varying vec4 vColor;",
 
         "void main() {",
             "positionEye = ( modelViewMatrix * vec4( vec3( offset.x + position.x*scale.x, offset.y + position.y*scale.y, offset.z + position.z*scale.z), 1.0 ) ).xyz;",
@@ -63,14 +63,14 @@ var SphereShader ={
 
     fragmentShader: [
             "precision highp float;",
-            "varying vec3 vColor;",
+            "varying vec4 vColor;",
             "varying vec3 v_normal;",
             "varying vec3 v_surfaceToLight;",
             "void main() {",
                 "vec3 normal = normalize(v_normal);",
                 "vec3 surfaceToLightDirection = normalize(v_surfaceToLight);",
                 "float light = dot(v_normal, surfaceToLightDirection);",
-                "gl_FragColor = vec4( vColor, 1.0 );",
+                "gl_FragColor = vColor;",
                 "gl_FragColor.rgb *= light;",
             "}"
     ].join("\n")

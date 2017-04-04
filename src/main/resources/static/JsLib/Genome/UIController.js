@@ -245,51 +245,52 @@ function searchKeyUp() {
     }
 }
 
+// function searchGene() {
+//     $('#nav').empty();
+//     var input = document.getElementById("searcherValue");
+//     var filterText = input.value.toUpperCase();
+//     // var children = $('#nav').children();
+//     var data = genome.allObjects;
+//     var keys = Object.keys(data);
+//     $.each(keys, function (i, key) {
+//         $.each(data[key], function (i, chrom) {
+//             for(var pos = 0; pos < chrom.length; pos++){
+//                 var point = chrom[pos];
+//                 // var row = $('<li/>')
+//                 //     .append($('<a/>')
+//                 //         .attr('href', '#')
+//                 //         .text(point.beadName));
+//                 //
+//                 // var ul = $('<ul/>')
+//                 //     .appendTo(row);
+//                 $.each(point.geneInfos, function (j, value) {
+//                     // if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
+//                     // {
+//                     //     // var row = $('<li/>')
+//                     //     //     .append($('<a/>')
+//                     //     //     // .addClass("hidden")
+//                     //     //         .attr('href', '#')
+//                     //     //         .text(point.beadName + " - > "+ value.genomeName))
+//                     //     //     .appendTo($('#nav'));
+//                     //
+//                     //     $('<li/>')
+//                     //         .append($('<a/>')
+//                     //             .attr('href', '#')
+//                     //             .text(value.genomeName))
+//                     //         .appendTo(ul);
+//                     //
+//                     //     // return false;
+//                     // }
+//                 });
+//                 // if(ul.children().length>0)
+//                 //     row.appendTo($("#nav"));
+//             }
+//         });
+//     })
+// }
+var foundKeys;
 function searchGene() {
-    $('#nav').empty();
-    var input = document.getElementById("searcherValue");
-    var filterText = input.value.toUpperCase();
-    // var children = $('#nav').children();
-    var data = genome.allObjects;
-    var keys = Object.keys(data);
-    $.each(keys, function (i, key) {
-        $.each(data[key], function (i, chrom) {
-            for(var pos = 0; pos < chrom.length; pos++){
-                var point = chrom[pos];
-                // var row = $('<li/>')
-                //     .append($('<a/>')
-                //         .attr('href', '#')
-                //         .text(point.beadName));
-                //
-                // var ul = $('<ul/>')
-                //     .appendTo(row);
-                $.each(point.geneInfos, function (j, value) {
-                    // if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
-                    // {
-                    //     // var row = $('<li/>')
-                    //     //     .append($('<a/>')
-                    //     //     // .addClass("hidden")
-                    //     //         .attr('href', '#')
-                    //     //         .text(point.beadName + " - > "+ value.genomeName))
-                    //     //     .appendTo($('#nav'));
-                    //
-                    //     $('<li/>')
-                    //         .append($('<a/>')
-                    //             .attr('href', '#')
-                    //             .text(value.genomeName))
-                    //         .appendTo(ul);
-                    //
-                    //     // return false;
-                    // }
-                });
-                // if(ul.children().length>0)
-                //     row.appendTo($("#nav"));
-            }
-        });
-    })
-}
-
-function searchGene() {
+    foundKeys = {};
     var input = document.getElementById("searcherValue");
     var filterText = input.value.toUpperCase();
     if(filterText.length === 0 ){
@@ -304,6 +305,7 @@ function searchGene() {
     $.each(children, function (i, child) {
         if(child.textContent.toUpperCase().indexOf(filterText) > -1) {
             child.classList.remove('hidden');
+            foundKeys[child.getAttribute('keyBead')] = 0;
         }
         else{
             if(!child.classList.contains('hidden'))
@@ -311,6 +313,7 @@ function searchGene() {
         }
     })
 }
+
 
 function MoveOptionTo(idFrom, idTo) {
     var fromOption = document.getElementById(idFrom).options;
@@ -622,7 +625,7 @@ function fillElements(data){
                     $('<div/>')
                         .addClass('element hidden')
                         .attr("key", key)
-                        .attr("pos", keyBead)
+                        .attr("keyBead", keyBead)
                         .text(value.genomeName)
                         .appendTo($('#listid'))
                         .click(function () {
