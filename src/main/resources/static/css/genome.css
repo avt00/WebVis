@@ -86,18 +86,21 @@ a {
     border:3px solid;
     background:#ffffff;
     font-size: 15px;
-    left: 0;
-    /*text-align: center;*/
+    height: 34px;
+    line-height: 30px;
+    text-align: left;
+    padding-left: 10px;
 }
 
 .FormGenTitleButton{
     width: 30px;
     height: 30px;
-    right: 0;
+    float: right;
     top: 0;
 }
 
 .FormGenInfo{
+    width: 300px;
     border: 5px #ddaa00;
     background:#ffffff;
     font-size: 12px;
@@ -115,7 +118,7 @@ a {
 
 
 .ListGen{
-    /*height: 100px;*/
+    /*width: 200px;*/
     max-height: 200px;
     overflow-y: scroll;
 }
@@ -128,11 +131,15 @@ a {
 
 .ButtonLock {
     /*width: 50%;*/
-    height: 20px;
+    height: 30px;
     text-align: center;
-    display: table;
-    margin: 5px auto ;
-    /*padding: 10px;*/
+    /*display: table;*/
+    /*margin: 5px auto ;*/
+    /*float:left;*/
+    width:100px;
+    display:inline-block;
+    margin:0;
+    padding:0;
 }
 
 .ShortLink{

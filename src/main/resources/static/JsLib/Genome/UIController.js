@@ -62,7 +62,7 @@ function onChangeFileName(value, state){
     var data = getData(value);
     genome.allObjects = data;
     setTimeout(function () {
-        fillElements(data);
+        // fillElements(data);
     }, 0);
     setTimeout(function () {
         genome.createMesh(data, state);
@@ -377,16 +377,37 @@ function createPopup(pointInfo, screenPosition, isLocked) {
         .addClass("ListGen")
         .appendTo(BeadInfoForm);
 
-    $.each(pointInfo.geneInfos, function(i)
-    {
-        var link = $('<a/>')
-            .attr("href", "#")
-            .text(pointInfo.geneInfos[i].genomeName);
-        $('<p/>')
-            .append(link)
-            .appendTo(ListGene)
-            .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-' +pointInfo.geneInfos[i].endGene)});
-    });
+    // genInfo
+    var keySet = {};
+    var dataForBar = [];
+    var geneLinkInfo = {};
+    for(var index = 0; index < pointInfo.geneInfos.length; index++){
+
+        var gen = pointInfo.geneInfos[index];
+        if(keySet[gen.genomeName] == null ) {
+            keySet[gen.genomeName] = 0;
+            dataForBar.push({name: gen.genomeName, value: gen.expression})
+            geneLinkInfo[gen.genomeName] = pointInfo.beadName.split('_')[0]+':'+gen.startGene+'-' +gen.endGene;
+        }
+        else {
+            keySet[gen.genomeName] = keySet[gen.genomeName] + 1 ;
+            dataForBar.push({name: gen.genomeName +'_'+ keySet[gen.genomeName], value: gen.expression})
+            geneLinkInfo[gen.genomeName +'_'+ keySet[gen.genomeName]] = pointInfo.beadName.split('_')[0]+':'+gen.startGene+'-' + gen.endGene;
+        }
+    }
+
+    var svg = createBarChart(ListGene[0], dataForBar, geneLinkInfo);
+    // ListGene.append(barChart);
+    // $.each(pointInfo.geneInfos, function(i)
+    // {
+    //     var link = $('<a/>')
+    //         .attr("href", "#")
+    //         .text(pointInfo.geneInfos[i].genomeName);
+    //     $('<p/>')
+    //         .append(link)
+    //         .appendTo(ListGene)
+    //         .click(function() {redirectToBead(pointInfo.beadName.split('_')[0]+':'+pointInfo.geneInfos[i].startGene+'-' +pointInfo.geneInfos[i].endGene)});
+    // });
     addListeners(BeadInfoForm[0]);
     var buttonLock = $('<button/>')
         .addClass(isLocked ? "ButtonLock hidden" : "ButtonLock")
@@ -422,6 +443,29 @@ function createPopup(pointInfo, screenPosition, isLocked) {
         .click(function () {
             genome.exportBead(pointInfo.beadName);
         }));
+
+    var LinearScaleButton = $('<button/>')
+        .addClass("ButtonLock")
+        .text("RescaleLinear")
+        .click(function () {
+            LinearScaleButton.addClass('hidden');
+            LogScaleButton.removeClass('hidden');
+            rescaleLinear(svg, dataForBar);
+        })
+        .appendTo(BeadInfoForm);
+
+    var LogScaleButton = $('<button/>')
+        .addClass("ButtonLock hidden")
+        .text("RescaleLog")
+        .click(function () {
+            LogScaleButton.addClass('hidden');
+            LinearScaleButton.removeClass('hidden');
+            rescaleLog(svg, dataForBar);
+        })
+        .appendTo(BeadInfoForm);
+
+
+
     return BeadInfoForm;
 }
 

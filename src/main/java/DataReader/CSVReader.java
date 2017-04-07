@@ -36,18 +36,18 @@ public class CSVReader {
 
                         if(!obj.points.containsKey(parts[3])){
                             PointMed point = new PointMed(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
-                            point.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
+                            point.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                             obj.points.put(point.beadName, point);
                         }
                         else{
                             PointMed lastPoint = obj.points.get(parts[3]);
-                            lastPoint.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
+                            lastPoint.addGeneInfo(new GeneInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                         }
                     }
                     else{
                         ObjectMed obj = new ObjectMed();
                         PointMed point = new PointMed(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
-                        point.addGeneInfo(new GeneInfo(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
+                        point.addGeneInfo(new GeneInfo(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                         obj.points.put(point.beadName, point);
                         chains.put(id, obj);
                     }
@@ -112,8 +112,8 @@ public class CSVReader {
 
         }
 
-        public void addGeneInfo(String genomeName, int startGene, int endGene) {
-            geneInfos.add(new GeneInfo(genomeName, startGene, endGene));
+        public void addGeneInfo(String genomeName, int startGene, int endGene, float expression) {
+            geneInfos.add(new GeneInfo(genomeName, startGene, endGene, expression));
         }
 
         public void addGeneInfo(GeneInfo geneinfo) {
@@ -128,11 +128,13 @@ public class CSVReader {
         public String genomeName;
         public int startGene;
         public int endGene;
+        public float expression;
 
-        public GeneInfo(String genomeName, int startGene, int endGene) {
+        public GeneInfo(String genomeName, int startGene, int endGene, float expression) {
             this.genomeName = genomeName;
             this.startGene = startGene;
             this.endGene = endGene;
+            this.expression = expression;
         }
     }
     public class ObjectMed  implements Serializable{
