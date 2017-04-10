@@ -282,7 +282,14 @@ function Genome() {
             this.beads[bead].material.uniforms.color.value.w = 1;
         }
 
-    }
+    };
+
+    this.paintByExpression = function () {
+        for(var bead in this.beads) {
+            this.beads[bead].material.uniforms.color.value.w = 1;
+        }
+
+    };
 
 }
 

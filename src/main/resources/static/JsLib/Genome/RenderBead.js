@@ -26,22 +26,43 @@ function getMeshPointsSeparate(chain, color) {
     // var colors = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint * 4 ), 4, 1 ).setDynamic( true );
     // 7. radius
     var scaleValues =  new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint*3 ), 3, 1 );
+    // 8. expression
+    var expressionValues = new THREE.InstancedBufferAttribute( new Float32Array( countAllPoint ), 1, 1 );
     var currentIndex = 0;
     var points = chain.points;
 
+
+    var minExpression;
+    var maxExpression;
+
     for ( var key in points) {
+        if(currentIndex==0)
+        {
+            minExpression = calculateAvrExpression(points[key]);
+            maxExpression = minExpression;
+        }
         currentIndex++;
         offsets.setXYZ( currentIndex, points[key].x, points[key].y, points[key].z);
         scaleValues.setXYZ( currentIndex, points[key].r,  points[key].r,  points[key].r);
+        var expressionValue = calculateAvrExpression(points[key]);
+        if(expressionValue > maxExpression)
+            maxExpression = expressionValue;
+        if(expressionValue < minExpression)
+            minExpression = expressionValue;
+        expressionValues.setX(currentIndex, expressionValue);
     }
     
     geometry.addAttribute( 'offset', offsets ); // per mesh translation
     geometry.addAttribute( 'scale', scaleValues );
+    geometry.addAttribute( 'expression', expressionValues );
     var color4 = new THREE.Vector4(color.r, color.g, color.b, 1);
     var material = new THREE.RawShaderMaterial( {
         uniforms: {
             color:{ value:  color4},
-            u_lightWorldPosition: {value: new THREE.Vector3(3,0,0)},
+            u_lightWorldPosition: { value: new THREE.Vector3(3,0,0) },
+            u_UseExpression: {value: true},
+            u_minExpression: {value: minExpression },
+            u_maxExpression: {value: maxExpression },
         },
         vertexShader: SphereShader.vertexShader,
         fragmentShader: SphereShader.fragmentShader,
@@ -105,4 +126,16 @@ function drawBeads( chain, color) {
     }
     var drawnObject = new THREE.Mesh( geometry, defaultMaterial );
     return drawnObject;
+}
+
+function calculateAvrExpression(pointInfo) {
+    if(pointInfo==null || pointInfo.geneInfos.length == 0){
+        return 0;
+    }
+    var sum = 0;
+    for(var index = 0; index < pointInfo.geneInfos.length; index++) {
+        var gen = pointInfo.geneInfos[index];
+        sum += gen.expression;
+    }
+    return sum/pointInfo.geneInfos.length;
 }

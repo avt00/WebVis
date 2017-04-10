@@ -4,9 +4,9 @@
 
 function getMeshSpline(obj, color) {
 
-    var points = obj.points;
-    var vertices = points.map(function(point) {
-        return  new THREE.Vector3(point.x, point.y, point.z);
+    var pointsKeys = Object.keys(obj.points);
+    var vertices = pointsKeys.map(function(key) {
+        return  new THREE.Vector3(obj.points[key].x, obj.points[key].y, obj.points[key].z);
     });
 
 

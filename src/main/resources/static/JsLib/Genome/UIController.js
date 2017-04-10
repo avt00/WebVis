@@ -55,6 +55,14 @@ var effectController = {
     },
     saveState : function () {
         saveState(effectController.fileName, genome);
+    },
+    useExpression : function () {
+        var keys =Object.keys(genome.beads);
+        for(var i =0; i < keys.length; i++){
+            genome.beads[keys[i]].material.uniforms.u_UseExpression.value = !genome.beads[keys[i]].material.uniforms.u_UseExpression.value;
+            genome.beads[keys[i]].material.needsUpdate = true;
+        }
+
     }
 };
 
@@ -62,7 +70,7 @@ function onChangeFileName(value, state){
     var data = getData(value);
     genome.allObjects = data;
     setTimeout(function () {
-        // fillElements(data);
+        fillElements(data);
     }, 0);
     setTimeout(function () {
         genome.createMesh(data, state);
@@ -80,8 +88,12 @@ function initGUI() {
     gui = new dat.GUI();
     gui.add( effectController, 'popupSearcher').name("Search...");
     gui.add( effectController, 'popup').name("Select parts");
+    gui.add( effectController, 'useExpression').name("useExpression");
+
+    gui.add( effectController, 'loadFile').name('Load CSV file');
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');
+
     // gui.add( effectController, "showDots" ).name("Show Dots").onChange( function( value ) {
     //     for (var key in mapMesh) {
     //         // if(previousValue==key)
@@ -659,13 +671,6 @@ function fillElements(data){
                 //     .appendTo(row);
 
                 $.each(point.geneInfos, function (j, value) {
-                    // $('<li/>')
-                    //     .append($('<a/>')
-                    //         .addClass("hidden")
-                    //         .attr('href', '#')
-                    //         .text(value.genomeName))
-                    //     .appendTo(ul);
-
                     $('<div/>')
                         .addClass('element hidden')
                         .attr("key", key)
@@ -681,9 +686,6 @@ function fillElements(data){
                     // console.log(value.genomeName)
                 });
             }
-            // $.each(chrom, function (k, point) {
-            //
-            // });
         });
     })
 }
