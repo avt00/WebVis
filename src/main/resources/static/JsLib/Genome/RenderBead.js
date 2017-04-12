@@ -60,7 +60,7 @@ function getMeshPointsSeparate(chain, color) {
         uniforms: {
             color:{ value:  color4},
             u_lightWorldPosition: { value: new THREE.Vector3(3,0,0) },
-            u_UseExpression: {value: true},
+            u_UseExpression: {value: false},
             u_minExpression: {value: minExpression },
             u_maxExpression: {value: maxExpression },
         },

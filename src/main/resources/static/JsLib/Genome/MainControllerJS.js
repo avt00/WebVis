@@ -66,9 +66,43 @@ var mouseDown = false;
 var countMouseMoveEvent = 0;
 var mousePos;
 document.addEventListener( 'mousemove', function (event) {
+    moveEventMouserOrTouch(event);
+}, false );
+
+document.addEventListener( 'mousedown', function (event) {
+    startEventMouserOrTouch();
+}, false );
+
+document.addEventListener( 'mouseup', function (event) {
+    endEventMouserOrTouch();
+}, false );
+
+document.addEventListener( 'touchmove', function (event) {
+    moveEventMouserOrTouch(event);
+}, false );
+
+document.addEventListener( 'touchstart', function (event) {
+    startEventMouserOrTouch();
+}, false );
+
+document.addEventListener( 'touchend', function (event) {
+    endEventMouserOrTouch();
+}, false );
+
+
+
+function startEventMouserOrTouch() {
+    mouseDown = true;
+}
+
+function endEventMouserOrTouch() {
+    mouseDown = false;
+    countMouseMoveEvent = 0;
+}
+
+function moveEventMouserOrTouch(event) {
     mousePos = new THREE.Vector2(event.x, event.y);
     if(mouseDown){
-
         countMouseMoveEvent++;
         if(countMouseMoveEvent>2) {
             mouseDrag = true;
@@ -77,46 +111,5 @@ document.addEventListener( 'mousemove', function (event) {
     else {
         mouseDrag = false;
     }
-
-}, false );
-document.addEventListener( 'mousedown', function (event) {
-    mouseDown = true;
-}, false );
-
-document.addEventListener( 'mouseup', function (event) {
-    mouseDown = false;
-    countMouseMoveEvent = 0;
-}, false );
-
-// var data = [{
-//     "name": "Apples",
-//     "value": 20,
-// },
-//     {
-//         "name": "Bananas",
-//         "value": 12,
-//     },
-//     {
-//         "name": "Grapes",
-//         "value": 19,
-//     },
-//     {
-//         "name": "Lemons",
-//         "value": 5,
-//     },
-//     {
-//         "name": "Limes",
-//         "value": 16,
-//     },
-//     {
-//         "name": "Oranges",
-//         "value": 26,
-//     },
-//     {
-//         "name": "Pears",
-//         "value": 30,
-//     }
-// ];
-
-// createBarChart('graphic', data);
+}
 

@@ -90,7 +90,6 @@ function initGUI() {
     gui.add( effectController, 'popup').name("Select parts");
     gui.add( effectController, 'useExpression').name("useExpression");
 
-    gui.add( effectController, 'loadFile').name('Load CSV file');
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');
 
@@ -256,50 +255,6 @@ function searchKeyUp() {
         }
     }
 }
-
-// function searchGene() {
-//     $('#nav').empty();
-//     var input = document.getElementById("searcherValue");
-//     var filterText = input.value.toUpperCase();
-//     // var children = $('#nav').children();
-//     var data = genome.allObjects;
-//     var keys = Object.keys(data);
-//     $.each(keys, function (i, key) {
-//         $.each(data[key], function (i, chrom) {
-//             for(var pos = 0; pos < chrom.length; pos++){
-//                 var point = chrom[pos];
-//                 // var row = $('<li/>')
-//                 //     .append($('<a/>')
-//                 //         .attr('href', '#')
-//                 //         .text(point.beadName));
-//                 //
-//                 // var ul = $('<ul/>')
-//                 //     .appendTo(row);
-//                 $.each(point.geneInfos, function (j, value) {
-//                     // if(value.genomeName.toUpperCase().indexOf(filterText) > -1)
-//                     // {
-//                     //     // var row = $('<li/>')
-//                     //     //     .append($('<a/>')
-//                     //     //     // .addClass("hidden")
-//                     //     //         .attr('href', '#')
-//                     //     //         .text(point.beadName + " - > "+ value.genomeName))
-//                     //     //     .appendTo($('#nav'));
-//                     //
-//                     //     $('<li/>')
-//                     //         .append($('<a/>')
-//                     //             .attr('href', '#')
-//                     //             .text(value.genomeName))
-//                     //         .appendTo(ul);
-//                     //
-//                     //     // return false;
-//                     // }
-//                 });
-//                 // if(ul.children().length>0)
-//                 //     row.appendTo($("#nav"));
-//             }
-//         });
-//     })
-// }
 var foundKeys;
 function searchGene() {
     foundKeys = {};
@@ -533,7 +488,7 @@ function saveState(filename) {
             selectedOptions.push(options[i].childNodes[0].textContent);
     }
     var keySelected = null;
-    if(genome.SelectedBeadInfo!=null){
+    if(genome.SelectedBeadInfo!=null && genome.SelectedBeadInfo.beadInfo!=null){
         keySelected = genome.SelectedBeadInfo.beadInfo.beadName;
     }
     sendPost(
@@ -554,7 +509,7 @@ function addNewCheckboxs(data, state) {
     if(keys!=null && keys.length>1){
         keys.sort();
     }
-
+    $('#beads').empty();
     $.each(keys, function (i, key) {
         var row = $('<div/>')
             .addClass("row")
@@ -627,6 +582,21 @@ function addListeners(obj){
         firstPosition = null;
         controllerCamera.enableRotate = true;
     }, false);
+
+    obj.addEventListener('touchstart', function (e) {
+        if(obj.classList.contains("lock"))
+            return;
+        mouseDownDrag(obj);
+        firstPosition = e;
+        controllerCamera.enableRotate = false;
+    }, false);
+    obj.addEventListener('touchend', function (e) {
+        if(obj.classList.contains("lock"))
+            return;
+        mouseUpDrag(obj);
+        firstPosition = null;
+        controllerCamera.enableRotate = true;
+    }, false);
 };
 
 function mouseUpDrag(obj)
@@ -634,27 +604,35 @@ function mouseUpDrag(obj)
     obj.removeEventListener('mousemove', function (e) {
         moveAction(obj, e);
     }, true);
+    obj.removeEventListener('touchmove', function (e) {
+        moveAction(obj, e);
+    }, true);
 };
 
 function mouseDownDrag(obj){
     obj.addEventListener('mousemove', function (e) {
-        moveAction(obj, e);
+        moveAction(obj, {x: e.clientX, y: e.clientY});
+    }, true);
+    obj.addEventListener('touchmove', function (e) {
+        var touches = e.changedTouches;
+        moveAction(obj, {x: touches[0].pageX, y: touches[0].pageY});
     }, true);
 };
 var firstPosition;
-var moveAction = function moveElement(obj, e) {
+var moveAction = function moveElement(obj, pos) {
     if(firstPosition==null)
         return;
 
     var rect = obj.getBoundingClientRect();
     obj.position = "absolute";
-    obj.style.top = (rect.top + e.clientY - firstPosition.clientY)+'px';
-    obj.style.left = (rect.left + e.clientX - firstPosition.clientX) + 'px';
-    firstPosition = e;
+    obj.style.top = (rect.top + pos.y - firstPosition.y)+'px';
+    obj.style.left = (rect.left + pos.x - firstPosition.x) + 'px';
+    firstPosition = pos;
     genome.moveHtmlBlock();
 };
 
 function fillElements(data){
+    $('#listid').empty();
     var keys = Object.keys(data);
     $.each(keys, function (i, key) {
         $.each(data[key], function (i, chrom) {
