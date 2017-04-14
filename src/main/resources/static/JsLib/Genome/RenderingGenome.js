@@ -15,6 +15,10 @@ function Genome() {
     this.state = null;
     this.rayCaster = new THREE.Raycaster();
 
+    this.genMaps = {};
+    this.keysGenMaps = [];
+    this.foundKeys = [];
+
     this.searcherBead = [];
 
     this.init = function (IsCssRender) {
@@ -257,12 +261,12 @@ function Genome() {
         this.SelectedLockBeadInfo.selectedBead.visible = true;
     };
 
-    this.selectAllFound = function (foundKeys) {
+    this.selectAllFound = function () {
         this.clearAllFound();
         this.searcherBead = new THREE.Group();
-        for(var key in foundKeys){
-            var keyBead = key.split('_')[0];
-            var pointInfo = this.allObjects[keyBead].points[key];
+        for(var index = 0; index < this.foundKeys.length; index++){
+            var keyBead = this.foundKeys[index].split('_')[0];
+            var pointInfo = this.allObjects[keyBead].points[this.foundKeys[index]];
             var bead = createSimpleSphere();
             bead.position.set(pointInfo.x, pointInfo.y, pointInfo.z);
             bead.scale.set(pointInfo.r +0.01, pointInfo.r +0.01, pointInfo.r+0.01 );
@@ -290,6 +294,66 @@ function Genome() {
         }
 
     };
+
+    this.createGenMap = function (data) {
+        this.genMaps = {};
+        this.keysGenMaps = [];
+
+        var keys = Object.keys(data);
+        var mapGene = this.genMaps;
+        var keysGenMaps = this.keysGenMaps;
+        $.each(keys, function (i, key) {
+            $.each(data[key], function (i, chrom) {
+                for(var keyBead in chrom){
+                    var point = chrom[keyBead];
+                    $.each(point.geneInfos, function (j, value) {
+                        if(mapGene[value.genomeName]=== undefined){
+                            mapGene[value.genomeName] = new Object();
+                            mapGene[value.genomeName].beadElements = [];
+                            keysGenMaps.push(value.genomeName);
+                        }
+                        mapGene[value.genomeName].beadElements.push(point);
+                    });
+                }
+            });
+        });
+    };
+
+    this.searchGene = function() {
+        var input = document.getElementById("searcherValue");
+        var filterText = input.value.toUpperCase();
+        var genMaps = this.genMaps;
+        var foundKeys = this.foundKeys;
+        if(filterText.length == 0){
+            $('#listid').empty();
+            return;
+        }
+        if(filterText.length <2)
+            return;
+        $('#listid').empty();
+        $('#listid').show();
+        $.each(this.keysGenMaps, function (i, key) {
+            if(key.toUpperCase().indexOf(filterText) > -1){
+                var listBeadinfo = genMaps[key].beadElements;
+                $.each(listBeadinfo, function (i, element) {
+                    $('<div/>')
+                        .addClass('element')
+                        .text(key)
+                        .appendTo($('#listid'))
+                        .click(function () {
+                            $('#listid').hide();
+                            $('#searcherGene').hide();
+                            genome.selectByInfo(element);
+                        })
+                        .append($('<div/>')
+                            .addClass('subElement')
+                            .text(element.beadName));
+                    foundKeys.push(element.beadName);
+                });
+            }
+        });
+        return foundKeys;
+    }
 
 }
 

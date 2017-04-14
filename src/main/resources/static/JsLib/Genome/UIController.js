@@ -70,7 +70,8 @@ function onChangeFileName(value, state){
     var data = getData(value);
     genome.allObjects = data;
     setTimeout(function () {
-        fillElements(data);
+        // fillElements(data);
+        genome.createGenMap(data);
     }, 0);
     setTimeout(function () {
         genome.createMesh(data, state);
@@ -78,9 +79,6 @@ function onChangeFileName(value, state){
     setTimeout(function () {
         addNewCheckboxs(data, state);
     }, 0);
-    // updateSelectedParts(data, value);
-
-
 }
 
 function initGUI() {
@@ -262,6 +260,7 @@ function searchGene() {
     var filterText = input.value.toUpperCase();
     if(filterText.length === 0 ){
         $('#listid').hide();
+        return;
     }
     if(filterText.length <2)
         return;
@@ -337,7 +336,10 @@ function createPopup(pointInfo, screenPosition, isLocked) {
         .addClass("FormGenTitleButton")
         .text("X")
         .click(function () {
+
             genome.closeForm(pointInfo.beadName);
+            BeadInfoForm.remove();
+            BeadInfoForm=null;
         }));
     // list gene
     var ListGene = $('<div/>')
@@ -568,17 +570,25 @@ function ScreenToSpherical(x, y, camera, width, height) {
 };
 
 function addListeners(obj){
+    var mouseFunction = function (e) {
+        moveAction(obj, {x: e.clientX, y: e.clientY});
+    };
+
+    var touchFunction = function (e) {
+        var touches = e.changedTouches;
+        moveAction(obj, {x: touches[0].pageX, y: touches[0].pageY});
+    };
     obj.addEventListener('mousedown', function (e) {
         if(obj.classList.contains("lock"))
             return;
-        mouseDownDrag(obj);
+        mouseDownDrag(obj, mouseFunction, touchFunction);
         firstPosition = e;
         controllerCamera.enableRotate = false;
     }, false);
     obj.addEventListener('mouseup', function (e) {
         if(obj.classList.contains("lock"))
             return;
-        mouseUpDrag(obj);
+        mouseUpDrag(obj, mouseFunction, touchFunction);
         firstPosition = null;
         controllerCamera.enableRotate = true;
     }, false);
@@ -586,37 +596,28 @@ function addListeners(obj){
     obj.addEventListener('touchstart', function (e) {
         if(obj.classList.contains("lock"))
             return;
-        mouseDownDrag(obj);
+        mouseDownDrag(obj, mouseFunction, touchFunction);
         firstPosition = e;
         controllerCamera.enableRotate = false;
     }, false);
     obj.addEventListener('touchend', function (e) {
         if(obj.classList.contains("lock"))
             return;
-        mouseUpDrag(obj);
+        mouseUpDrag(obj, mouseFunction, touchFunction);
         firstPosition = null;
         controllerCamera.enableRotate = true;
     }, false);
 };
 
-function mouseUpDrag(obj)
+function mouseUpDrag(obj, mouseFunction, touchFunction)
 {
-    obj.removeEventListener('mousemove', function (e) {
-        moveAction(obj, e);
-    }, true);
-    obj.removeEventListener('touchmove', function (e) {
-        moveAction(obj, e);
-    }, true);
+    obj.parentElement.removeEventListener('mousemove', mouseFunction, true);
+    obj.parentElement.removeEventListener('touchmove', touchFunction, true);
 };
 
-function mouseDownDrag(obj){
-    obj.addEventListener('mousemove', function (e) {
-        moveAction(obj, {x: e.clientX, y: e.clientY});
-    }, true);
-    obj.addEventListener('touchmove', function (e) {
-        var touches = e.changedTouches;
-        moveAction(obj, {x: touches[0].pageX, y: touches[0].pageY});
-    }, true);
+function mouseDownDrag(obj, mouseFunction, touchFunction){
+    obj.parentElement.addEventListener('mousemove', mouseFunction, true);
+    obj.parentElement.addEventListener('touchmove', touchFunction, true);
 };
 var firstPosition;
 var moveAction = function moveElement(obj, pos) {
@@ -631,39 +632,4 @@ var moveAction = function moveElement(obj, pos) {
     genome.moveHtmlBlock();
 };
 
-function fillElements(data){
-    $('#listid').empty();
-    var keys = Object.keys(data);
-    $.each(keys, function (i, key) {
-        $.each(data[key], function (i, chrom) {
-            for(var keyBead in chrom){
-                var point = chrom[keyBead];
-                // var row = $('<li/>')
-                //     .append($('<a/>')
-                //         // .addClass("hidden")
-                //         .attr('href', '#')
-                //         .text(point.beadName))
-                //     .appendTo($('#nav'));
-                //
-                // var ul = $('<ul/>')
-                //     .appendTo(row);
 
-                $.each(point.geneInfos, function (j, value) {
-                    $('<div/>')
-                        .addClass('element hidden')
-                        .attr("key", key)
-                        .attr("keyBead", keyBead)
-                        .text(value.genomeName)
-                        .appendTo($('#listid'))
-                        .click(function () {
-                            $('#listid').hide();
-                            $('#searcherGene').hide();
-                            genome.selectByInfo(point);
-                        });
-
-                    // console.log(value.genomeName)
-                });
-            }
-        });
-    })
-}

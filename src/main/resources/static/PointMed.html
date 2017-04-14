@@ -59,10 +59,10 @@
 
 <div id="searcherGene">
     <label>Search gene:</label>
-    <input type="type" id="searcherValue" placeholder="Search by name" oninput="searchGene()">
+    <input type="type" id="searcherValue" placeholder="Search by name" oninput="genome.searchGene()">
     <div id='listid'>
     </div>
-    <input type="button" onclick="genome.selectAllFound(foundKeys); $('#listid').hide();" value="Search">
+    <input type="button" onclick="genome.selectAllFound(); $('#listid').hide();" value="Search">
     <!--<ul id="nav"></ul>-->
     <input type="button" onclick="$('#searcherGene').hide();" value="Close">
     <!--<input type="button" onclick="genome.selectAllFound(foundKeys);" value="Select all">-->

@@ -99,8 +99,13 @@
 }
 
 #listid .element:hover{
-    background-color: #101010;
+    background-color: #92D5FC;
 }
+
+#listid .subElement{
+    font-size:10px;
+}
+
 
 #searcherValue{
     width: 200px;
