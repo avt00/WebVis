@@ -152,6 +152,9 @@ function Genome() {
         this.bonds = {};
         var indexColor = 0;
         this.group = new THREE.Group();
+
+        var minExpression;
+        var maxExpression;
         for (var key in this.allObjects){
             var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
             chain.colorBead = palette[indexColor];
@@ -164,6 +167,20 @@ function Genome() {
             this.beads[key] = chain;
             // this.bonds[key] = spline;
             indexColor++;
+
+            if(indexColor == 1){
+                minExpression = chain.material.uniforms.u_minExpression.value;
+                maxExpression = chain.material.uniforms.u_maxExpression.value;
+            }
+            if(minExpression > chain.material.uniforms.u_minExpression.value)
+                minExpression = chain.material.uniforms.u_minExpression.value;
+            if(maxExpression < chain.material.uniforms.u_maxExpression.value)
+                maxExpression = chain.material.uniforms.u_maxExpression.value;
+        }
+        var keys = Object.keys(this.beads);
+        for(var i =0; i < keys.length; i++){
+            this.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value = minExpression;
+            this.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value = maxExpression;
         }
         this.renderSystem.scene.add(this.group);
     };

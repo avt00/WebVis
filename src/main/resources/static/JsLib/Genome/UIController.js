@@ -8,8 +8,6 @@ var previousPartofGene = [];
 var effectController = {
     showDots: true,
     showLines: true,
-    maxOpacity: 1,
-    minDistance: 150,
     limitConnections: false,
     maxConnections: 20,
     particleCount: 500,
@@ -62,7 +60,19 @@ var effectController = {
             genome.beads[keys[i]].material.uniforms.u_UseExpression.value = !genome.beads[keys[i]].material.uniforms.u_UseExpression.value;
             genome.beads[keys[i]].material.needsUpdate = true;
         }
+    },
+    useExpressionGlobal : function () {
+        var keys =Object.keys(genome.beads);
+        for(var i =0; i < keys.length; i++){
+            genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value = !genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value;
+            genome.beads[keys[i]].material.needsUpdate = true;
+            console.log("DIFF:");
+            console.log(genome.beads[keys[i]].material.uniforms.u_minExpression.value);
+            console.log(genome.beads[keys[i]].material.uniforms.u_maxExpression.value);
 
+            console.log(genome.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value);
+            console.log(genome.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value);
+        }
     }
 };
 
@@ -87,6 +97,7 @@ function initGUI() {
     gui.add( effectController, 'popupSearcher').name("Search...");
     gui.add( effectController, 'popup').name("Select parts");
     gui.add( effectController, 'useExpression').name("useExpression");
+    gui.add( effectController, 'useExpressionGlobal').name("Switch Global Expression");
 
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');

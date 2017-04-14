@@ -63,14 +63,16 @@ function getMeshPointsSeparate(chain, color) {
             u_UseExpression: {value: false},
             u_minExpression: {value: minExpression },
             u_maxExpression: {value: maxExpression },
+
+            u_UseExpressionGlobal: {value: false},
+            u_minExpressionGlobal: {value: 0 },
+            u_maxExpressionGlobal: {value: 0 },
         },
         vertexShader: SphereShader.vertexShader,
         fragmentShader: SphereShader.fragmentShader,
         alphaTest: 0.5,
         transparent: true,
     } );
-
-
 
     var mesh = new THREE.Mesh( geometry, material );
     return mesh;

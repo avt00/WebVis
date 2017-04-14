@@ -16,6 +16,10 @@ var SphereShader ={
         "uniform float u_minExpression;",
         "uniform float u_maxExpression;",
 
+        "uniform bool u_UseExpressionGlobal;",
+        "uniform float u_minExpressionGlobal;",
+        "uniform float u_maxExpressionGlobal;",
+
 
         "attribute vec3 normal;",
         "attribute vec3 position;",
@@ -48,6 +52,14 @@ var SphereShader ={
                 // "vColor.y = (expression - u_minExpression)/(u_maxExpression - u_minExpression);",
                 // "vColor.z = (expression - u_minExpression)/(u_maxExpression - u_minExpression);",
                 "vColor.w = (expression - u_minExpression)/(u_maxExpression - u_minExpression);",
+            "}",
+            "else {",
+                "if(u_UseExpressionGlobal){",
+                    "vColor.x = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+                    "vColor.y = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+                    "vColor.z = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+                    // "vColor.w = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+                "}",
             "}",
             // "else {",
             //     "v_expression = 1.0;",
