@@ -66,12 +66,6 @@ var effectController = {
         for(var i =0; i < keys.length; i++){
             genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value = !genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value;
             genome.beads[keys[i]].material.needsUpdate = true;
-            console.log("DIFF:");
-            console.log(genome.beads[keys[i]].material.uniforms.u_minExpression.value);
-            console.log(genome.beads[keys[i]].material.uniforms.u_maxExpression.value);
-
-            console.log(genome.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value);
-            console.log(genome.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value);
         }
     }
 };

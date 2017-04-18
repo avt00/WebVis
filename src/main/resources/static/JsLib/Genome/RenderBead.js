@@ -35,20 +35,52 @@ function getMeshPointsSeparate(chain, color) {
     var minExpression;
     var maxExpression;
 
+    var minX;
+    var maxX;
+    var minY;
+    var maxY;
+    var minZ;
+    var maxZ;
+
     for ( var key in points) {
+        var x = points[key].x;
+        var y = points[key].y;
+        var z = points[key].z;
         if(currentIndex==0)
         {
             minExpression = calculateAvrExpression(points[key]);
             maxExpression = minExpression;
+            minX = x;
+            maxX = x;
+            minY = y;
+            maxY = y;
+            minZ = z;
+            maxZ = z;
         }
         currentIndex++;
-        offsets.setXYZ( currentIndex, points[key].x, points[key].y, points[key].z);
+
+        offsets.setXYZ( currentIndex, x, y, z);
         scaleValues.setXYZ( currentIndex, points[key].r,  points[key].r,  points[key].r);
         var expressionValue = calculateAvrExpression(points[key]);
         if(expressionValue > maxExpression)
             maxExpression = expressionValue;
         if(expressionValue < minExpression)
             minExpression = expressionValue;
+
+        if(minX > x)
+            minX = x;
+        if(maxX < x)
+            maxX = x;
+
+        if(minY > y)
+            minY = y;
+        if(maxY < y)
+            maxY = y;
+
+        if(minZ > z)
+            minZ = z;
+        if(maxZ < z)
+            maxZ = z;
         expressionValues.setX(currentIndex, expressionValue);
     }
     
@@ -56,6 +88,7 @@ function getMeshPointsSeparate(chain, color) {
     geometry.addAttribute( 'scale', scaleValues );
     geometry.addAttribute( 'expression', expressionValues );
     var color4 = new THREE.Vector4(color.r, color.g, color.b, 1);
+    var center = new THREE.Vector3(maxX - Math.abs(maxX - minX)/2, maxY - Math.abs(maxY - minY)/2, maxZ - Math.abs(maxZ - maxZ)/2);
     var material = new THREE.RawShaderMaterial( {
         uniforms: {
             color:{ value:  color4},
@@ -67,6 +100,7 @@ function getMeshPointsSeparate(chain, color) {
             u_UseExpressionGlobal: {value: false},
             u_minExpressionGlobal: {value: 0 },
             u_maxExpressionGlobal: {value: 0 },
+            u_center: {value: center}
         },
         vertexShader: SphereShader.vertexShader,
         fragmentShader: SphereShader.fragmentShader,
@@ -75,6 +109,7 @@ function getMeshPointsSeparate(chain, color) {
     } );
 
     var mesh = new THREE.Mesh( geometry, material );
+    mesh.position.set(center.x, center.y, center.z);
     return mesh;
 }
 

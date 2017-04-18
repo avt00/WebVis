@@ -20,6 +20,9 @@ var SphereShader ={
         "uniform float u_minExpressionGlobal;",
         "uniform float u_maxExpressionGlobal;",
 
+        "uniform vec3 u_center;",
+
+
 
         "attribute vec3 normal;",
         "attribute vec3 position;",
@@ -38,7 +41,7 @@ var SphereShader ={
         // "varying float v_expression;",
 
         "void main() {",
-            "positionEye = ( modelViewMatrix * vec4( vec3( offset.x + position.x*scale.x, offset.y + position.y*scale.y, offset.z + position.z*scale.z), 1.0 ) ).xyz;",
+            "positionEye = ( modelViewMatrix * vec4( vec3( offset.x + (position.x)*scale.x - u_center.x , offset.y + (position.y)*scale.y - u_center.y, offset.z + (position.z)*scale.z  - u_center.z ), 1.0 ) ).xyz;",
             "gl_Position = projectionMatrix * vec4( positionEye, 1.0 );",
             "v_normal = mat3(modelViewMatrix) * normal;",
             "// compute the world position of the surfoace",
