@@ -4,6 +4,8 @@ var container = document.getElementById('container');
 var renderSystem = new RenderSystem();
 container.appendChild(renderSystem.renderer.domElement);
 // tiles
+var earth = new Planet(radius, zoom, "http://b.tile.openstreetmap.org");
+renderSystem.addMeshToScene(earth.getTilesSphere());
 if(0==1){
     var earth = new Planet(radius, zoom, "http://b.tile.openstreetmap.org");
     renderSystem.addMeshToScene(earth.getMesh());
@@ -49,7 +51,7 @@ function drawData(jsonData) {
     var lon = jsonData.lon;
     var values = jsonData.dataValue;
 
-    heatMap = new HeatMapEarth(time, lat, lon, values, radius+10);
+    heatMap = new HeatMapEarth(time, lat, lon, values, radius+0.01);
     renderSystem.addMeshToScene(heatMap.getLayer());
     // drawPointsAnother(0, lat, lon, values, length1X, length1Y);
     // drawPoints(jsonDataReceived, length1X, length1Y, length2X, length2Y);
@@ -91,6 +93,8 @@ function getData(filename) {
 }
 
 function onClick(event) {
+    if(heatMap==null)
+        return;
     var mouse = new THREE.Vector2();
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;

@@ -17,3 +17,9 @@ function getXYZ(lat, lon) {
 function distance(x1, y1, z1, x2, y2, z2) {
     return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) + (z2 - z1) * (z2 - z1));
 }
+
+function TileToGeo(i, j, countTileLine) {
+    var lat = j * 180 / countTileLine + 90;
+    var lon = i * 360 / countTileLine;
+    return new THREE.Vector2(lat, lon);
+}

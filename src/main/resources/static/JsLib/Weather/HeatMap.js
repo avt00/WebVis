@@ -90,9 +90,17 @@ function HeatMapEarth(timeArray, latArray, lonArray, values, radius) {
         for(var i = 0; i < this.latitudeArray.length; i++){
             for(var j = 0; j < this.longitudeArray.length; j++){
                 var value = this.values[timeIndex][i][j];
+                var nextIndex = this.values.length == timeIndex+1 ? 0 : timeIndex+1;
+                var valueNext = this.values[nextIndex][i][j];
+                var colorNext = new THREE.Color();
                 var indexForInsert = (i*this.longitudeArray.length + j)*3;
                 this.updateMinMax(value);
+                colorNext.setHSL((1-(valueNext-this.min)/(this.max-this.min))*240/360, 1, 0.5);
                 color.setHSL((1-(value-this.min)/(this.max-this.min))*240/360, 1, 0.5);
+                // console.log(color);
+                // console.log(colorNext);
+                // console.log(color.lerp(colorNext, 0.1));
+                color = color.lerp(colorNext, 0.1);
                 color.toArray(this.colors, indexForInsert);
             }
         }
