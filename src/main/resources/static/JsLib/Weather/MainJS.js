@@ -1,5 +1,5 @@
 var radius = 60;
-var zoom = 4;
+var zoom = 3;
 var container = document.getElementById('container');
 var renderSystem = new RenderSystem();
 container.appendChild(renderSystem.renderer.domElement);
@@ -33,6 +33,7 @@ $('#getData').click(function () {
     var fileName = document.getElementById("textField").value;
     getData(fileName);
 });
+
 $('#drawButton').click(function () {
     drawData(jsonData);
 });

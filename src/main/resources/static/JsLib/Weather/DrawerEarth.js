@@ -74,7 +74,7 @@ function Planet(radius, currentZoom, tileUrl) {
                 // mesh.position.set(i, -j, 0);
                 group.add(mesh);
             }
-        group.rotation.set(Math.PI, 0, 0);
+        group.rotation.set(0, 0, Math.PI);
         return group;
     };
 
@@ -87,16 +87,20 @@ function Planet(radius, currentZoom, tileUrl) {
         var uvs = new Float32Array( countPoint * 2 );
         var indexBuffer = new Uint32Array( 6*(lengthLat-1)*(lengthLon));
         var normalBuffer = new Float32Array( countPoint * 3);
-        var leftTopCorner = TileToGeo(tileI, tileJ, countTileLine);
-        var stepLon = 360 / countTileLine / (lengthLon - 1);
-        var stepLat = 180 / countTileLine / (lengthLat - 1);
+
+        var posTileI = tileI / countTileLine;
+        var posTileJ = tileJ / countTileLine;
+
+        var stepLon = 1 / countTileLine / (lengthLon - 1);
+        var stepLat = 1 / countTileLine / (lengthLat - 1);
         for(var i = 0; i < lengthLat; i++){
             for(var j = 0; j < lengthLon; j++){
-                var lat = leftTopCorner.x + i * stepLat;
-                var lon = leftTopCorner.y + j * stepLon;
+                var u = posTileI + i * stepLat;
+                var v = posTileJ + j * stepLon;
                 var indexForInsert = (i*lengthLon + j)*3;
-                var normal = getXYZ(lat, lon);
-                var uv = new THREE.Vector2(j/(lengthLon-1), 1 - i/(lengthLat-1) );
+                var geoPositionDegree = TileToWorldPos(u, v, 1);
+                var normal = getXYZ(geoPositionDegree.y, geoPositionDegree.x);
+                var uv = new THREE.Vector2(i/(lengthLat-1), 1 - j/(lengthLon-1));
                 var vertex =  normal.multiplyScalar(this.radius);
                 var newNormal = normal.multiplyScalar(-1);
                 newNormal.toArray(normalBuffer, indexForInsert);
@@ -142,7 +146,7 @@ function Planet(radius, currentZoom, tileUrl) {
             // vertexShader: TileShader.vertexShader,
             // fragmentShader: TileShader.fragmentShader,
             map: texture,
-            side: THREE.FrontSide,
+            side: THREE.DoubleSide,
             transparent: false
         } );
         var mesh = new THREE.Mesh( geometry, material );
