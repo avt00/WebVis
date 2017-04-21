@@ -46,53 +46,55 @@
 <div id="container"></div>
 <div class="rightPanel">
     <div class="rightPanelButtonMain" onclick="$('.rightPanel').toggleClass('clicked');">Open</div>
-    <button id="getData">
-        Get data
-    </button>
+    <!--<button id="getData">-->
+        <!--Get data-->
+    <!--</button>-->
 
-    <div id="results">
+    <!--<div id="results">-->
+    <!--</div>-->
+
+    <!--<input type="number" name="1" id="lenght1X" size="40" min="1" value="0">-->
+    <!--<input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">-->
+
+    <!--<input type="number" name="3" id="lenght2X" size="40" min="1" value="0">-->
+    <!--<input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">-->
+
+    <div>
+        <button id="drawButton">
+            Draw Data
+        </button>
     </div>
 
-    <input type="number" name="1" id="lenght1X" size="40" min="1" value="0">
-    <input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">
+    <!--<div>-->
+        <!--<input type="checkbox" id="drawPoint">-->
+        <!--Draw Point-->
+        <!--</input>-->
+    <!--</div>-->
 
-    <input type="number" name="3" id="lenght2X" size="40" min="1" value="0">
-    <input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">
+    <!--<input type="checkbox" id="drawFromFile" checked>-->
+    <!--drawFromFile-->
+    <!--</input>-->
 
-    <button id="drawButton">
-        Draw Data
-    </button>
+    <!--<input type="checkbox" id="drawCustomPoint">-->
+    <!--drawCustomPoint-->
+    <!--</input>-->
 
-    <input type="checkbox" id="drawPoint">
-    Draw Point
-    </input>
-
-    <input type="checkbox" id="drawFromFile" checked>
-    drawFromFile
-    </input>
-
-    <input type="checkbox" id="drawCustomPoint">
-    drawCustomPoint
-    </input>
-
-    <input type="checkbox" id="wireFrame">
-    wireFrame
-    </input>
+    <!--<input type="checkbox" id="wireFrame">-->
+    <!--wireFrame-->
+    <!--</input>-->
 
     <input type="checkbox" id="updateMeshColor">
-    updateMeshColor
+        Play
     </input>
 
     <input type="text" id="textField" value="air">
     </input>
 </div>
 
-
-<div id="plot" class="plot">
-</div>
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="JsLib/Weather/MapSource/OSMSource.js"></script>
+<script src="JsLib/Weather/MapSource/GoogleSource.js"></script>
 <script src="JsLib/Weather/Shaders/TileShader.js"></script>
 <script src="JsLib/external/three.js"></script>
 <script src="JsLib/external/OrbitControls.js"></script>

@@ -4,8 +4,9 @@ var container = document.getElementById('container');
 var renderSystem = new RenderSystem();
 container.appendChild(renderSystem.renderer.domElement);
 // tiles
-var earth = new Planet(radius, zoom, "http://b.tile.openstreetmap.org");
+var earth = new Planet(radius, zoom, new GoogleMapSource());
 renderSystem.addMeshToScene(earth.getTilesSphere());
+renderSystem.addMeshToScene(earth.getSphereBlank());
 if(0==1){
     var earth = new Planet(radius, zoom, "http://b.tile.openstreetmap.org");
     renderSystem.addMeshToScene(earth.getMesh());
@@ -31,7 +32,7 @@ getData('air');
 
 $('#getData').click(function () {
     var fileName = document.getElementById("textField").value;
-    getData(fileName);
+    // getData(fileName);
 });
 
 $('#drawButton').click(function () {
@@ -126,7 +127,11 @@ function onClick(event) {
             trace.y.push(heatMap.values[i][latIndex][longIndex]);
             trace.x.push(heatMap.timeArray[i]);
         }
-        var plot = new PlotConroller([trace],layout, document.getElementById('plot'));
+        var plotHtml =  $('<div/>').addClass('plot').appendTo($('body'));
+        var plot = new PlotConroller([trace],layout, plotHtml[0]);
+        plot.domElementId.addEventListener('click', function(e) {
+            this.parentElement.removeChild(this);
+        });
         plot.draw();
     }
 }

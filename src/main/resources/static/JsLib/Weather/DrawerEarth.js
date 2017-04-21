@@ -3,10 +3,11 @@
  */
 
 //"http://b.tile.openstreetmap.org/"
-function Planet(radius, currentZoom, tileUrl) {
+function Planet(radius, currentZoom, mapSource) {
     this.radius = radius;
     this.zoom = currentZoom;
-    this.tileUrl = tileUrl;
+
+    this.mapSource = mapSource;
 
     this.getMesh = function () {
         var horizontal = Math.pow(2, this.zoom), vertical=Math.pow(2, this.zoom);
@@ -41,6 +42,21 @@ function Planet(radius, currentZoom, tileUrl) {
         return new THREE.Mesh(geometry,new THREE.MeshFaceMaterial(materials));
     };
 
+    this.getSphereBlank = function () {
+        var geometry   = new THREE.SphereGeometry(this.radius, 100, 100);
+        var material = new THREE.MeshBasicMaterial( {
+            // uniforms: {
+            //     map: { value: texture }
+            // },
+            // vertexShader: TileShader.vertexShader,
+            // fragmentShader: TileShader.fragmentShader,
+            color: new THREE.Color(1,1,1),
+            side: THREE.BackSide,
+            transparent: false
+        } );
+        return new THREE.Mesh(geometry, material);
+    };
+
     this.getPlane = function () {
         var horizontal = 2;
         var vertical = 2;
@@ -49,9 +65,7 @@ function Planet(radius, currentZoom, tileUrl) {
         for(var j=0;j< countTileLine;j++)
             for(var i=0;i< countTileLine;i++){
                 THREE.ImageUtils.crossOrigin = '';
-                var texture = THREE.ImageUtils.loadTexture(this.tileUrl+"/"+this.zoom+"/"+i+"/"+j+".png");
-                // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-                // texture.repeat.set( countTileLine, countTileLine );
+                var texture = THREE.ImageUtils.loadTexture(this.mapSource.GenerateUrl(i, j, this.zoom));
                 var geometry = new THREE.PlaneGeometry( 1, 1, horizontal, vertical );
                 var material1 = new THREE.MeshBasicMaterial( { map:texture, side: THREE.DoubleSide});
                 // materials.push(  material1);
@@ -68,9 +82,7 @@ function Planet(radius, currentZoom, tileUrl) {
         var group = new THREE.Group();
         for(var j=0;j< countTileLine;j++)
             for(var i=0;i< countTileLine;i++){
-                THREE.ImageUtils.crossOrigin = '';
-                var texture = THREE.ImageUtils.loadTexture(this.tileUrl+"/"+this.zoom+"/"+i+"/"+j+".png");
-                var mesh = this.getTile(countTileLine, i, j, texture);
+                var mesh = this.getTile(countTileLine, i, j);
                 // mesh.position.set(i, -j, 0);
                 group.add(mesh);
             }
@@ -78,10 +90,11 @@ function Planet(radius, currentZoom, tileUrl) {
         return group;
     };
 
-    this.getTile = function (countTileLine, tileI, tileJ, texture) {
+    this.getTile = function (countTileLine, tileI, tileJ) {
         var lengthLat = 10;
         var lengthLon = 10;
-
+        THREE.ImageUtils.crossOrigin = '';
+        var texture = THREE.ImageUtils.loadTexture(this.mapSource.GenerateUrl(tileI, tileJ, this.zoom));
         var countPoint = lengthLat * lengthLon;
         var positionBuffer = new Float32Array( countPoint * 3);
         var uvs = new Float32Array( countPoint * 2 );
@@ -103,6 +116,8 @@ function Planet(radius, currentZoom, tileUrl) {
                 var uv = new THREE.Vector2(i/(lengthLat-1), 1 - j/(lengthLon-1));
                 var vertex =  normal.multiplyScalar(this.radius);
                 var newNormal = normal.multiplyScalar(-1);
+                // normal.toArray(normalBuffer, indexForInsert);
+
                 newNormal.toArray(normalBuffer, indexForInsert);
                 vertex.toArray(positionBuffer, indexForInsert);
                 uv.toArray(uvs, (i*lengthLon + j)*2);
@@ -146,7 +161,7 @@ function Planet(radius, currentZoom, tileUrl) {
             // vertexShader: TileShader.vertexShader,
             // fragmentShader: TileShader.fragmentShader,
             map: texture,
-            side: THREE.DoubleSide,
+            side: THREE.BackSide,
             transparent: false
         } );
         var mesh = new THREE.Mesh( geometry, material );

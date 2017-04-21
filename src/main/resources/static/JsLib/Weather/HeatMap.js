@@ -86,7 +86,7 @@ function HeatMapEarth(timeArray, latArray, lonArray, values, radius) {
     // insert new values one moment
     this.updateColor = function (timeIndex) {
         var color = new THREE.Color();
-        console.log(timeIndex +" min: "+ this.min + " max:" + this.max);
+        // console.log(timeIndex +" min: "+ this.min + " max:" + this.max);
         for(var i = 0; i < this.latitudeArray.length; i++){
             for(var j = 0; j < this.longitudeArray.length; j++){
                 var value = this.values[timeIndex][i][j];
