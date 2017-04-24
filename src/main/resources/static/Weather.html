@@ -44,55 +44,29 @@
 <body>
 
 <div id="container"></div>
-<div class="rightPanel">
-    <div class="rightPanelButtonMain" onclick="$('.rightPanel').toggleClass('clicked');">Open</div>
-    <!--<button id="getData">-->
-        <!--Get data-->
-    <!--</button>-->
+<!--<div class="rightPanel">-->
+    <!--<div class="rightPanelButtonMain" onclick="$('.rightPanel').toggleClass('clicked');">Open</div>-->
 
-    <!--<div id="results">-->
-    <!--</div>-->
-
-    <!--<input type="number" name="1" id="lenght1X" size="40" min="1" value="0">-->
-    <!--<input type="number" name="2" id="lenght1Y" size="40" min="1" value="720">-->
-
-    <!--<input type="number" name="3" id="lenght2X" size="40" min="1" value="0">-->
-    <!--<input type="number" name="4" id="lenght2Y" size="40" min="1" value="720">-->
-
-    <div>
-        <button id="drawButton">
-            Draw Data
-        </button>
-    </div>
 
     <!--<div>-->
-        <!--<input type="checkbox" id="drawPoint">-->
-        <!--Draw Point-->
-        <!--</input>-->
+        <!--<button id="drawButton">-->
+            <!--Draw Data-->
+        <!--</button>-->
     <!--</div>-->
 
-    <!--<input type="checkbox" id="drawFromFile" checked>-->
-    <!--drawFromFile-->
+    <!--<input type="checkbox" id="updateMeshColor">-->
+        <!--Play-->
     <!--</input>-->
 
-    <!--<input type="checkbox" id="drawCustomPoint">-->
-    <!--drawCustomPoint-->
+    <!--<input type="text" id="textField" value="air">-->
     <!--</input>-->
-
-    <!--<input type="checkbox" id="wireFrame">-->
-    <!--wireFrame-->
-    <!--</input>-->
-
-    <input type="checkbox" id="updateMeshColor">
-        Play
-    </input>
-
-    <input type="text" id="textField" value="air">
-    </input>
-</div>
+<!--</div>-->
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="JsLib/external/dat.gui.min.js"></script>
+<script src="JsLib/Weather/WeatherController.js"></script>
+<script src="JsLib/Weather/UI/Menu.js"></script>
 <script src="JsLib/Weather/MapSource/OSMSource.js"></script>
 <script src="JsLib/Weather/MapSource/GoogleSource.js"></script>
 <script src="JsLib/Weather/Shaders/TileShader.js"></script>
@@ -105,31 +79,6 @@
 <script src="JsLib/Common/RenderClass.js"></script>
 <script src="JsLib/Weather/MainJS.js"></script>
 <script src="JsLib/Weather/PlotController.js"></script>
-
-
-<script type="x-shader/x-vertex" id="vertexshader">
-    attribute float size;
-attribute vec3 customColor;
-varying vec3 vColor;
-void main() {
-    vColor = customColor;
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-    gl_PointSize = size * ( 300.0 / -mvPosition.z );
-    gl_Position = projectionMatrix * mvPosition;
-}
-</script>
-
-<script type="x-shader/x-fragment" id="fragmentshader">
-    uniform vec3 color;
-uniform sampler2D texture;
-varying vec3 vColor;
-void main() {
-    gl_FragColor = vec4( color * vColor, 1.0 );
-    gl_FragColor = gl_FragColor * texture2D( texture, gl_PointCoord );
-    if ( gl_FragColor.a < ALPHATEST ) discard;
-}
-</script>
-
 
 </body>
 

@@ -9,6 +9,8 @@ function Planet(radius, currentZoom, mapSource) {
 
     this.mapSource = mapSource;
 
+    this.tiles = null;
+
     this.getMesh = function () {
         var horizontal = Math.pow(2, this.zoom), vertical=Math.pow(2, this.zoom);
         var geometry   = new THREE.SphereGeometry(this.radius, horizontal, vertical);
@@ -87,6 +89,7 @@ function Planet(radius, currentZoom, mapSource) {
                 group.add(mesh);
             }
         group.rotation.set(0, 0, Math.PI);
+        this.tiles = group;
         return group;
     };
 
@@ -166,6 +169,5 @@ function Planet(radius, currentZoom, mapSource) {
         } );
         var mesh = new THREE.Mesh( geometry, material );
         return mesh;
-    }
-
+    };
 }
