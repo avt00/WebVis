@@ -28,12 +28,12 @@ var effectController = {
             var file = inputFile.files[0];
             effectController['fileName'] = file.name;
             // update all controllers
-            for (var i in gui.__controllers) {
-                gui.__controllers[i].updateDisplay();
-            }
+            // for (var i in gui.__controllers) {
+            //     gui.__controllers[i].updateDisplay();
+            // }
             effectController.fileNameList.push(file.name);
             // effectController.fileNameList = filesName;
-            gui.__controllers[2].remove();
+            gui.__controllers[gui.__controllers.length-1].remove();
             // gui.__controllers[4].remove();
             gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(function (value) {
                 onChangeFileName(value);

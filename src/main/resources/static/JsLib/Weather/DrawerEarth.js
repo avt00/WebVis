@@ -11,6 +11,8 @@ function Planet(radius, currentZoom, mapSource) {
 
     this.tiles = null;
 
+    this.arrowCamera = null;
+
     this.getMesh = function () {
         var horizontal = Math.pow(2, this.zoom), vertical=Math.pow(2, this.zoom);
         var geometry   = new THREE.SphereGeometry(this.radius, horizontal, vertical);
@@ -85,6 +87,14 @@ function Planet(radius, currentZoom, mapSource) {
         for(var j=0;j< countTileLine;j++)
             for(var i=0;i< countTileLine;i++){
                 var mesh = this.getTile(countTileLine, i, j);
+                var copy = new THREE.Vector3();
+                copy = copy.copy(mesh.centerPosition);
+                var arrow = new THREE.ArrowHelper(
+                    copy.normalize(),
+                    mesh.centerPosition,
+                    15,
+                    0x3333FF );
+                // mesh.add(arrow);
                 // mesh.position.set(i, -j, 0);
                 group.add(mesh);
             }
@@ -120,7 +130,7 @@ function Planet(radius, currentZoom, mapSource) {
                 var vertex =  normal.multiplyScalar(this.radius);
                 var newNormal = normal.multiplyScalar(-1);
                 // normal.toArray(normalBuffer, indexForInsert);
-
+                //
                 newNormal.toArray(normalBuffer, indexForInsert);
                 vertex.toArray(positionBuffer, indexForInsert);
                 uv.toArray(uvs, (i*lengthLon + j)*2);
@@ -168,6 +178,25 @@ function Planet(radius, currentZoom, mapSource) {
             transparent: false
         } );
         var mesh = new THREE.Mesh( geometry, material );
+        var geoPositionDegreeCenter = TileToWorldPos(posTileI, posTileJ, 1);
+        var normalCenter = getXYZ(geoPositionDegreeCenter.y, geoPositionDegreeCenter.x);
+        mesh.centerPosition = normalCenter.multiplyScalar(this.radius);
         return mesh;
     };
+
+    this.checkTiles = function(camera){
+        var copyCamera = new THREE.Vector3();
+        var copyTile = new THREE.Vector3();
+        var cameraNorm = copyCamera.copy(camera.position).multiplyScalar(-1).normalize();
+
+        for(var i = 0; i < this.tiles.children.length; i++){
+            var tile = this.tiles.children[i];
+            var tileNorm = copyTile.copy(tile.centerPosition).normalize();
+            var result = cameraNorm.dot(tileNorm);
+            if( result < -0.15){
+                this.tiles.remove(tile);
+                console.log(result);
+            }
+        }
+    }
 }

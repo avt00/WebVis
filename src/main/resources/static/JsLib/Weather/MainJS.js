@@ -6,13 +6,23 @@ container.appendChild(renderSystem.renderer.domElement);
 // tiles
 var earth = new Planet(radius, zoom, new GoogleMapSource());
 renderSystem.addMeshToScene(earth.getTilesSphere());
-renderSystem.addMeshToScene(earth.getSphereBlank());
+
+// renderSystem.addMeshToScene(earth.getSphereBlank());
 // camera
 renderSystem.camera = new THREE.PerspectiveCamera(  60, window.innerWidth / window.innerHeight, 1, 1000 );
 renderSystem.camera.position.z = 100;
 var controls = new THREE.OrbitControls( renderSystem.camera, container, container);
 controls.minDistance=radius*1.02;
 controls.maxDistance=radius*3;
+controls.maxDistance=radius*3;
+
+var copyCamera = new THREE.Vector3();
+copyCamera = copyCamera.copy(renderSystem.camera.position).multiplyScalar(-1);
+// renderSystem.addMeshToScene(new THREE.ArrowHelper(
+//     copyCamera.normalize(),
+//     renderSystem.camera.position,
+//     100,
+//     0x3333FF ));
 // window with stat
 var stats = new Stats();
 container.appendChild( stats.dom );
@@ -44,6 +54,7 @@ var render = function () {
     renderSystem.update();
     controls.update();
     stats.update();
+    // earth.checkTiles(renderSystem.camera);
 };
 render();
 
@@ -64,4 +75,6 @@ renderSystem.renderer.domElement.addEventListener('click', function(e) {
     if (e.target !== this)
         return;
     weatherController.openPlotByClick(e);
+    console.log(DecarToSphere(renderSystem.camera.position));
 });
+

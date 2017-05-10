@@ -36,3 +36,17 @@ function TileToWorldPos(x, y)
 
     return new THREE.Vector2(lon, lat);
 }
+
+function DecarToSphere(v3)
+{
+    // var normal = new THREE.Vector3(v3.x, v3.y, v3.z);
+    // normal = normal.normalize();
+    // var lon, lat;
+    // lon = Math.atan(normal.x/normal.z);
+    // lat = Math.asin(normal.y);
+    var radius = distance(v3.x, 0, v3.y, 0, v3.z, 0);
+    var lon = Math.atan2(v3.x, v3.z);
+    var lat = Math.asin(v3.y / radius);
+
+    return new THREE.Vector2(lon, lat);
+}

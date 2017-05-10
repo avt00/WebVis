@@ -16,6 +16,8 @@ function WeatherController(renderSystem) {
     };
 
     this.drawHeatMap = function (jsonData) {
+        if(jsonData==null)
+            return;
         this.time = jsonData.time;
         var lat = jsonData.lat;
         var lon = jsonData.lon;

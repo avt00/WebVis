@@ -2,7 +2,9 @@
  * Created by user on 28.09.2016.
  */
 import DataReader.CSVReader;
+import DataReader.Models.ChainGenome;
 import DataReader.NetCDFReader;
+import DataReader.XmlReader;
 import Model.PointArrayData;
 import Model.State;
 import MyService.StateService;
@@ -45,11 +47,15 @@ public class Example  {
     }
 
     @RequestMapping("/getGenome/{name}")
-    Map<String, CSVReader.ObjectMed> getGenome(@PathVariable String name) {
+    Map<String, ChainGenome> getGenome(@PathVariable String name) {
+        XmlReader readerXml = new XmlReader();
         CSVReader reader = new CSVReader();
         int positionLast = name.lastIndexOf("_");
+        String extention = name.substring(positionLast+1, name.length());
         if(positionLast>0)
            name = name.substring(0, positionLast) + "." +  name.substring(positionLast+1, name.length());
+        if(extention.equalsIgnoreCase("cmm"))
+            return readerXml.readPoints(name);
         return reader.readPoints(name);
     }
 
