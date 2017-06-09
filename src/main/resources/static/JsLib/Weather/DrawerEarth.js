@@ -86,12 +86,15 @@ function Planet(radius, currentZoom, mapSource) {
         var group = new THREE.Group();
         for(var j=0;j< countTileLine;j++)
             for(var i=0;i< countTileLine;i++){
+                // if(i!=5 || j!=5){
+                //     continue;
+                // }
                 var mesh = this.getTile(countTileLine, i, j);
                 var copy = new THREE.Vector3();
                 copy = copy.copy(mesh.centerPosition);
                 var arrow = new THREE.ArrowHelper(
-                    copy.normalize(),
-                    mesh.centerPosition,
+                    copy.normalize().multiplyScalar(-1),
+                    mesh.centerPosition.multiplyScalar(-1),
                     15,
                     0x3333FF );
                 // mesh.add(arrow);
@@ -126,7 +129,7 @@ function Planet(radius, currentZoom, mapSource) {
                 var indexForInsert = (i*lengthLon + j)*3;
                 var geoPositionDegree = TileToWorldPos(u, v, 1);
                 var normal = getXYZ(geoPositionDegree.y, geoPositionDegree.x);
-                var uv = new THREE.Vector2(i/(lengthLat-1), 1 - j/(lengthLon-1));
+                var uv = new THREE.Vector2( i/(lengthLat-1), 1 - j/(lengthLon-1));
                 var vertex =  normal.multiplyScalar(this.radius);
                 var newNormal = normal.multiplyScalar(-1);
                 // normal.toArray(normalBuffer, indexForInsert);
@@ -187,15 +190,19 @@ function Planet(radius, currentZoom, mapSource) {
     this.checkTiles = function(camera){
         var copyCamera = new THREE.Vector3();
         var copyTile = new THREE.Vector3();
-        var cameraNorm = copyCamera.copy(camera.position).multiplyScalar(-1).normalize();
+        var cameraNorm = copyCamera.copy(camera.position).normalize();
 
         for(var i = 0; i < this.tiles.children.length; i++){
             var tile = this.tiles.children[i];
+
             var tileNorm = copyTile.copy(tile.centerPosition).normalize();
+            var axis = new THREE.Vector3( 0, 0, 1 );
+            var angle = Math.PI;
+
+            tileNorm.applyAxisAngle( axis, angle );
             var result = cameraNorm.dot(tileNorm);
             if( result < -0.15){
                 this.tiles.remove(tile);
-                console.log(result);
             }
         }
     }

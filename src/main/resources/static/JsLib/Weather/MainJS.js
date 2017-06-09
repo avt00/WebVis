@@ -1,5 +1,5 @@
 var radius = 60;
-var zoom = 3;
+var zoom = 4;
 var container = document.getElementById('container');
 var renderSystem = new RenderSystem();
 container.appendChild(renderSystem.renderer.domElement);

@@ -23,7 +23,7 @@ function WeatherController(renderSystem) {
         var lon = jsonData.lon;
         var values = jsonData.dataValue;
 
-        this.heatMap = new HeatMapEarth(this.time, lat, lon, values, radius+0.01);
+        this.heatMap = new HeatMapEarth(this.time, lat, lon, values, radius+0.03);
         this.renderSystem.addMeshToScene(this.heatMap.getLayer());
         // drawPointsAnother(0, lat, lon, values, length1X, length1Y);
         // drawPoints(jsonDataReceived, length1X, length1Y, length2X, length2Y);

@@ -50,12 +50,13 @@ function PairGenomeAndHtml(bead, htmlBead, line, beadInfo) {
     this.export = function () {
         var element = document.createElement('a');
         var fileName = this.beadInfo.beadName;
-        var text = fileName+"\n";
+        var text = "Chr, start, end, name, fpkm\n";
+        var SEPARATOR = ",";
+
         $.each(this.beadInfo.geneInfos, function(index, value)
         {
-            text += value.genomeName + ";" + value.startGene +"-"+value.endGene+"\n";
+            text += fileName + SEPARATOR + value.startGene + SEPARATOR + value.endGene + SEPARATOR + value.genomeName + SEPARATOR + value.expression + SEPARATOR + "\n";
         });
-
 
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
         element.setAttribute('download', fileName);

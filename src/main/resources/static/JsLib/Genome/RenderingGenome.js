@@ -272,7 +272,7 @@ function Genome() {
         this.SelectedLockBeadInfo = this.LockedBeadInfo[key];
         var rect = this.SelectedLockBeadInfo.selectedBeadHtml[0].getBoundingClientRect();
         var screenPosition = ScreenToSpherical(rect.left, rect.top, this.renderSystem.camera,  window.innerWidth , window.innerHeight);
-        updatePositionLine(this.SelectedLockBeadInfo.line, screenPosition, this.SelectedLockBeadInfo.selectedBead.position)
+        updatePositionLine(this.SelectedLockBeadInfo.line, screenPosition, this.SelectedLockBeadInfo.selectedBead.position);
         this.renderSystem.scene.add(this.SelectedLockBeadInfo.line);
         this.renderSystem.scene.add(this.SelectedLockBeadInfo.selectedBead);
         this.SelectedLockBeadInfo.selectedBead.visible = true;
@@ -349,8 +349,10 @@ function Genome() {
             return;
         $('#listid').empty();
         $('#listid').show();
+        var IsFoundSomething = false;
         $.each(this.keysGenMaps, function (i, key) {
             if(key.toUpperCase().indexOf(filterText) > -1){
+                IsFoundSomething = true;
                 var listBeadinfo = genMaps[key].beadElements;
                 $.each(listBeadinfo, function (i, element) {
                     $('<div/>')
@@ -369,6 +371,12 @@ function Genome() {
                 });
             }
         });
+        if(!IsFoundSomething) {
+            $('<div/>')
+                .addClass('element')
+                .text("Not found")
+                .appendTo($('#listid'));
+        }
         return foundKeys;
     }
 
