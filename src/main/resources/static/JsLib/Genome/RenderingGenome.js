@@ -6,6 +6,7 @@ function Genome() {
     this.renderSystem = new RenderSystem();
     this.allObjects = null;
     this.beads = {};
+    this.OneMeshBeads = null;
     this.bonds = {};
     this.group = null;
     this.SelectedLockBeadInfo = null;
@@ -87,14 +88,16 @@ function Genome() {
         this.rayCaster = new THREE.Raycaster();
         this.rayCaster.setFromCamera(mouse, this.renderSystem.camera);
         for (var key in this.allObjects){
-            if(this.beads[key].visible == false)
+            if(!this.allObjects[key].visible)
                 continue;
             for(var keyBead in this.allObjects[key].points){
+                if(!this.allObjects[key].points[keyBead].visible)
+                    continue;
                 var point = new THREE.Vector3(this.allObjects[key].points[keyBead].x, this.allObjects[key].points[keyBead].y, this.allObjects[key].points[keyBead].z);
                 var distance = this.rayCaster.ray.distanceToPoint(point);
                 // raycaster.inter
                 var distanceToCamera = this.rayCaster.ray.origin.distanceTo(point);
-                if(distance<this.allObjects[key].points[keyBead].r && minDistToCamera > distanceToCamera){
+                if(distance < this.allObjects[key].points[keyBead].r && minDistToCamera > distanceToCamera){
                     minDistToCamera = distanceToCamera;
                     pointInfo = this.allObjects[key].points[keyBead];
                 }
@@ -124,7 +127,7 @@ function Genome() {
         else {
             this.closeSelected();
             this.hideLockSelected();
-            this.clearAllFound();
+            this.updateAlphaAllBeads(1);
         }
     };
 
@@ -150,38 +153,37 @@ function Genome() {
             this.renderSystem.scene.remove(this.group);
         this.beads = {};
         this.bonds = {};
-        var indexColor = 0;
         this.group = new THREE.Group();
 
-        var minExpression;
-        var maxExpression;
-        for (var key in this.allObjects){
-            var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
-            chain.colorBead = palette[indexColor];
-            // var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
-            if(state!=null && !state.selected.includes(key))
-                chain.visible = false;
-            this.group.add(chain);
-            // this.group.add(spline);
-
-            this.beads[key] = chain;
-            // this.bonds[key] = spline;
-            indexColor++;
-
-            if(indexColor == 1){
-                minExpression = chain.material.uniforms.u_minExpression.value;
-                maxExpression = chain.material.uniforms.u_maxExpression.value;
-            }
-            if(minExpression > chain.material.uniforms.u_minExpression.value)
-                minExpression = chain.material.uniforms.u_minExpression.value;
-            if(maxExpression < chain.material.uniforms.u_maxExpression.value)
-                maxExpression = chain.material.uniforms.u_maxExpression.value;
-        }
-        var keys = Object.keys(this.beads);
-        for(var i =0; i < keys.length; i++){
-            this.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value = minExpression;
-            this.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value = maxExpression;
-        }
+        this.OneMeshBeads = createOneMeshGenome(allObjects, palette);
+        this.group.add(this.OneMeshBeads);
+        // for (var key in this.allObjects){
+        //     var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
+        //     chain.colorBead = palette[indexColor];
+        //     // var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
+        //     if(state!=null && !state.selected.includes(key))
+        //         chain.visible = false;
+        //     this.group.add(chain);
+        //     // this.group.add(spline);
+        //
+        //     this.beads[key] = chain;
+        //     // this.bonds[key] = spline;
+        //     indexColor++;
+        //
+        //     if(indexColor == 1){
+        //         minExpression = chain.material.uniforms.u_minExpression.value;
+        //         maxExpression = chain.material.uniforms.u_maxExpression.value;
+        //     }
+        //     if(minExpression > chain.material.uniforms.u_minExpression.value)
+        //         minExpression = chain.material.uniforms.u_minExpression.value;
+        //     if(maxExpression < chain.material.uniforms.u_maxExpression.value)
+        //         maxExpression = chain.material.uniforms.u_maxExpression.value;
+        // }
+        // var keys = Object.keys(this.beads);
+        // for(var i =0; i < keys.length; i++){
+        //     this.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value = minExpression;
+        //     this.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value = maxExpression;
+        // }
         this.renderSystem.scene.add(this.group);
     };
 
@@ -190,7 +192,49 @@ function Genome() {
     };
 
     this.changeVisibleNew = function(key) {
-        this.beads[key].visible = !this.beads[key].visible;
+        var mesh = this.OneMeshBeads;
+        var value = this.allObjects[key].visible ? 0 : 1;
+        this.allObjects[key].visible = !this.allObjects[key].visible;
+        $.each(this.allObjects[key].points, function (i, point) {
+            var colorAtt = mesh.geometry.getAttribute("color");
+            colorAtt.array[point.index*4+3] = value;
+            mesh.geometry.attributes.color.needsUpdate = true;
+        });
+    };
+
+    this.UpdateExpression = function(isTurn) {
+        var allChains = this.allObjects;
+        var keys = Object.keys(allChains);
+        var minValueExpression = this.OneMeshBeads.material.uniforms.u_minExpressionGlobal.value;
+        var maxValueExpression = this.OneMeshBeads.material.uniforms.u_maxExpressionGlobal.value;
+        var expressionAtt = this.OneMeshBeads.geometry.getAttribute("expression");
+        $.each(keys, function (i, key) {
+            $.each(allChains[key].points, function (i, point) {
+                var expressionValue = expressionAtt.array[point.index] ;
+                var normalValue = (expressionValue - minValueExpression)/(maxValueExpression - minValueExpression);
+                if(normalValue < 0.2)
+                    point.visible = false;
+                else {
+                    point.visible = true;
+                    console.log(i);
+                }
+                point.avrExTest1 = normalValue;
+            });
+        });
+    };
+
+    this.changeVisibleBead = function(key, keyBead, value) {
+        var mesh = this.OneMeshBeads;
+        var bead = this.allObjects[key].points[keyBead];
+        var index = bead.index;
+        var colorAtt = mesh.geometry.getAttribute("color");
+        colorAtt.array[index*4+3] = value;
+        mesh.geometry.attributes.color.needsUpdate = true;
+
+        if(value==0)
+            bead.visible = false;
+        else
+            bead.visible = true;
     };
 
     this.moveHtmlBlock = function (beadInfo) {
@@ -255,7 +299,7 @@ function Genome() {
             clearPopupObject(lockedElement.selectedBeadHtml);
             this.renderSystem.scene.remove(lockedElement.line);
             this.renderSystem.scene.remove(lockedElement.selectedBead);
-            this.SelectedBeadInfo = null;
+            delete this.LockedBeadInfo[key];
         }
     };
 
@@ -279,30 +323,25 @@ function Genome() {
     };
 
     this.selectAllFound = function () {
-        this.clearAllFound();
-        this.searcherBead = new THREE.Group();
+        var input = document.getElementById("searcherValue");
+        var filterText = input.value.toUpperCase();
+        this.updateAlphaAllBeads(0);
         for(var index = 0; index < this.foundKeys.length; index++){
-            var keyBead = this.foundKeys[index].split('_')[0];
-            var pointInfo = this.allObjects[keyBead].points[this.foundKeys[index]];
-            var bead = createSimpleSphere();
-            bead.position.set(pointInfo.x, pointInfo.y, pointInfo.z);
-            bead.scale.set(pointInfo.r +0.01, pointInfo.r +0.01, pointInfo.r+0.01 );
-            this.searcherBead.add(bead);
+            if(this.foundKeys[index].gen.toUpperCase()!==filterText)
+                continue;
+            var chrId = this.foundKeys[index].chr;
+            var beadId = this.foundKeys[index].bead;
+            this.changeVisibleBead(chrId, beadId, 1);
         }
-        this.renderSystem.scene.add(this.searcherBead);
-        for(var bead in this.beads) {
-            this.beads[bead].material.uniforms.color.value.w = 0.3;
-        }
-
     };
 
-    this.clearAllFound = function () {
-        this.renderSystem.scene.remove(this.searcherBead);
-        this.searcherBead = null;
-        for(var bead in this.beads) {
-            this.beads[bead].material.uniforms.color.value.w = 1;
-        }
-
+    this.updateAlphaAllBeads = function (value) {
+        if(!this.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value)
+            for(var key in this.allObjects) {
+                for(var keyBead in this.allObjects[key].points) {
+                    this.changeVisibleBead(key, keyBead, value);
+                }
+            }
     };
 
     this.paintByExpression = function () {
@@ -323,6 +362,7 @@ function Genome() {
             $.each(data[key], function (i, chrom) {
                 for(var keyBead in chrom){
                     var point = chrom[keyBead];
+                    point.chrId = key;
                     $.each(point.geneInfos, function (j, value) {
                         if(mapGene[value.genomeName]=== undefined){
                             mapGene[value.genomeName] = new Object();
@@ -340,6 +380,7 @@ function Genome() {
         var input = document.getElementById("searcherValue");
         var filterText = input.value.toUpperCase();
         var genMaps = this.genMaps;
+        this.foundKeys = [];
         var foundKeys = this.foundKeys;
         if(filterText.length == 0){
             $('#listid').empty();
@@ -367,7 +408,7 @@ function Genome() {
                         .append($('<div/>')
                             .addClass('subElement')
                             .text(element.beadName));
-                    foundKeys.push(element.beadName);
+                    foundKeys.push({chr: element.chrId, bead: element.beadName, gen: key});
                 });
             }
         });

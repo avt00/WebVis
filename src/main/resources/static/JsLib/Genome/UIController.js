@@ -15,6 +15,7 @@ var effectController = {
     template: [],
     message: [],
     fileName : "Name",
+    legendHtml: null,
     loadFile:function(){
         var inputFile = document.getElementById('InputFile');
         var submit = document.getElementById('submit');
@@ -54,19 +55,18 @@ var effectController = {
     saveState : function () {
         saveState(effectController.fileName, genome);
     },
-    useExpression : function () {
-        var keys =Object.keys(genome.beads);
-        for(var i =0; i < keys.length; i++){
-            genome.beads[keys[i]].material.uniforms.u_UseExpression.value = !genome.beads[keys[i]].material.uniforms.u_UseExpression.value;
-            genome.beads[keys[i]].material.needsUpdate = true;
-        }
-    },
+    // useExpression : function () {
+    //     var keys =Object.keys(genome.beads);
+    //     for(var i =0; i < keys.length; i++){
+    //         genome.beads[keys[i]].material.uniforms.u_UseExpression.value = !genome.beads[keys[i]].material.uniforms.u_UseExpression.value;
+    //         genome.beads[keys[i]].material.needsUpdate = true;
+    //     }
+    // },
     useExpressionGlobal : function () {
-        var keys =Object.keys(genome.beads);
-        for(var i =0; i < keys.length; i++){
-            genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value = !genome.beads[keys[i]].material.uniforms.u_UseExpressionGlobal.value;
-            genome.beads[keys[i]].material.needsUpdate = true;
-        }
+        genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value = !genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value;
+        genome.OneMeshBeads.material.needsUpdate = true;
+        genome.UpdateExpression(genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value);
+        document.getElementById("legend").style.visibility = genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value ? "visible" : "hidden";
     }
 };
 
@@ -90,7 +90,7 @@ function initGUI() {
     gui = new dat.GUI();
     gui.add( effectController, 'popupSearcher').name("Search...");
     gui.add( effectController, 'popup').name("Select parts");
-    gui.add( effectController, 'useExpression').name("useExpression");
+    // gui.add( effectController, 'useExpression').name("useExpression");
     gui.add( effectController, 'useExpressionGlobal').name("Switch Global Expression");
 
     gui.add(effectController, 'saveState').name('Save current state');
@@ -142,7 +142,7 @@ function initGUI() {
             return;
         PopUpHide();
     });
-
+    effectController.legendHtml = createLegendVertical(document.getElementById("legend"), 100, 300, "#ff00ff", "#0000ff", "Expression");
 }
 
 function UpdatePartGenome(selectElement) {
@@ -533,7 +533,7 @@ function addNewCheckboxs(data, state) {
             checkboxLabel.addClass('active');
         var colorFrame = $('<div/>')
             .addClass("square col-6")
-            .css("background-color", '\#'+ genome.beads[key].colorBead.getHexString())
+            .css("background-color", '\#'+ data[key].color.getHexString())
             .appendTo(row);
     });
 }

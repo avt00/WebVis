@@ -225,7 +225,84 @@ function rescaleLog(svg, data) {
         .attr("x", function (d) {
             return x(d.value+1)+3;
         });
+}
 
+function createLegendVertical(parent, w, h, color1, color2, text) {
+    var padding = 10;
+    var svg = d3.select(parent).append("svg");
+        // .attr("width", w)
+        // .attr("height", h)
+        // .attr("transform", "translate(" + 100 + "," + 100 + ")");
+    svg.attr('width', w).attr('height', h);
+
+    // Create the svg:defs element and the main gradient definition.
+    var svgDefs = svg.append('defs');
+
+    var mainGradient = svgDefs.append('linearGradient')
+        .attr('id', 'mainGradient')
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "0%")
+        .attr("y2", "100%");
+
+    // Create the stops of the main gradient. Each stop will be assigned
+    // a class to style the stop using CSS.
+    mainGradient.append('stop')
+        .attr("stop-color", color1)
+        .attr("offset", "0%");
+
+
+    mainGradient.append('stop')
+        .attr("stop-color", color2)
+        .attr("offset", "100%");
+
+    var borderGradient = svgDefs.append('linearGradient')
+        .attr('id', 'borderGradient')
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "0%")
+        .attr("y2", "100%");
+
+    // Create the stops of the main gradient. Each stop will be assigned
+    // a class to style the stop using CSS.
+    borderGradient.append('stop')
+        .attr("stop-color", color2)
+        .attr("offset", "0%");
+
+
+    borderGradient.append('stop')
+        .attr("stop-color", color1)
+        .attr("offset", "100%");
+
+
+    // Use the gradient to set the shape fill, via CSS.
+    svg.append('rect')
+    // .classed('outlined', true)
+        .attr('x', padding)
+        .attr('y', padding*2)
+        .attr('width', (w / 2) - 1.5 * padding)
+        .attr('height', h - 3 * padding)
+        .style("stroke", "url(#borderGradient)")
+        .style("stroke-width", "4");
+    svg.append('rect')
+        // .classed('filled', true)
+        .attr('x', padding)
+        .attr('y', padding*2)
+        .attr('width', (w / 2) - 1.5 * padding)
+        .attr('height', h - 3 * padding)
+        .style("fill", "url(#mainGradient)");
+
+
+
+
+    svg.append("text")
+        .attr("y", 7)
+        // .attr("x", 15)
+        .attr("alignment-baseline", "central")
+        .style('fill', 'white')
+        .text(text);
+
+    return svg;
 }
 
 
