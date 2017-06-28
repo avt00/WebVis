@@ -25,10 +25,12 @@ public class XmlReader extends DefaultHandler {
 
     private Map<String, ChainGenome> chains = new HashMap<>();
 
+
     private String currentChrId;
+    private int currentOrder;
 
     public Map<String, ChainGenome> readPoints(String filename) {
-
+        currentOrder = 0;
         SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             SAXParser parser = factory.newSAXParser();
@@ -48,7 +50,7 @@ public class XmlReader extends DefaultHandler {
     public void startElement(String s, String s1, String elementName, Attributes attributes) throws SAXException {
         if (elementName.equalsIgnoreCase("marker")) {
             currentChrId = attributes.getValue("chrID");
-            BeadInfo beadInfo = new BeadInfo(attributes.getValue("beadID"), Float.parseFloat(attributes.getValue("x")), Float.parseFloat(attributes.getValue("y")), Float.parseFloat(attributes.getValue("z")), Float.parseFloat(attributes.getValue("r")));
+            BeadInfo beadInfo = new BeadInfo(attributes.getValue("beadID"), Float.parseFloat(attributes.getValue("x")), Float.parseFloat(attributes.getValue("y")), Float.parseFloat(attributes.getValue("z")), Float.parseFloat(attributes.getValue("r")), currentOrder);
             if(chains.containsKey(currentChrId)){
                 chains.get(currentChrId).points.put(attributes.getValue("beadID"), beadInfo);
             }
@@ -56,8 +58,10 @@ public class XmlReader extends DefaultHandler {
                 ChainGenome obj = new ChainGenome();
                 obj.points.put(beadInfo.beadName, beadInfo);
                 chains.put(currentChrId, obj);
+                currentOrder = 0;
             }
         }
+        currentOrder++;
         if (elementName.equalsIgnoreCase("link")) {
 //            System.out.println("Link");
         }

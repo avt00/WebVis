@@ -122,6 +122,10 @@ var SphereShader ={
         "uniform float u_minExpressionGlobal;",
         "uniform float u_maxExpressionGlobal;",
 
+        "uniform bool u_hasClipping;",
+        "uniform vec3 u_normalClipping;",
+        "uniform vec3 u_positionPoint;",
+
         "attribute vec3 normal;",
         "attribute vec3 position;",
         "attribute vec2 uv;",
@@ -149,36 +153,21 @@ var SphereShader ={
         "v_surfaceToLight = u_lightWorldPosition - surfaceWorldPosition;",
         "vColor = color;",
         "if(u_UseExpressionGlobal){",
-        "vColor.x = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
-        "vColor.y = 0.0;",
-        "vColor.z = 1.0;",
-        "vColor.w = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+            "vColor.x = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
+            "vColor.y = 0.0;",
+            "vColor.z = 1.0;",
+            "vColor.w = (expression - u_minExpressionGlobal)/(u_maxExpressionGlobal - u_minExpressionGlobal);",
         "}",
-        // "else {",
-        //     "v_expression = 1.0;",
-        // "}",
+        "if(u_hasClipping){",
+            "vec3 vectorDirection = u_positionPoint - offset;",
+            "float scalarMultiValue = dot(u_normalClipping, vectorDirection);",
+            "if(scalarMultiValue < 0.0){",
+                "vColor.w = 0.0;",
+            "}",
+        "}",
         "}",
     ].join("\n"),
 
-    // fragmentShader: [
-    //     "#extension GL_OES_standard_derivatives : enable",
-    //     "precision highp float;",
-    //
-    //
-    //     "uniform sampler2D map;",
-    //     "varying vec2 vUv;",
-    //
-    //     "varying vec3 vColor;",
-    //     "varying vec3 positionEye;",
-    //
-    //     "void main() {",
-    //         "vec3 fdx = dFdx( positionEye );",
-    //         "vec3 fdy = dFdy( positionEye );",
-    //         "vec3 normal = normalize( cross( fdx, fdy ) );",
-    //         "float diffuse = dot( normal, vec3( 0.0, 0.0, 1.0 ) );",
-    //         "gl_FragColor = vec4( diffuse * vColor.xyz, 1.0 );",
-    //     "}",
-    // ].join("\n")
 
 
     fragmentShaderNew: [

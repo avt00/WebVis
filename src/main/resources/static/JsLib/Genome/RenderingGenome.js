@@ -93,6 +93,8 @@ function Genome() {
             for(var keyBead in this.allObjects[key].points){
                 if(!this.allObjects[key].points[keyBead].visible)
                     continue;
+                if(genome.OneMeshBeads.material.uniforms.u_hasClipping.value && !sliser.checkPoint(new THREE.Vector3(this.allObjects[key].points[keyBead].x, this.allObjects[key].points[keyBead].y, this.allObjects[key].points[keyBead].z)))
+                    continue;
                 var point = new THREE.Vector3(this.allObjects[key].points[keyBead].x, this.allObjects[key].points[keyBead].y, this.allObjects[key].points[keyBead].z);
                 var distance = this.rayCaster.ray.distanceToPoint(point);
                 // raycaster.inter
@@ -152,23 +154,24 @@ function Genome() {
         if(this.group != null)
             this.renderSystem.scene.remove(this.group);
         this.beads = {};
-        this.bonds = {};
+        // this.bonds = {};
         this.group = new THREE.Group();
 
         this.OneMeshBeads = createOneMeshGenome(allObjects, palette);
         this.group.add(this.OneMeshBeads);
-        // for (var key in this.allObjects){
+        var indexColor = 0;
+        for (var key in this.allObjects){
         //     var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
         //     chain.colorBead = palette[indexColor];
-        //     // var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
+            var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
         //     if(state!=null && !state.selected.includes(key))
         //         chain.visible = false;
         //     this.group.add(chain);
-        //     // this.group.add(spline);
+            this.group.add(spline);
         //
-        //     this.beads[key] = chain;
-        //     // this.bonds[key] = spline;
-        //     indexColor++;
+            this.bonds[key] = spline;
+            indexColor++;
+            // break;
         //
         //     if(indexColor == 1){
         //         minExpression = chain.material.uniforms.u_minExpression.value;
@@ -183,7 +186,7 @@ function Genome() {
         // for(var i =0; i < keys.length; i++){
         //     this.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value = minExpression;
         //     this.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value = maxExpression;
-        // }
+        }
         this.renderSystem.scene.add(this.group);
     };
 
@@ -199,7 +202,8 @@ function Genome() {
             var colorAtt = mesh.geometry.getAttribute("color");
             colorAtt.array[point.index*4+3] = value;
             mesh.geometry.attributes.color.needsUpdate = true;
-        });
+        })
+        this.bonds[key].visible = this.allObjects[key].visible;
     };
 
     this.UpdateExpression = function(isTurn) {
@@ -348,7 +352,6 @@ function Genome() {
         for(var bead in this.beads) {
             this.beads[bead].material.uniforms.color.value.w = 1;
         }
-
     };
 
     this.createGenMap = function (data) {

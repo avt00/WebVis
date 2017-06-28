@@ -27,6 +27,7 @@ public class CSVReader {
 //            e.printStackTrace();
 //        }
         try (Stream<String> stream = Files.lines(Paths.get(FOLDER_UPLOAD + filename))) {
+            final int[] currentOrder = {0};
             stream.forEach(line -> {
                 String[] parts = line.split("\t");
                 if(parts.length == 10){
@@ -36,7 +37,7 @@ public class CSVReader {
                         ChainGenome obj = chains.get(id);
 
                         if(!obj.points.containsKey(parts[3])){
-                            BeadInfo point = new BeadInfo(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
+                            BeadInfo point = new BeadInfo(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]), currentOrder[0]);
                             point.addGeneInfo(new GenInfo(parts[8], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                             obj.points.put(point.beadName, point);
                         }
@@ -46,8 +47,9 @@ public class CSVReader {
                         }
                     }
                     else{
+                        currentOrder[0]=0;
                         ChainGenome obj = new ChainGenome();
-                        BeadInfo point = new BeadInfo(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]));
+                        BeadInfo point = new BeadInfo(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]), currentOrder[0]);
                         point.addGeneInfo(new GenInfo(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                         obj.points.put(point.beadName, point);
                         chains.put(id, obj);
@@ -57,15 +59,16 @@ public class CSVReader {
                     String id = parts[0].split(":")[0];
                     if(chains.containsKey(id)){
                         ChainGenome obj = chains.get(id);
-                        obj.points.put(parts[0], new BeadInfo(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                        obj.points.put(parts[0], new BeadInfo(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4]), currentOrder[0]));
                     }
                     else{
+                        currentOrder[0]=0;
                         ChainGenome obj = new ChainGenome();
-                        obj.points.put(parts[0], new BeadInfo(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4])));
+                        obj.points.put(parts[0], new BeadInfo(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4]), currentOrder[0]));
                         chains.put(id, obj);
                     }
                 }
-
+                currentOrder[0]++;
             });
         } catch (IOException e) {
             e.printStackTrace();

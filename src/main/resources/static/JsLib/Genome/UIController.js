@@ -14,6 +14,9 @@ var effectController = {
     fileNameList: [],
     template: [],
     message: [],
+    IsRotate: false,
+    IsClipping:false,
+    ShowPanel: false,
     fileName : "Name",
     legendHtml: null,
     loadFile:function(){
@@ -67,7 +70,20 @@ var effectController = {
         genome.OneMeshBeads.material.needsUpdate = true;
         genome.UpdateExpression(genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value);
         document.getElementById("legend").style.visibility = genome.OneMeshBeads.material.uniforms.u_UseExpressionGlobal.value ? "visible" : "hidden";
-    }
+    },
+    useClipping : function () {
+        genome.OneMeshBeads.material.uniforms.u_hasClipping.value = !genome.OneMeshBeads.material.uniforms.u_hasClipping.value;
+        genome.OneMeshBeads.material.needsUpdate = true;
+
+    },
+
+    RotateMove : function () {
+        // effectController.IsRotate = !effectController.IsRotate;
+        if(effectController.IsRotate)
+            sliser.dragControls.deactivate();
+        else
+            sliser.dragControls.activate();
+    },
 };
 
 function onChangeFileName(value, state){
@@ -92,6 +108,11 @@ function initGUI() {
     gui.add( effectController, 'popup').name("Select parts");
     // gui.add( effectController, 'useExpression').name("useExpression");
     gui.add( effectController, 'useExpressionGlobal').name("Switch Global Expression");
+    gui.add( effectController, 'useClipping').name("Use Clipping");
+    gui.add( effectController, 'IsRotate').name("Rotate/move").onChange(effectController.RotateMove);
+    gui.add(effectController, 'ShowPanel').name("Show panel").onChange(function (e) {
+        sliser.plane.visible = e;
+    });
 
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');

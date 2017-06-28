@@ -14,16 +14,18 @@ public class BeadInfo implements Serializable{
     public float x;
     public float y;
     public float z;
+    public int order;
     public List<GenInfo> geneInfos;
 
     public float r;
 
-    public BeadInfo(String beadName, float x, float y, float z, float r) {
+    public BeadInfo(String beadName, float x, float y, float z, float r, int order) {
         this.beadName = beadName;
         this.x = x;
         this.y = y;
         this.z = z;
         this.r = r;
+        this.order = order;
         geneInfos = new ArrayList<>();
     }
 

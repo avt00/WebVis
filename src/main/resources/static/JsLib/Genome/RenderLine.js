@@ -2,12 +2,24 @@
  * Created by user on 13.02.2017.
  */
 
-function getMeshSpline(obj, color) {
+function getMeshSpline(obj, color, length) {
 
-    var pointsKeys = Object.keys(obj.points);
-    var vertices = pointsKeys.map(function(key) {
-        return  new THREE.Vector3(obj.points[key].x, obj.points[key].y, obj.points[key].z);
+    // var pointsKeys = Object.keys(obj.points);
+    var values = Object.values(obj.points).sort(function(a, b){
+        if(a.order < b.order) return -1;
+        if(a.order > b.order) return 1;
+        return 0;
     });
+    var vertices = [];
+    for(var i = 0; i < values.length; i++){
+        if(i > length)
+            break;
+        var point = values[i];
+        vertices.push(new THREE.Vector3(point.x, point.y, point.z));
+    }
+    // var vertices = pointsKeys.map(function(key) {
+    //     return  new THREE.Vector3(obj.points[key].x, obj.points[key].y, obj.points[key].z);
+    // });
 
 
     var sampleClosedSpline = new THREE.CatmullRomCurve3(vertices);
@@ -17,7 +29,7 @@ function getMeshSpline(obj, color) {
     }));
 
     var countSegment = 3;
-    var segmenets = spline.points.length;
+    var segmenets = spline.points.length*10;
     var widthTube = 0.01;
     var tube = new THREE.TubeBufferGeometry( spline, segmenets, widthTube, countSegment, false );
 

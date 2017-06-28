@@ -4,7 +4,7 @@
 var state = getParameterByName('state');
 var jsonState = null;
 if(state!=null) {
-    var loader = new THREE.ObjectLoader()
+    var loader = new THREE.ObjectLoader();
     jsonState = getRequest('/getState/' + state);
     if(jsonState!=null)
         jsonState = JSON.parse(jsonState.file);
@@ -27,6 +27,10 @@ genome.init(true);
 container.appendChild(genome.renderSystem.cssRender.domElement);
 genome.renderSystem.cssRender.domElement.appendChild(genome.renderSystem.renderer.domElement);
 
+var sliser = new Sliser();
+genome.renderSystem.addMeshToScene(sliser.plane);
+sliser.addEvents(genome.renderSystem.renderer.domElement);
+
 // init(jsonState);
 if(effectController.fileName){
     onChangeFileName(effectController.fileName, jsonState);
@@ -47,8 +51,6 @@ function animate() {
     genome.moveHtmlBlock(genome.SelectedLockBeadInfo);
     genome.renderSystem.render();
 }
-
-
 
 // events
 window.addEventListener( 'resize', function () {
