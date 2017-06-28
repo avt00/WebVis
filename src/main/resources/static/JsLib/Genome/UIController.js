@@ -538,6 +538,22 @@ function addNewCheckboxs(data, state) {
         keys.sort();
     }
     $('#beads').empty();
+    $('<div/>')
+        .addClass("row")
+        .appendTo($('#beads'))
+        .append($("<div/>")
+            .addClass("btn btn-primary col-6")
+            .text("Hide all")
+            .click(function () {
+                genome.changeVisibleAll(0);
+            }))
+        .append($("<div/>")
+            .addClass("btn btn-primary col-6")
+            .text("Show all")
+            .click(function () {
+                genome.changeVisibleAll(1);
+            })
+        );
     $.each(keys, function (i, key) {
         var row = $('<div/>')
             .addClass("row")

@@ -202,8 +202,23 @@ function Genome() {
             var colorAtt = mesh.geometry.getAttribute("color");
             colorAtt.array[point.index*4+3] = value;
             mesh.geometry.attributes.color.needsUpdate = true;
-        })
+        });
         this.bonds[key].visible = this.allObjects[key].visible;
+    };
+
+    this.changeVisibleAll = function(value) {
+        var mesh = this.OneMeshBeads;
+        var keys = Object.keys(this.allObjects);
+        for(var i = 0; i < keys.length; i++ ){
+            var key = keys[i];
+            this.allObjects[key].visible = value === 1;
+            $.each(this.allObjects[key].points, function (i, point) {
+                var colorAtt = mesh.geometry.getAttribute("color");
+                colorAtt.array[point.index*4+3] = value;
+                mesh.geometry.attributes.color.needsUpdate = true;
+            });
+            this.bonds[key].visible = this.allObjects[key].visible;
+        }
     };
 
     this.UpdateExpression = function(isTurn) {
