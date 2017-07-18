@@ -118,6 +118,10 @@ function createSimpleSphere() {
    return new THREE.Mesh( new THREE.SphereBufferGeometry( 1, 20, 20 ), new THREE.MeshLambertMaterial({color : 0xff0000, shading: THREE.SmoothShading}) )
 }
 
+// function createSphereGenome(r) {
+//     return new THREE.Mesh( new THREE.SphereBufferGeometry( r, 20, 20 ), new THREE.MeshLambertMaterial({color : 0xff0000, shading: THREE.SmoothShading, transparent: true, opacity:0.3}) )
+// }
+
 function calculateAvrExpression(pointInfo) {
     if(pointInfo==null || pointInfo.geneInfos.length == 0){
         return 0;
@@ -165,6 +169,7 @@ function createOneMeshGenome(allChains, palettes) {
     var maxExpression;
 
     var currentIndex = 0;
+    var maxRadius = 0;
     for (var key1 in allChains){
         var color = palettes[indexColor];
         allChains[key1].color = color;
@@ -174,6 +179,9 @@ function createOneMeshGenome(allChains, palettes) {
             var x = points[key].x;
             var y = points[key].y;
             var z = points[key].z;
+            var radius = Math.sqrt(x*x + y*y + z*z);
+            if(maxRadius<radius + points[key].r)
+                maxRadius = radius + points[key].r;
             if(currentIndex==0)
             {
                 minExpression = calculateAvrExpression(points[key]);
@@ -211,6 +219,7 @@ function createOneMeshGenome(allChains, palettes) {
             u_hasClipping : {value: false},
             u_normalClipping : {value: new THREE.Vector3(0, 0, 0)},
             u_positionPoint : {value: new THREE.Vector3(0, 0, 0)},
+            u_maxRadius: {value:maxRadius},
         },
         vertexShader: SphereShader.vertexShaderNew,
         fragmentShader: SphereShader.fragmentShaderNew,
@@ -220,5 +229,28 @@ function createOneMeshGenome(allChains, palettes) {
     } );
 
     var mesh = new THREE.Mesh( geometry, material );
+    return mesh;
+}
+
+function createSphereGenome(r) {
+    var basicSphere = new THREE.SphereBufferGeometry( r, 30, 30 );
+    var material = new THREE.RawShaderMaterial( {
+        uniforms: {
+            u_lightWorldPosition: { value: new THREE.Vector3(3,0,0) },
+            u_color : {value: new THREE.Vector4(1, 0, 0, 0.3)},
+            u_hasClipping : {value: false},
+            u_normalClipping : {value: new THREE.Vector3(0, 0, 0)},
+            u_positionPoint : {value: new THREE.Vector3(0, 0, 0)},
+        },
+        vertexShader: SphereShader.vertexShaderSphereGenome,
+        fragmentShader: SphereShader.fragmentShaderSphereGenome,
+        alphaTest: 0.5,
+        blending: THREE.NormalBlending,
+        transparent: true,
+        opacity:0.5,
+        // wireframe: true,
+        side: THREE.FrontSide,
+    } );
+    var mesh = new THREE.Mesh( basicSphere, material );
     return mesh;
 }

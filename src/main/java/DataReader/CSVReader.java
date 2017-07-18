@@ -31,7 +31,7 @@ public class CSVReader {
             stream.forEach(line -> {
                 String[] parts = line.split("\t");
                 if(parts.length == 10){
-                    String id = parts[0];
+                    String id = parts[3].split(":")[0];
                     String[] position = parts[4].split(",");
                     if(chains.containsKey(id)){
                         ChainGenome obj = chains.get(id);
@@ -50,13 +50,13 @@ public class CSVReader {
                         currentOrder[0]=0;
                         ChainGenome obj = new ChainGenome();
                         BeadInfo point = new BeadInfo(parts[3], Float.valueOf(position[0]), Float.valueOf(position[1]), Float.valueOf(position[2]), Float.valueOf(position[3]), currentOrder[0]);
-                        point.addGeneInfo(new GenInfo(parts[0], Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
+                        point.addGeneInfo(new GenInfo(id, Integer.parseInt(parts[1]), Integer.parseInt(parts[2]), Float.parseFloat(parts[9])));
                         obj.points.put(point.beadName, point);
                         chains.put(id, obj);
                     }
                 }
                 else {
-                    String id = parts[0].split(":")[0];
+                    String id = parts[3].split(":")[0];
                     if(chains.containsKey(id)){
                         ChainGenome obj = chains.get(id);
                         obj.points.put(parts[0], new BeadInfo(parts[0], Float.valueOf(parts[1]), Float.valueOf(parts[2]), Float.valueOf(parts[3]), Float.valueOf(parts[4]), currentOrder[0]));

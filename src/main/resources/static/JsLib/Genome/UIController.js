@@ -15,10 +15,13 @@ var effectController = {
     template: [],
     message: [],
     IsRotate: false,
-    IsClipping:false,
     ShowPanel: false,
+    IsClipping: false,
+    DrawLine: true,
+    DrawSphere: true,
     fileName : "Name",
     legendHtml: null,
+    scaleScreen: 2,
     loadFile:function(){
         var inputFile = document.getElementById('InputFile');
         var submit = document.getElementById('submit');
@@ -40,6 +43,7 @@ var effectController = {
             gui.__controllers[gui.__controllers.length-1].remove();
             // gui.__controllers[4].remove();
             gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(function (value) {
+                genome.beforeChangeFile();
                 onChangeFileName(value);
             });
             // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
@@ -74,7 +78,8 @@ var effectController = {
     useClipping : function () {
         genome.OneMeshBeads.material.uniforms.u_hasClipping.value = !genome.OneMeshBeads.material.uniforms.u_hasClipping.value;
         genome.OneMeshBeads.material.needsUpdate = true;
-
+        genome.Sphere.material.uniforms.u_hasClipping.value = !genome.Sphere.material.uniforms.u_hasClipping.value;
+        genome.Sphere.material.needsUpdate = true;
     },
 
     RotateMove : function () {
@@ -84,6 +89,24 @@ var effectController = {
         else
             sliser.dragControls.activate();
     },
+    ChangeVisibleChains : function (e) {
+        genome.changeVisibleChainsAll(e);
+    },
+    ChangeVisibleSphere : function (e) {
+        genome.changeVisibleSphere(e);
+    },
+    makeScreenShot: function () {
+        ChangeSizeRender(genome.renderSystem.renderer, genome.renderSystem.camera, genome.renderSystem.scene, effectController.scaleScreen);
+        makeScreenShot(genome.renderSystem.renderer, genome.renderSystem.camera, genome.renderSystem.scene);
+        ChangeSizeRender(genome.renderSystem.renderer, genome.renderSystem.camera, genome.renderSystem.scene, 1/effectController.scaleScreen);
+    },
+    ShowLockElements: function () {
+        var keys = Object.keys(genome.LockedBeadInfo);
+        for(var i = 0; i < keys.length; i++){
+            genome.selectLockElement(keys[i]);
+        }
+
+    }
 };
 
 function onChangeFileName(value, state){
@@ -107,15 +130,21 @@ function initGUI() {
     gui.add( effectController, 'popupSearcher').name("Search...");
     gui.add( effectController, 'popup').name("Select parts");
     // gui.add( effectController, 'useExpression').name("useExpression");
-    gui.add( effectController, 'useExpressionGlobal').name("Switch Global Expression");
-    gui.add( effectController, 'useClipping').name("Use Clipping");
-    gui.add( effectController, 'IsRotate').name("Rotate/move").onChange(effectController.RotateMove);
-    gui.add(effectController, 'ShowPanel').name("Show panel").onChange(function (e) {
+    gui.add( effectController, 'useExpressionGlobal').name("Render Expression");
+    var folder = gui.addFolder("Clipping");
+    folder.add( effectController, 'IsClipping').name("Enable").onChange(effectController.useClipping);
+    folder.add( effectController, 'IsRotate').name("Rotate/move").onChange(effectController.RotateMove);
+    folder.add(effectController, 'ShowPanel').name("Show panel").onChange(function (e) {
         sliser.plane.visible = e;
     });
 
+    gui.add(effectController, "DrawLine").name("Draw line").onChange(effectController.ChangeVisibleChains);
+    gui.add(effectController, "DrawSphere").name("Draw sphere").onChange(effectController.ChangeVisibleSphere);
     gui.add(effectController, 'saveState').name('Save current state');
     gui.add( effectController, 'loadFile').name('Load CSV file');
+    gui.add(effectController, 'makeScreenShot').name('Screenshot');
+    gui.add(effectController, 'scaleScreen').name('Scale screenshot');
+    gui.add(effectController, 'ShowLockElements').name("Show Lock elements");
 
     // gui.add( effectController, "showDots" ).name("Show Dots").onChange( function( value ) {
     //     for (var key in mapMesh) {
@@ -145,7 +174,9 @@ function initGUI() {
 
     gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Selected file").onChange(function (value) {
         // var data = getData(value);
+        genome.beforeChangeFile();
         onChangeFileName(value);
+        effectController.fileName = value;
     });
     // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
 
@@ -381,12 +412,12 @@ function createPopup(pointInfo, screenPosition, isLocked) {
         var gen = pointInfo.geneInfos[index];
         if(keySet[gen.genomeName] == null ) {
             keySet[gen.genomeName] = 0;
-            dataForBar.push({name: gen.genomeName, value: gen.expression})
+            dataForBar.push({name: gen.genomeName, value: gen.expression});
             geneLinkInfo[gen.genomeName] = pointInfo.beadName.split('_')[0]+':'+gen.startGene+'-' +gen.endGene;
         }
         else {
             keySet[gen.genomeName] = keySet[gen.genomeName] + 1 ;
-            dataForBar.push({name: gen.genomeName +'_'+ keySet[gen.genomeName], value: gen.expression})
+            dataForBar.push({name: gen.genomeName +'_'+ keySet[gen.genomeName], value: gen.expression});
             geneLinkInfo[gen.genomeName +'_'+ keySet[gen.genomeName]] = pointInfo.beadName.split('_')[0]+':'+gen.startGene+'-' + gen.endGene;
         }
     }
@@ -535,7 +566,11 @@ function saveState(filename) {
 function addNewCheckboxs(data, state) {
     var keys = Object.keys(data);
     if(keys!=null && keys.length>1){
-        keys.sort();
+        keys.sort(function(a, b){
+            if(parseInt(a.substr(3)) < parseInt(b.substr(3))) return -1;
+            if(parseInt(a.substr(3)) > parseInt(b.substr(3))) return 1;
+            return 0;
+        });
     }
     $('#beads').empty();
     $('<div/>')
@@ -674,4 +709,64 @@ var moveAction = function moveElement(obj, pos) {
     genome.moveHtmlBlock();
 };
 
+function makeScreenShot(renderer, cameraRender, scene) {
+    // var domElement = renderer.domElement;
+    // var sizePrev = renderer.getSize();
+    // var newWidth = sizePrev.width*10;
+    // var newHeight = sizePrev.height*10;
+    //
+    // cameraRender.aspect = newWidth / newHeight;
+    // cameraRender.updateProjectionMatrix();
+    // renderer.setSize( newWidth, newHeight );
+    //
+    // var download_photo_btn = document.getElementById("download-photo");
+    // var hidden_canvas = document.getElementById('screenshot'),
+    // context = hidden_canvas.getContext('2d');
+    // // Setup a canvas with the same dimensions as the video.
+    //
+    // hidden_canvas.width = newWidth;
+    // hidden_canvas.height = newHeight;
+    // // Make a copy of the current frame in the video on the canvas.
+    // context.drawImage(domElement, 0, 0, newWidth, newHeight);
+    // // Turn the canvas image into a dataURL that can be used as a src for our photo.
+    // download_photo_btn.href = hidden_canvas.toDataURL('image/png');
+    // download_photo_btn.click();
+    // context.clearRect(0, 0, hidden_canvas.width, hidden_canvas.height);
+    // ChangeSizeRender(renderer, cameraRender, scene, 10);
 
+
+    var link = document.createElement('a');
+    // if (typeof link.download === 'string') {
+    document.body.appendChild(link); //Firefox requires the link to be in the body
+    link.download = "test.jpeg";
+    link.href = renderer.domElement.toDataURL('image/png');
+    link.click();
+    document.body.removeChild(link);
+
+    // var a = $("<a style='display: none;'/>");
+    // var url = window.URL.createObjectURL(new Blob([renderer.domElement.toDataURL('image/png')], {type: 'image/png'}));
+    // a.attr("href", url);
+    // a.attr("download", "test.jpeg");
+    // $("body").append(a);
+    // a[0].click();
+    // window.URL.revokeObjectURL(url);
+    // a.remove();
+
+
+    //remove the link when done
+    // // var download_photo_btn = document.getElementById("download-photo");
+    // download_photo_btn.href =
+    // download_photo_btn.click();
+    // ChangeSizeRender(renderer, cameraRender, scene, 1/10);
+}
+
+function ChangeSizeRender(renderer, cameraRender, scene, coef) {
+    var sizePrev = renderer.getSize();
+    var newWidth = sizePrev.width*coef;
+    var newHeight = sizePrev.height*coef;
+
+    cameraRender.aspect = newWidth / newHeight;
+    cameraRender.updateProjectionMatrix();
+    renderer.setSize( newWidth, newHeight );
+    renderer.render(scene, cameraRender);
+}

@@ -53,7 +53,7 @@ function RenderSystem (){
 }
 
 function createGlRenderer() {
-    var glRenderer = new THREE.WebGLRenderer( { antialias:true, alpha:true} );
+    var glRenderer = new THREE.WebGLRenderer( { antialias:true, alpha:true, preserveDrawingBuffer: true} );
     glRenderer.setClearColor(0x000000);
     glRenderer.setPixelRatio(window.devicePixelRatio);
     glRenderer.setSize(window.innerWidth, window.innerHeight);

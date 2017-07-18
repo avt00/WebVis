@@ -15,6 +15,8 @@ function getMeshSpline(obj, color, length) {
         if(i > length)
             break;
         var point = values[i];
+        // var partBeadName = point.beadName.split(":");
+        // if(partBeadName.length>)
         vertices.push(new THREE.Vector3(point.x, point.y, point.z));
     }
     // var vertices = pointsKeys.map(function(key) {

@@ -37,76 +37,98 @@ function Sliser() {
     };
 
     this.addEvents = function (htmlElement) {
+        var slicer = this;
         var plane = this.plane;
         // var IsRotate = this.IsRotate;
         var previousMousePosition = this.previousMousePosition;
         var isDragging = this.isDragging;
-        $(htmlElement).on('mousedown', function(e) {
-            previousMousePosition.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            previousMousePosition.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            genome.rayCaster.setFromCamera( previousMousePosition, genome.renderSystem.camera );
-            previousMousePosition.x = e.offsetX;
-            previousMousePosition.y = e.offsetY;
-            var intersects = genome.rayCaster.intersectObjects( [plane] );
-            for ( var i = 0; i < intersects.length; i++ ) {
-                if(intersects[ i ].object===plane){
-                    isDragging = true;
-                    controllerCamera.enableRotate = false;
-                }
-            }
-        })
+        $(htmlElement)
+            .on('mousedown', function(e) {
+                slicer.actionDown(e);
+            })
             .on('mousemove', function(e) {
-
-                if(!plane.visible)
-                    return;
-
-                var deltaMove = {
-                    x: e.offsetX-previousMousePosition.x,
-                    y: e.offsetY-previousMousePosition.y
-                };
-
-                previousMousePosition.x = e.offsetX;
-                previousMousePosition.y = e.offsetY;
-                if(isDragging && effectController.IsRotate) {
-
-                    var deltaRotationQuaternion = new THREE.Quaternion()
-                        .setFromEuler(new THREE.Euler(
-                            toRadians(deltaMove.y * 1),
-                            toRadians(deltaMove.x * 1),
-                            0,
-                            'XYZ'
-                        ));
-
-                    plane.quaternion.multiplyQuaternions(deltaRotationQuaternion, plane.quaternion);
-                }
-
-                if(!genome.OneMeshBeads.material.uniforms.u_hasClipping.value)
-                    return;
-                // console.log(previousMousePosition);
-
-                previousMousePosition = {
-                    x: e.offsetX,
-                    y: e.offsetY
-                };
-
-                plane.updateMatrixWorld();
-                plane.geometry.computeFaceNormals();
-                plane.geometry.computeVertexNormals();
-                var position = new THREE.Vector3();
-                position.setFromMatrixPosition( plane.matrixWorld );
-                var normalMatrix = new THREE.Matrix3().getNormalMatrix( plane.matrixWorld );
-                var newNormal = plane.geometry.faces[0].normal.clone().applyMatrix3( normalMatrix ).normalize();
-                // console.log(newNormal);
-                // console.log(plane.geometry.center());
-                genome.OneMeshBeads.material.uniforms.u_normalClipping.value = newNormal;
-                genome.OneMeshBeads.material.uniforms.u_positionPoint.value = position;
-                // console.log(position);
+                slicer.actionMove(e)
             })
             .on('mouseup', function(e) {
-                isDragging = false;
-                controllerCamera.enableRotate = true;
-
+                // isDragging = false;
+                // controllerCamera.enableRotate = true;
+                slicer.actionUp();
+            })
+            .on('touchmove', function (e) {
+                slicer.actionMove(e)
+            })
+            .on('touchstart', function (e) {
+                slicer.actionDown(e);
+            })
+            .on('touchend', function (e) {
+                slicer.actionUp();
             });
+    };
+
+    this.actionMove = function (e) {
+        if(!this.plane.visible)
+            return;
+
+        var deltaMove = {
+            x: e.pageX - this.previousMousePosition.x,
+            y: e.pageY - this.previousMousePosition.y
+        };
+
+        this.previousMousePosition.x = e.pageX;
+        this.previousMousePosition.y = e.pageY;
+        if(this.isDragging && effectController.IsRotate) {
+
+            var deltaRotationQuaternion = new THREE.Quaternion()
+                .setFromEuler(new THREE.Euler(
+                    toRadians(deltaMove.y * 1),
+                    toRadians(deltaMove.x * 1),
+                    0,
+                    'XYZ'
+                ));
+
+            this.plane.quaternion.multiplyQuaternions(deltaRotationQuaternion, this.plane.quaternion);
+        }
+
+        if(!genome.OneMeshBeads.material.uniforms.u_hasClipping.value)
+            return;
+        // console.log(previousMousePosition);
+
+        this.previousMousePosition = {
+            x: e.pageX,
+            y: e.pageY
+        };
+
+        this.plane.updateMatrixWorld();
+        this.plane.geometry.computeFaceNormals();
+        this.plane.geometry.computeVertexNormals();
+        var position = new THREE.Vector3();
+        position.setFromMatrixPosition( this.plane.matrixWorld );
+        var normalMatrix = new THREE.Matrix3().getNormalMatrix( this.plane.matrixWorld );
+        var newNormal = this.plane.geometry.faces[0].normal.clone().applyMatrix3( normalMatrix ).normalize();
+        genome.OneMeshBeads.material.uniforms.u_normalClipping.value = newNormal;
+        genome.OneMeshBeads.material.uniforms.u_positionPoint.value = position;
+        genome.Sphere.material.uniforms.u_normalClipping.value = newNormal;
+        genome.Sphere.material.uniforms.u_positionPoint.value = position;
+    };
+
+    this.actionUp = function () {
+        this.isDragging = false;
+        controllerCamera.enableRotate = true;
+    };
+    
+    this.actionDown = function (e) {
+        this.previousMousePosition.x = ( e.pageX / window.innerWidth ) * 2 - 1;
+        this.previousMousePosition.y = - ( e.pageY / window.innerHeight ) * 2 + 1;
+        genome.rayCaster.setFromCamera( this.previousMousePosition, genome.renderSystem.camera );
+        this.previousMousePosition.x = e.pageX;
+        this.previousMousePosition.y = e.pageY;
+        var intersects = genome.rayCaster.intersectObjects( [this.plane] );
+        for ( var i = 0; i < intersects.length; i++ ) {
+            if(intersects[ i ].object===this.plane){
+                this.isDragging = true;
+                controllerCamera.enableRotate = false;
+            }
+        }
     };
 
     this.checkPoint = function (point) {

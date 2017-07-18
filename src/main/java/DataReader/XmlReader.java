@@ -50,7 +50,7 @@ public class XmlReader extends DefaultHandler {
     public void startElement(String s, String s1, String elementName, Attributes attributes) throws SAXException {
         if (elementName.equalsIgnoreCase("marker")) {
             currentChrId = attributes.getValue("chrID");
-            BeadInfo beadInfo = new BeadInfo(attributes.getValue("beadID"), Float.parseFloat(attributes.getValue("x")), Float.parseFloat(attributes.getValue("y")), Float.parseFloat(attributes.getValue("z")), Float.parseFloat(attributes.getValue("r")), currentOrder);
+            BeadInfo beadInfo = new BeadInfo(attributes.getValue("beadID"), Float.parseFloat(attributes.getValue("x")), Float.parseFloat(attributes.getValue("y")), Float.parseFloat(attributes.getValue("z")), Float.parseFloat(attributes.getValue("radius")), currentOrder);
             if(chains.containsKey(currentChrId)){
                 chains.get(currentChrId).points.put(attributes.getValue("beadID"), beadInfo);
             }

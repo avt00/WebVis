@@ -48,7 +48,11 @@ function animate() {
 
     genome.renderSystem.camera.updateMatrixWorld(true);
     genome.moveHtmlBlock(genome.SelectedBeadInfo);
-    genome.moveHtmlBlock(genome.SelectedLockBeadInfo);
+    var keys = Object.keys(genome.SelectedLockBeadInfo);
+    for(var i = 0; i < keys.length; i++){
+        genome.moveHtmlBlock(genome.SelectedLockBeadInfo[keys[i]]);
+    }
+
     genome.renderSystem.render();
 }
 

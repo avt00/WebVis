@@ -57,7 +57,7 @@
     <div id="beads"  data-toggle="buttons"></div>
 </div>
 
-<div id="searcherGene">
+<div id="searcherGene" onkeypress="event.keyCode === 13 ? genome.selectAllFound() : false">
     <label>Search gene:</label>
     <input type="type" id="searcherValue" placeholder="Search by name" oninput="genome.searchGene()">
     <div id='listid'>
@@ -98,8 +98,7 @@
 <script src="JsLib/Genome/RenderLine.js"></script>
 <script src="JsLib/Genome/RenderBead.js"></script>
 <script src="JsLib/Genome/RenderingGenome.js"></script>
-<script src="JsLib/Genome/MainControllerJS.js"></script>
-
+<script src="JsLib/Genome/MainControllerJS.js"></script>    
 
 </body>
 </html>

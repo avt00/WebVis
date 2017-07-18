@@ -7,9 +7,10 @@ function Genome() {
     this.allObjects = null;
     this.beads = {};
     this.OneMeshBeads = null;
+    this.Sphere = null;
     this.bonds = {};
     this.group = null;
-    this.SelectedLockBeadInfo = null;
+    this.SelectedLockBeadInfo = {};
     this.SelectedBeadInfo = null;
     this.LockedBeadInfo = {};
     this.selectedCSSObject = null;
@@ -49,7 +50,7 @@ function Genome() {
             if(this.state.selectedBeadKey!=null){
                 // this.selectedCssObject = createCssObject(this.state.pointInfo, this.renderSystem.camera.position);
                 // this.renderSystem.cssScene.add(this.selectedCssObject);
-                var keyBead = this.state.selectedBeadKey.split('_')[0];
+                var keyBead = this.state.selectedBeadKey.split(':')[0];
                 this.SelectedBeadInfo.beadInfo =  this.allObjects[keyBead].points[this.state.selectedBeadKey];
                 this.SelectedBeadInfo.selectedBead.visible = true;
                 this.SelectedBeadInfo.selectedBead.position.set(this.SelectedBeadInfo.beadInfo.x, this.SelectedBeadInfo.beadInfo.y, this.SelectedBeadInfo.beadInfo.z);
@@ -62,7 +63,7 @@ function Genome() {
             if(this.state.lockElements){
                 for (var index = 0; index < this.state.lockElements.length; index++){
                     var key = this.state.lockElements[index];
-                    var keyBead = key.split('_')[0];
+                    var keyBead = key.split(':')[0];
                     var pointInfo = this.allObjects[keyBead].points[key];
                     var bead = createSimpleSphere();
                     bead.position.set(pointInfo.x, pointInfo.y, pointInfo.z);
@@ -128,7 +129,7 @@ function Genome() {
         }
         else {
             this.closeSelected();
-            this.hideLockSelected();
+            this.hideAllLockSelected();
             this.updateAlphaAllBeads(1);
         }
     };
@@ -156,37 +157,20 @@ function Genome() {
         this.beads = {};
         // this.bonds = {};
         this.group = new THREE.Group();
-
+        // mesh
         this.OneMeshBeads = createOneMeshGenome(allObjects, palette);
         this.group.add(this.OneMeshBeads);
         var indexColor = 0;
+        // lines
         for (var key in this.allObjects){
-        //     var chain = getMeshPointsSeparate(this.allObjects[key], palette[indexColor]);
-        //     chain.colorBead = palette[indexColor];
             var spline = getMeshSpline(this.allObjects[key], palette[indexColor]);
-        //     if(state!=null && !state.selected.includes(key))
-        //         chain.visible = false;
-        //     this.group.add(chain);
             this.group.add(spline);
-        //
             this.bonds[key] = spline;
             indexColor++;
-            // break;
-        //
-        //     if(indexColor == 1){
-        //         minExpression = chain.material.uniforms.u_minExpression.value;
-        //         maxExpression = chain.material.uniforms.u_maxExpression.value;
-        //     }
-        //     if(minExpression > chain.material.uniforms.u_minExpression.value)
-        //         minExpression = chain.material.uniforms.u_minExpression.value;
-        //     if(maxExpression < chain.material.uniforms.u_maxExpression.value)
-        //         maxExpression = chain.material.uniforms.u_maxExpression.value;
-        // }
-        // var keys = Object.keys(this.beads);
-        // for(var i =0; i < keys.length; i++){
-        //     this.beads[keys[i]].material.uniforms.u_minExpressionGlobal.value = minExpression;
-        //     this.beads[keys[i]].material.uniforms.u_maxExpressionGlobal.value = maxExpression;
         }
+        // sphere
+        this.Sphere = createSphereGenome(this.OneMeshBeads.material.uniforms.u_maxRadius.value);
+        this.group.add(this.Sphere);
         this.renderSystem.scene.add(this.group);
     };
 
@@ -219,6 +203,18 @@ function Genome() {
             });
             this.bonds[key].visible = this.allObjects[key].visible;
         }
+    };
+
+    this.changeVisibleChainsAll = function(value) {
+        var keys = Object.keys(this.allObjects);
+        for(var i = 0; i < keys.length; i++ ){
+            var key = keys[i];
+            this.bonds[key].visible = value;
+        }
+    };
+
+    this.changeVisibleSphere = function(value) {
+        this.Sphere.visible = value;
     };
 
     this.UpdateExpression = function(isTurn) {
@@ -293,13 +289,21 @@ function Genome() {
         this.renderSystem.scene.add(unlockedElement.selectedBead);
     };
 
+    this.hideAllLockSelected = function () {
+        var keys = Object.keys(this.SelectedLockBeadInfo);
+        for(var i = 0; i < keys.length; i++){
+            var key = keys[i];
+            this.hideLockSelected(key);
+        }
+    };
 
-    this.hideLockSelected = function () {
-        if(this.SelectedLockBeadInfo==null)
+
+    this.hideLockSelected = function (key) {
+        if(this.SelectedLockBeadInfo[key]==null)
             return;
-        this.renderSystem.scene.remove(this.SelectedLockBeadInfo.line);
-        this.renderSystem.scene.remove(this.SelectedLockBeadInfo.selectedBead);
-        this.SelectedLockBeadInfo = null;
+        this.renderSystem.scene.remove(this.SelectedLockBeadInfo[key].line);
+        this.renderSystem.scene.remove(this.SelectedLockBeadInfo[key].selectedBead);
+        this.SelectedLockBeadInfo[key] = null;
     };
 
     this.closeSelected = function () {
@@ -314,12 +318,16 @@ function Genome() {
         if(this.SelectedBeadInfo != null && this.SelectedBeadInfo.beadInfo!=null && this.SelectedBeadInfo.beadInfo.beadName===key)
             this.closeSelected();
         else{
-            var lockedElement = this.LockedBeadInfo[key];
-            clearPopupObject(lockedElement.selectedBeadHtml);
-            this.renderSystem.scene.remove(lockedElement.line);
-            this.renderSystem.scene.remove(lockedElement.selectedBead);
-            delete this.LockedBeadInfo[key];
+            this.closeLockElement(key);
         }
+    };
+
+    this.closeLockElement = function (key) {
+        var lockedElement = this.LockedBeadInfo[key];
+        clearPopupObject(lockedElement.selectedBeadHtml);
+        this.renderSystem.scene.remove(lockedElement.line);
+        this.renderSystem.scene.remove(lockedElement.selectedBead);
+        delete this.LockedBeadInfo[key];
     };
 
     this.exportBead = function (key) {
@@ -331,17 +339,18 @@ function Genome() {
     };
 
     this.selectLockElement = function (key) {
-        this.hideLockSelected();
-        this.SelectedLockBeadInfo = this.LockedBeadInfo[key];
-        var rect = this.SelectedLockBeadInfo.selectedBeadHtml[0].getBoundingClientRect();
+        // this.hideAllLockSelected();
+        this.SelectedLockBeadInfo[key] = this.LockedBeadInfo[key];
+        var rect = this.SelectedLockBeadInfo[key].selectedBeadHtml[0].getBoundingClientRect();
         var screenPosition = ScreenToSpherical(rect.left, rect.top, this.renderSystem.camera,  window.innerWidth , window.innerHeight);
-        updatePositionLine(this.SelectedLockBeadInfo.line, screenPosition, this.SelectedLockBeadInfo.selectedBead.position);
-        this.renderSystem.scene.add(this.SelectedLockBeadInfo.line);
-        this.renderSystem.scene.add(this.SelectedLockBeadInfo.selectedBead);
-        this.SelectedLockBeadInfo.selectedBead.visible = true;
+        updatePositionLine(this.SelectedLockBeadInfo[key].line, screenPosition, this.SelectedLockBeadInfo[key].selectedBead.position);
+        this.renderSystem.scene.add(this.SelectedLockBeadInfo[key].line);
+        this.renderSystem.scene.add(this.SelectedLockBeadInfo[key].selectedBead);
+        this.SelectedLockBeadInfo[key].selectedBead.visible = true;
     };
 
     this.selectAllFound = function () {
+        $("#searcherGene").hide();
         var input = document.getElementById("searcherValue");
         var filterText = input.value.toUpperCase();
         this.updateAlphaAllBeads(0);
@@ -437,6 +446,16 @@ function Genome() {
                 .appendTo($('#listid'));
         }
         return foundKeys;
+    };
+
+    this.beforeChangeFile = function () {
+        this.closeSelected();
+        if(this.LockedBeadInfo==null)
+            return;
+        var keys = Object.keys(this.LockedBeadInfo);
+        for(var i = 0; i < keys.length; i++){
+            this.closeLockElement(keys[i]);
+        }
     }
 
 }
