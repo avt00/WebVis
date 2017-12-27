@@ -31,24 +31,6 @@ var effectController = {
             uploadNewGenome(formData);
             return false;
         });
-        inputFile.addEventListener('change', function() {
-            var file = inputFile.files[0];
-            effectController['fileName'] = file.name;
-            // update all controllers
-            // for (var i in gui.__controllers) {
-            //     gui.__controllers[i].updateDisplay();
-            // }
-            effectController.fileNameList.push(file.name);
-            // effectController.fileNameList = filesName;
-            gui.__controllers[gui.__controllers.length-1].remove();
-            // gui.__controllers[4].remove();
-            gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(function (value) {
-                genome.beforeChangeFile();
-                onChangeFileName(value);
-            });
-            // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
-            submit.click();
-        });
         inputFile.click();
     },
     popup : function () {
@@ -145,6 +127,27 @@ function initGUI() {
     gui.add(effectController, 'makeScreenShot').name('Screenshot');
     gui.add(effectController, 'scaleScreen').name('Scale screenshot');
     gui.add(effectController, 'ShowLockElements').name("Show Lock elements");
+
+    var inputFile = document.getElementById('InputFile');
+    var submit = document.getElementById('submit');
+    inputFile.addEventListener('change', function() {
+        var file = inputFile.files[0];
+        effectController['fileName'] = file.name;
+        // update all controllers
+        // for (var i in gui.__controllers) {
+        //     gui.__controllers[i].updateDisplay();
+        // }
+        effectController.fileNameList.push(file.name);
+        // effectController.fileNameList = filesName;
+        gui.__controllers[gui.__controllers.length-1].remove();
+        // gui.__controllers[4].remove();
+        gui.add( effectController, 'fileNameList', effectController.fileNameList).name("Loaded file").onChange(function (value) {
+            genome.beforeChangeFile();
+            onChangeFileName(value);
+        });
+        // gui.add( effectController, 'template', effectController.template).name("Part name").onChange(onChangeList); // controller 1
+        submit.click();
+    });
 
     // gui.add( effectController, "showDots" ).name("Show Dots").onChange( function( value ) {
     //     for (var key in mapMesh) {
