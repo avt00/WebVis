@@ -19,8 +19,10 @@
     <dependencies>
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>netcdf</artifactId>
-            <version>4.3.22</version>
+            <artifactId>thredds-parent</artifactId>
+            <version>${netcdf-java.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
