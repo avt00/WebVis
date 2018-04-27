@@ -20,7 +20,6 @@
         <dependency>
             <groupId>edu.ucar</groupId>
             <artifactId>thredds-parent</artifactId>
-            <version>${netcdf-java.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
