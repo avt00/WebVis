@@ -10,13 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
+import java.nio.file.Paths;
 
 /**
  * Created by amois on 11/16/2016.
  */
 public class CSVReader {
 
-    public static String FOLDER_UPLOAD = "C:\\Users\\user\\Downloads\\DELETEME\\";
+    public static String PATH = Paths.get(".").toAbsolutePath().normalize().toString();
+    public static String FOLDER_UPLOAD = PATH + "/upload/";
 
     public Map<String, ChainGenome> readPoints(String filename) {
 //        URL url = this.getClass().getClassLoader().getResource(filename);

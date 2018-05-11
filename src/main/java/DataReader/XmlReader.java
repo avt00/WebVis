@@ -21,7 +21,8 @@ import java.util.stream.Stream;
  * Created by user on 10.05.2017.
  */
 public class XmlReader extends DefaultHandler {
-    public static String FOLDER_UPLOAD = "C:\\Users\\user\\Downloads\\DELETEME\\";
+    public static String PATH = Paths.get(".").toAbsolutePath().normalize().toString();
+    public static String FOLDER_UPLOAD = PATH + "/upload/";
 
     private Map<String, ChainGenome> chains = new HashMap<>();
 
